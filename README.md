@@ -45,7 +45,7 @@ cd client
 npm install
 
 # Backend
-cd ../server
+cd server
 npm install
 ```
 4. **รันโปรเจค**
