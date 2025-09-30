@@ -1,4 +1,4 @@
-
+import '@/styles/login.css';
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -7,9 +7,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`antialiased`}
-      >
-        
+        className={` flex h-screen mx-auto justify-center items-center`}      >
+  
         {children}
       </body>
     </html>

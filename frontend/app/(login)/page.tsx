@@ -1,11 +1,15 @@
 import React from 'react'
 export const metadata = {
-  title: "Login"  ,
-  description: "A modern ecommerce platform",
+  title: "เข้าสู่ระบบ",  
+  description: "เข้าสู่ระบบ Tech Job",
 };
 const page = () => {
   return (
-    <div>page</div>
+    <div className='flex min-h-screen mx-auto justify-center items-center'>
+        <div className=' rounded shadow p-5'>
+          เข้าสู่ระบบ
+        </div>
+    </div>
   )
 }
 
