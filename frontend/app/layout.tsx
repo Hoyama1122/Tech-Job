@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
-
+import { Bounce, ToastContainer } from "react-toastify";
+import ToastProvider from "@/components/ToastProvider";
 export const metadata: Metadata = {
   title: {
-    template: "%s - Tech Job",
+    template: "%s | Tech Job",
     default: APP_NAME,
   },
-  description: APP_DESCRIPTION
-
+  description: APP_DESCRIPTION,
 };
 
 export default function RootLayout({
@@ -18,10 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`antialiased`}
-      >
+      <body >
         {children}
+        <ToastProvider />
       </body>
     </html>
   );

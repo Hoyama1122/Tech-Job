@@ -5,12 +5,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`antialiased`}>  
+      <div
+        className={``}>  
         Navbar
         {children}
-      </body>
-    </html>
+      </div>
   );
 }
