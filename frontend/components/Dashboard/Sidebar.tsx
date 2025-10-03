@@ -5,8 +5,11 @@ import Link from "next/link";
 import { Menu, X, Wrench } from "lucide-react";
 import { SidebarProps } from "@/lib/type/TypeSidebar";
 import { navLink } from "@/lib/Navlink/NavSidebar";
+import { usePathname } from "next/navigation";
 
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
+  const pathname = usePathname();
+  console.log(pathname);
   return (
     <div className="flex">
       {/* Burger button */}
@@ -51,17 +54,18 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         <div className="h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
 
         {/* Navigation */}
-        <nav className="py-8 px-3">
-          <ul className="space-y-2">
+        <nav className="py-8 ">
+          <ul className="space-y-2 ">
             {navLink.map((link, index) => {
-              const Icon = link.icon; // ดึงออกมาเป็น Component
+              const Icon = link.icon; 
               return (
                 <li key={index}>
                   <Link
                     href={"/dashboard" + link.path}
-                    className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-[#388E3C] transition text-xl"
+                    className={`${pathname === "/dashboard" + link.path ? "bg-gradient-to-r from-[#white] to-[#558B6E]" : ""} flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors duration-300`}
                     onClick={() => setIsOpen(false)}
                   >
+                    
                     <Icon size={20} /> {/* ✅ ใช้เป็น JSX element */}
                     {link.name}
                   </Link>
