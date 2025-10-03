@@ -2,16 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Menu, FileText, Users, X, HomeIcon, Wrench } from "lucide-react";
+import { Menu, X, Wrench } from "lucide-react";
 import { SidebarProps } from "@/lib/type/TypeSidebar";
+import { navLink } from "@/lib/Navlink/NavSidebar";
 
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
-  const navLink = [
-    { name: "หน้าหลัก", path: "/", icon: <HomeIcon size={20} /> },
-    { name: "ใบงาน", path: "/work", icon: <FileText size={20} /> },
-    { name: "ผู้ใช้งาน", path: "/user", icon: <Users size={20} /> },
-  ];
-
   return (
     <div className="flex">
       {/* Burger button */}
@@ -43,7 +38,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Tech Job</h1>
-              <p className="text-sm">ระบบจัดการงานหางานช่าง</p>
+              <p className="text-sm font-primary">ระบบจัดการงานหางานช่าง</p>
             </div>
           </div>
           <button
@@ -57,19 +52,22 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
 
         {/* Navigation */}
         <nav className="py-8 px-3">
-          <ul className="space-y-4">
-            {navLink.map((link, index) => (
-              <li key={index}>
-                <Link
-                  href={"/dashboard" + link.path}
-                  className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-[#388E3C] transition text-xl"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.icon}
-                  <span>{link.name}</span>
-                </Link>
-              </li>
-            ))}
+          <ul className="space-y-2">
+            {navLink.map((link, index) => {
+              const Icon = link.icon; // ดึงออกมาเป็น Component
+              return (
+                <li key={index}>
+                  <Link
+                    href={"/dashboard" + link.path}
+                    className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-[#388E3C] transition text-xl"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Icon size={20} /> {/* ✅ ใช้เป็น JSX element */}
+                    {link.name}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
       </div>
