@@ -18,3 +18,9 @@
 .btn-mail{
   @apply relative p-2.5 hover:bg-hover hover:text-white rounded-xl transition-all duration-300 ;
 }
+.card-dashboard{
+  @apply bg-white shadow-md rounded-xl px-6 py-4;
+}
+.card-title{
+  @apply text-2xl font-bold text-primary;
+}

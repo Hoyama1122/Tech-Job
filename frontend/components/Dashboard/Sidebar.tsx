@@ -62,11 +62,11 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                 <li key={index}>
                   <Link
                     href={"/dashboard" + link.path}
-                    className={`${pathname === "/dashboard" + link.path ? "bg-gradient-to-r from-[#white] to-[#558B6E]" : ""} flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/20 transition-colors duration-300`}
+                    className={`${pathname === "/dashboard" + link.path ? "bg-gradient-to-r from-[#2E7D32] to-[#558B6E]" : ""} flex items-center gap-3 px-4 py-2 rounded-r-full hover:bg-white/20 transition-colors duration-300 text-lg`}
                     onClick={() => setIsOpen(false)}
                   >
                     
-                    <Icon size={20} /> {/* ✅ ใช้เป็น JSX element */}
+                    <Icon size={20} /> 
                     {link.name}
                   </Link>
                 </li>
