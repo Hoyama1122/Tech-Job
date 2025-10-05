@@ -1,12 +1,19 @@
-import React from 'react'
+import React from "react";
+import TablePage from "./TablePage";
+import SortTableUser from "@/components/Dashboard/Table/SortTableUser";
 export const metadata = {
   title: "Technician user",
-  description: "เข้าสู่ระบบ Tech Job",
 };
 const page = () => {
   return (
-    <div className=''>User page</div>
-  )
-}
+    <div className="">
+      <div>
+        <h1 className="font-title">ตารางผู้ใช้งาน</h1>
+      </div>
+      {/* Sort table */}
+      <TablePage />
+    </div>
+  );
+};
 
-export default page
+export default page;

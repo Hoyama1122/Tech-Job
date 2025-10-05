@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema,LoginFormInputs } from "@/lib/validation";
 import { toast } from "react-toastify";
+import { redirect } from "next/navigation";
 
 
 
@@ -19,6 +20,7 @@ const FormLogin = () => {
     console.log("Login data:", data);
     if(data.username === "admin" && data.password === "admin123"){
       toast.success("เข้าสู่ระบบสําเร็จ ! ");
+      redirect("/dashboard")
     }else{
       toast.error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง ! ");
     }

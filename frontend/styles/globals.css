@@ -24,3 +24,6 @@
 .card-title{
   @apply text-2xl font-bold text-primary;
 }
+.table-body{
+  @apply  px-6 py-4;
+}

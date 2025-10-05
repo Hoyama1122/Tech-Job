@@ -11,6 +11,6 @@ export const NavNotifacationMail= [
         id:2,user:"คุณสมพงศ์" ,department:"ช่างคอม",message:"สวัสดีครัย",time:"20 นาทีที่แล้ว",unread:false
     },
     {
-        id:1,user:"คุณสมพงศ์" ,department:"HR",message:"ไม่รู้ ",time:"5 นาทีที่แล้ว",unread:true
+        id:3,user:"คุณสมพงศ์" ,department:"HR",message:"ไม่รู้ ",time:"5 นาทีที่แล้ว",unread:true
     },
 ]

@@ -3,10 +3,11 @@ import { Bell, Mail } from "lucide-react";
 import {
   NavNotifacation,
   NavNotifacationMail,
-} from "@/lib/Navlink/NavNotifacation";
+} from "@/lib/Mock/NavNotifacation";
 import profile from "@/public/profile/profile.jpg";
 import Image from "next/image";
 import NotifacationBell from "./NotifacationBell";
+import NotifacationMail from "./NotificationMail";
 const RightNavbar = () => {
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);
   const [showNotificationsMail, setShowNotificationsMail] = useState(false);
@@ -30,38 +31,10 @@ const RightNavbar = () => {
         </button>
         {/* Notification Dropdown */}
         {showNotificationsBell && (
-          <>
-            <div
-              className="fixed inset-0 z-10"
-              onClick={() => setShowNotificationsBell(false)}
-            />
-            <div className="absolute right-1 mt-2 w-[450px] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-20">
-              <div className="px-6 py-4 flex items-center gap-4">
-                <Bell size={22} className="text-primary" />
-                <h3 className="font-semibold text-xl">การแจ้งเตือน</h3>
-              </div>
-              <div className="max-h-96 overflow-y-auto">
-                {NavNotifacation.map((notif, index) => (
-                  <div
-                    key={notif.id}
-                    className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 transition-colors ${
-                      notif.unread ? "bg-blue-50" : ""
-                    }`}
-                  >
-                    <p className="text-sm text-gray-800 font-medium">
-                      {notif.message}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">{notif.time} </p>
-                  </div>
-                ))}
-              </div>
-              <div className="px-4 py-2 bg-gray-50 text-center">
-                <button className="text-sm text-[#2E7D32] font-medium hover:underline">
-                  ดูทั้งหมด
-                </button>
-              </div>
-            </div>
-          </>
+          <NotifacationBell
+            setShowNotificationsBell={setShowNotificationsBell}
+            NavNotifacation={NavNotifacation}
+          />
         )}
       </div>
       {/*  */}
@@ -69,7 +42,8 @@ const RightNavbar = () => {
       <div className="relative">
         <button
           className="btn-mail group"
-          onClick={() => setShowNotificationsMail(!showNotificationsBell)}>
+          onClick={() => setShowNotificationsMail(!showNotificationsBell)}
+        >
           <Mail
             size={22}
             className="text-[#2E7D32] group-hover:text-[#F5F5F5]"
@@ -82,7 +56,10 @@ const RightNavbar = () => {
         </button>
         {/* Notification Dropdown */}
         {showNotificationsMail && (
-         <NotifacationBell setShowNotificationsMail={setShowNotificationsMail} NavNotifacationMail={NavNotifacationMail}/>
+          <NotifacationMail
+            setShowNotificationsMail={setShowNotificationsMail}
+            NavNotifacationMail={NavNotifacationMail}
+          />
         )}
       </div>
       <div className="w-px h-8 bg-gray-200" />

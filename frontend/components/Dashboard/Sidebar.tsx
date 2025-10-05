@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, X, Wrench } from "lucide-react";
 import { SidebarProps } from "@/lib/type/TypeSidebar";
-import { navLink } from "@/lib/Navlink/NavSidebar";
+import { navLink } from "@/lib/Mock/NavSidebar";
 import { usePathname } from "next/navigation";
 
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
@@ -31,8 +31,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       {/* Sidebar */}
       <div
         className={`bg-gradient-to-b from-[#2E7D32] via-[#388E3C] to-[#1B5E20] text-white w-64 min-h-screen fixed md:static top-0 left-0 transform transition-transform duration-300 z-40
-        ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
-      >
+        ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
         {/* Logo */}
         <div className="py-6 px-4 flex items-center justify-between bg-black/10">
           <div className="flex items-center gap-3">
@@ -46,13 +45,12 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="md:hidden p-3  rounded-lg hover:scale-105"
+            className="md:hidden p-3 rounded-lg hover:scale-105"
           >
             <X size={24} />
           </button>
         </div>
         <div className="h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-
         {/* Navigation */}
         <nav className="py-8 ">
           <ul className="space-y-2 ">
