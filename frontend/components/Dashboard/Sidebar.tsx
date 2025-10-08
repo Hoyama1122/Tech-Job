@@ -30,7 +30,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       )}
       {/* Sidebar */}
       <div
-        className={`bg-gradient-to-b from-[#2E7D32] via-[#388E3C] to-[#1B5E20] text-white w-64 min-h-screen fixed md:static top-0 left-0 transform transition-transform duration-300 z-40
+        className={`bg-[#29335C] text-white w-64 min-h-screen fixed md:static top-0 left-0 transform transition-transform duration-300 z-40
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
         {/* Logo */}
         <div className="py-6 px-4 flex items-center justify-between bg-black/10">
@@ -60,7 +60,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                 <li key={index}>
                   <Link
                     href={"/dashboard" + link.path}
-                    className={`${pathname === "/dashboard" + link.path ? "bg-gradient-to-r from-[#2E7D32] to-[#558B6E]" : ""} flex items-center gap-3 px-4 py-2 rounded-r-full hover:bg-white/20 transition-colors duration-300 text-lg`}
+                    className={`${pathname === "/dashboard" + link.path ? "bg-gradient-to-r from-[#2E7D32] to-[#558B6E]" : ""} flex items-center gap-3 px-4 py-2 rounded-r-full hover:bg-white/20 transition-colors duration-300 text-lg `}
                     onClick={() => setIsOpen(false)}
                   >
                     
