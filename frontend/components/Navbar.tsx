@@ -1,6 +1,6 @@
 "use client";
 
-import RightNavbar from "./RightNavbar";
+import RightNavbar from "./Dashboard/RightNavbar";
 
 const Navbar = () => {
   return (
@@ -8,7 +8,7 @@ const Navbar = () => {
       <div className="flex items-center justify-between gap-4">
         {/* Title */}
         <div className="flex-1 max-w-xl">
-          <h1 className="text-xl font-bold text-secondary hidden md:block">
+          <h1 className="text-xl font-bold text-primary-test hidden md:block">
             Dashboard
           </h1>
         </div>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Menu, X, Wrench } from "lucide-react";
 import { SidebarProps } from "@/lib/type/TypeSidebar";
-import { navLink } from "@/lib/Mock/NavSidebar";
+import { navLink, navLinkTechnician } from "@/lib/Mock/NavSidebar";
 import { usePathname } from "next/navigation";
 
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
@@ -54,13 +54,13 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         {/* Navigation */}
         <nav className="py-8 ">
           <ul className="space-y-2 ">
-            {navLink.map((link, index) => {
+            {navLinkTechnician.map((link, index) => {
               const Icon = link.icon; 
               return (
-                <li key={index} className="px-3">
+                <li key={index} className="">
                   <Link
-                    href={"/dashboard" + link.path}
-                    className={`${pathname === "/dashboard" + link.path ? "bg-gradient-to-r from-[#2E7D32] to-[#558B6E]" : ""} flex items-center gap-3 px-4 py-2 rounded hover:bg-white/20 transition-colors duration-300 text-lg `}
+                    href={"/technician" + link.path}
+                    className={`${pathname === "/technician" + link.path ? "bg-gradient-to-r from-[#2E7D32] to-[#558B6E]" : ""} flex items-center gap-3 px-4 py-2 rounded-r-full hover:bg-white/20 transition-colors duration-300 text-lg `}
                     onClick={() => setIsOpen(false)}
                   >
                     

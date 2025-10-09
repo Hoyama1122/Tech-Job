@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
 
 import SidebarWrapper from "@/components/Dashboard/SidebarWrapper";
-import Navbar from "@/components/Dashboard/Navbar";
+import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: {
