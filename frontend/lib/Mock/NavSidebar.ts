@@ -10,6 +10,10 @@ import {
   Wrench,
   AlertTriangle,
   Clock,
+  ClipboardCheck,
+  UserCog,
+  Users2,
+  BarChart3,
 } from "lucide-react";
 
 type NavItem = {
@@ -18,7 +22,7 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-export const navLink: NavItem[] = [
+export const navLinkAdmin: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: HomeIcon },
   { name: "ใบงาน", path: "/work", icon: FileText },
   { name: "ผู้ใช้งาน", path: "/user", icon: Users },
@@ -31,4 +35,14 @@ export const navLinkTechnician: NavItem[] = [
   { name: "ประวัติงาน", path: "/calendar", icon: Clock },
   { name: "ปฏิทิน", path: "/calendar", icon: CalendarDays },
   { name: "ตั้งค่า", path: "/calendar", icon: Settings },
+];
+
+export const navLinkSupervisor: NavItem[] = [
+  { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
+  { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck }, 
+  { name: "มอบหมายงาน", path: "/assign", icon: UserCog }, 
+  { name: "ตรวจงาน", path: "/review", icon: Wrench }, 
+  { name: "ทีมของฉัน", path: "/team", icon: Users2 },
+  { name: "สถิติทีม", path: "/report", icon: BarChart3 }, 
+  { name: "ตั้งค่า", path: "/settings", icon: Settings }, 
 ];

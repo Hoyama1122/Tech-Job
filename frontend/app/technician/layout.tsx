@@ -1,5 +1,5 @@
-import Navbar from "@/components/Navbar";
-import SidebarWrapper from "@/components/Technician/SidebarWrapper";
+import Navbar from "@/components/Technician/NavbarTechnician";
+import SidebarWrapper from "@/components/Supervisor/SidebarWrapper";
 
 export default function RootLayout({
   children,
@@ -11,7 +11,7 @@ export default function RootLayout({
       <SidebarWrapper />
       <div className="flex-1 flex flex-col">
         <Navbar/>
-        <main className="flex-1 p-6 bg-gray-100">{children}</main>
+        <main className="flex-1 p-6 bg-gray-200">{children}</main>
       </div>
     </div>
   );

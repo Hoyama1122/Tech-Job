@@ -1,18 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { Menu, X, Wrench } from "lucide-react";
-import { SidebarProps } from "@/lib/type/TypeSidebar";
-import { navLink, navLinkTechnician } from "@/lib/Mock/NavSidebar";
 import { usePathname } from "next/navigation";
+import { LucideIcon } from "lucide-react";
 
-const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
+export type NavItem = {
+  name: string;
+  path: string;
+  icon: LucideIcon;
+};
+
+type SidebarProps = {
+  navLinks: NavItem[];
+  basePath: string;
+  isOpen: boolean;
+  setIsOpen: (v: boolean) => void;
+};
+
+const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
   const pathname = usePathname();
-  console.log(pathname);
+
   return (
     <>
-      {/* 🟢 Burger button (Mobile) */}
+      {/* 🔘 Burger Button (Mobile) */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -22,7 +34,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         </button>
       )}
 
-      {/* 🔘 Overlay (dim background) */}
+      {/* 🔘 Overlay */}
       {isOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/30 z-30 transition-opacity duration-300"
@@ -36,7 +48,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         flex flex-col overflow-y-auto transform transition-transform duration-300 z-40
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
-        {/* Header / Logo */}
+        {/* Header */}
         <div className="py-6 px-4 flex items-center justify-between bg-black/10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/20 rounded-lg">
@@ -44,11 +56,9 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Tech Job</h1>
-              <p className="text-sm font-primary">ระบบจัดการงานหางานช่าง</p>
+              <p className="text-sm font-primary">ระบบจัดการงานช่าง</p>
             </div>
           </div>
-
-          {/* ปุ่มปิดเฉพาะมือถือ */}
           <button
             onClick={() => setIsOpen(false)}
             className="md:hidden p-3 rounded-lg hover:scale-105 transition-transform"
@@ -57,23 +67,26 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
           </button>
         </div>
 
-        {/* เส้นคั่น */}
         <div className="h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
 
-        {/* Navigation Menu */}
+        {/* Nav Links */}
         <nav className="py-8 flex-1">
           <ul className="space-y-2">
-            {navLinkTechnician.map((link, index) => {
+            {navLinks.map((link, index) => {
               const Icon = link.icon;
-              const active =
-                pathname === "/technician" + link.path
-                  ? "bg-gradient-to-r from-[#2E7D32] to-[#558B6E]"
-                  : "";
+              const fullPath =
+                link.path === "/" ? basePath : `${basePath}${link.path}`;
+              const isActive =
+                pathname.replace(/\/+$/, "") === fullPath.replace(/\/+$/, "");
               return (
                 <li key={index}>
                   <Link
-                    href={"/technician" + link.path}
-                    className={`${active} flex items-center gap-3 px-4 py-2 rounded-r-full hover:bg-white/20 transition-colors duration-300 text-lg`}
+                    href={basePath + link.path}
+                    className={`flex items-center gap-3 px-4 py-2 rounded-r-full text-lg transition-colors duration-300 ${
+                      isActive
+                        ? "bg-gradient-to-r from-[#2E7D32] to-[#558B6E]"
+                        : "hover:bg-white/20"
+                    }`}
                     onClick={() => setIsOpen(false)}
                   >
                     <Icon size={20} />
@@ -84,8 +97,6 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
             })}
           </ul>
         </nav>
-
-        
       </div>
     </>
   );
