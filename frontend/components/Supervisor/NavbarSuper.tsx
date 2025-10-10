@@ -14,9 +14,9 @@ const Navbar = () => {
             <div className="bg-gray-100 shadow-2xl rounded-xl gap-2 px-4 py-2 flex items-center border-2 border-gray-300 text-lg">
               <Search size={24} className="text-gray-500"/>
               <input type="text" className="w-full  focus:outline-none" placeholder="ค้นหาใบงาน"/>
-              <div className="bg-primary-test rounded px-3 py-1">
-                <p className="text-white text-sm cursor-pointer">ค้นหา</p>
-              </div>
+              <button className="bg-primary hover:bg-primary-hover cursor-pointer transition-all duration-300 rounded px-3 py-1">
+                <p className="text-white text-sm ">ค้นหา</p>
+              </button>
             </div>
           </div>
         </div>

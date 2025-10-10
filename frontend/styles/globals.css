@@ -3,22 +3,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #2e7d32;
-  --color-secondary: #4caf50;
-  --color-accent: #6b8e23;
-  --color-neutral: #f5f5f5;
+  --color-primary: #29335C;
+  --color-secondary: #4A4A4A;
+  --color-accent: #E99F0C;
+  --color-neutral: #E1E5EE;
   --color-hover: #558B6E;
+  --color-danger: #B42B18;      
+   /* 💫 Hover States */
+  --color-primary-hover: #1F284B;  /* น้ำเงินเข้มกว่า */
+  --color-accent-hover: #D48D00;   /* เหลืองทองเข้มขึ้น */
+  --color-danger-hover: #942312;   /* แดงเข้มขึ้น */
+  --color-neutral-hover: #D5DAE6;  /* เทาอ่อนเข้มขึ้น */
+  --color-success-hover: #558B6E;  /* เขียวธรรมชาติ (ถ้ามี success state) */
 
-  --color-text-test: #e1e5ee; 
-  --color-primary-test: #29335C;
-  --color-test: #e99f0c;
+  /* 🧱 Backgrounds */
+  --color-bg: #E1E5EE;         /* พื้นหลังทั่วไป */
+  --color-bg-dark: #29335C;    /* พื้นหลังเข้ม เช่น navbar หรือ footer */
 
-  --color-primary-test1: #29335C;
-  --color-accent1: #B42B18;
-  --color-highlight: #E99F0C;
-  --color-bg1: #E1E5EE;
-  --color-text1: #1A1A1A;
-  --color-text-secondary1: #4A4A4A;
+  /* 📝 Text */
+  --color-text: #1A1A1A;           /* ตัวอักษรหลัก */
+  --color-text-secondary: #4A4A4A; /* ตัวอักษรรอง */
+  --color-text-light: #E1E5EE;     /* ตัวอักษรบนพื้นเข้ม */
+
+  /* ⚡ Optional Highlights */
+  --color-highlight: #E99F0C;   /* สีเน้นข้อความหรือ icon */
 }
 * {
   font-family: "Sarabun", sans-serif;
@@ -26,15 +34,18 @@
 .font-title {
   @apply text-4xl font-bold text-accent;
 }
-.btn-mail{
-  @apply relative p-2.5 hover:bg-hover hover:text-white rounded-xl transition-all duration-300 ;
+.btn-noti{
+  @apply relative p-2.5  hover:text-accent rounded-xl transition-all duration-300 ;
 }
 .card-dashboard{
-  @apply bg-white shadow-md rounded-xl px-6 py-4;
+  @apply  shadow-md rounded-xl px-6 py-4 bg-white ;
 }
 .card-title{
-  @apply text-2xl font-bold text-primary;
+  @apply text-2xl font-bold text-primary text-right ;
 }
 .table-body{
   @apply  px-6 py-4;
+}
+.card-text{
+  @apply text-2xl font-bold text-right mt-2;
 }

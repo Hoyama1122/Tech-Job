@@ -6,7 +6,7 @@ type NavNotifacation = {
     id: number;
     user: string;
     department: string;
-    message: string;
+    message: string;  
     time: string;
     unread: boolean;
   }[];
