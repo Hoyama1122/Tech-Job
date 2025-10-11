@@ -3,30 +3,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #29335C;
-  --color-secondary: #4A4A4A;
-  --color-accent: #E99F0C;
-  --color-neutral: #E1E5EE;
-  --color-hover: #558B6E;
-  --color-danger: #B42B18;      
-   /* 💫 Hover States */
-  --color-primary-hover: #1F284B;  /* น้ำเงินเข้มกว่า */
-  --color-accent-hover: #D48D00;   /* เหลืองทองเข้มขึ้น */
-  --color-danger-hover: #942312;   /* แดงเข้มขึ้น */
-  --color-neutral-hover: #D5DAE6;  /* เทาอ่อนเข้มขึ้น */
-  --color-success-hover: #558B6E;  /* เขียวธรรมชาติ (ถ้ามี success state) */
+  --color-primary: #29335c;
+  --color-secondary: #4a4a4a;
+  --color-accent: #e99f0c;
+  --color-neutral: #e1e5ee;
+  --color-hover: #558b6e;
+  --color-danger: #b42b18;
+  /* 💫 Hover States */
+  --color-primary-hover: #1f284b; /* น้ำเงินเข้มกว่า */
+  --color-accent-hover: #d48d00; /* เหลืองทองเข้มขึ้น */
+  --color-danger-hover: #942312; /* แดงเข้มขึ้น */
+  --color-neutral-hover: #d5dae6; /* เทาอ่อนเข้มขึ้น */
+  --color-success-hover: #558b6e; /* เขียวธรรมชาติ (ถ้ามี success state) */
 
   /* 🧱 Backgrounds */
-  --color-bg: #E1E5EE;         /* พื้นหลังทั่วไป */
-  --color-bg-dark: #29335C;    /* พื้นหลังเข้ม เช่น navbar หรือ footer */
+  --color-bg: #e1e5ee; /* พื้นหลังทั่วไป */
+  --color-bg-dark: #29335c; /* พื้นหลังเข้ม เช่น navbar หรือ footer */
 
   /* 📝 Text */
-  --color-text: #1A1A1A;           /* ตัวอักษรหลัก */
-  --color-text-secondary: #4A4A4A; /* ตัวอักษรรอง */
-  --color-text-light: #E1E5EE;     /* ตัวอักษรบนพื้นเข้ม */
+  --color-text: #1a1a1a; /* ตัวอักษรหลัก */
+  --color-text-secondary: #4a4a4a; /* ตัวอักษรรอง */
+  --color-text-light: #e1e5ee; /* ตัวอักษรบนพื้นเข้ม */
 
   /* ⚡ Optional Highlights */
-  --color-highlight: #E99F0C;   /* สีเน้นข้อความหรือ icon */
+  --color-highlight: #e99f0c; /* สีเน้นข้อความหรือ icon */
 }
 * {
   font-family: "Sarabun", sans-serif;
@@ -34,18 +34,18 @@
 .font-title {
   @apply text-4xl font-bold text-accent;
 }
-.btn-noti{
-  @apply relative p-2.5  hover:text-accent rounded-xl transition-all duration-300 ;
+.btn-noti {
+  @apply relative p-2.5  hover:text-accent rounded-xl transition-all duration-300;
 }
-.card-dashboard{
-  @apply  shadow-md rounded-xl px-6 py-4 bg-white ;
+.card-dashboard {
+  @apply bg-white shadow rounded-lg  w-full gap-4 py-4 px-4;
 }
-.card-title{
-  @apply text-2xl font-bold text-primary text-right ;
+.card-title {
+  @apply text-gray-600 text-2xl font-semibold;
 }
-.table-body{
-  @apply  px-6 py-4;
+.table-body {
+  @apply px-6 py-4;
 }
-.card-text{
-  @apply text-2xl font-bold text-right mt-2;
+.card-text {
+  @apply md:text-4xl font-bold text-left  text-2xl;
 }

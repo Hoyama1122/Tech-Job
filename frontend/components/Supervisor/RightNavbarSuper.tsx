@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bell, Mail } from "lucide-react";
+import { Bell, Mail, Search } from "lucide-react";
 import {
   NavNotifacation,
   NavNotifacationMail,
@@ -15,6 +15,9 @@ const RightNavbar = () => {
   const [showProfile, setShowProfile] = useState(false);
   return (
     <div className="flex items-center gap-3 px-4">
+      <div className="block md:hidden">
+      <Search size={24}/>
+      </div>
       <div className="relative">
         <button
           className="btn-noti group cursor-pointer"
