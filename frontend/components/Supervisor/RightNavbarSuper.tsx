@@ -14,10 +14,8 @@ const RightNavbar = () => {
   const [showNotificationsMail, setShowNotificationsMail] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   return (
-    <div className="flex items-center gap-3 px-4">
-      <div className="block md:hidden">
-      <Search size={24}/>
-      </div>
+    <div className="flex items-center gap-3 px-4 ">
+      
       <div className="relative">
         <button
           className="btn-noti group cursor-pointer"

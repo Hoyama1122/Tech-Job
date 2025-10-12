@@ -16,7 +16,7 @@ const NotifacationBell = ({
   return (
     <>
       <div
-        className="fixed inset-0 "
+        className="fixed inset-0 z-[1000]"
         onClick={() => setShowNotificationsBell(false)}
       />
       <div className="absolute right-1 mt-2 w-[200px] md:w-[450px] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">

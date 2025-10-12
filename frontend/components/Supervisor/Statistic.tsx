@@ -1,8 +1,8 @@
-import React from 'react'
+import React from "react";
 import { CheckCircle2, ClipboardList, Clock, RotateCcw } from "lucide-react";
 
 const Statistic = () => {
-    const stats = [
+  const stats = [
     {
       title: "ทั้งหมด",
       value: 32,
@@ -34,23 +34,23 @@ const Statistic = () => {
   ];
 
   return (
-   <div className="flex flex-col">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map((item, i) => (
-              <div
-                key={i}
-                className={`flex flex-col items-center p-4 rounded-lg ${item.bg} shadow-md`}
-              >
-                <item.icon className={`${item.color} w-8 h-8`} />
-                <p className={`${item.color} text-lg font-semibold`}>
-                  {item.title}
-                </p>
-                <p className="text-2xl font-bold">{item.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-  )
-}
 
-export default Statistic
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {stats.map((item, i) => (
+          <div
+            key={i}
+            className={`flex flex-col items-center p-4 rounded-lg ${item.bg} shadow-md`}
+          >
+            <item.icon className={`${item.color} w-8 h-8`} />
+            <p className={`${item.color} text-lg font-semibold`}>
+              {item.title}
+            </p>
+            <p className="text-2xl font-bold">{item.value}</p>
+          </div>
+        ))}
+      </div>
+    
+  );
+};
+
+export default Statistic;

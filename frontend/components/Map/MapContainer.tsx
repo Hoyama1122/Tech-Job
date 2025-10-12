@@ -32,7 +32,7 @@ const TeamMap = () => {
     <MapContainer
       center={[13.845, 100.59]}
       zoom={14}
-      className="rounded-lg w-full h-[300px] md:h-[400px]"
+      className="rounded-lg w-full h-[300px] md:h-[400px] z-0"
       scrollWheelZoom={false}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
