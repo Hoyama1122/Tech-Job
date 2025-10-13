@@ -16,6 +16,7 @@
     "@fullcalendar/react": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
     "@hookform/resolvers": "^5.2.2",
+    "@react-google-maps/api": "^2.20.7",
     "axios": "^1.12.2",
     "dayjs": "^1.11.18",
     "dotenv": "^17.2.2",

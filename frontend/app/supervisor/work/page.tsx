@@ -1,9 +1,12 @@
-import React from 'react'
+import React from "react";
+import Allwork from "./AllWork";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <Allwork />
+    </div>
+  );
+};
 
-export default page
+export default page;

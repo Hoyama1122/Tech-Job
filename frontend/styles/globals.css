@@ -32,7 +32,7 @@
   font-family: "Sarabun", sans-serif;
 }
 .font-title {
-  @apply text-4xl font-bold text-accent;
+  @apply text-4xl font-bold text-primary;
 }
 .btn-noti {
   @apply relative p-2.5  hover:text-accent rounded-xl transition-all duration-300;
@@ -49,6 +49,7 @@
 .card-text {
   @apply md:text-4xl font-bold text-left  text-2xl;
 }
+/* Search */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -68,7 +69,7 @@
     transform: scale(1);
   }
 }
-
+/* Scroll */
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;
 }
@@ -87,3 +88,4 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #d48d00;
 }
+/* Google Map */

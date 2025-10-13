@@ -18,12 +18,9 @@ const ReviewDashboard = () => {
     switch (status) {
       case "รอการตรวจสอบ":
         return "bg-[#f0ad4e] text-white";
-      case "รอการอนุมัติ":
-        return "bg-blue-100 text-blue-800";
+
       case "ตีกลับ":
         return "bg-red-100 text-red-700";
-      case "สำเร็จ":
-        return "bg-green-100 text-green-800";
       default:
         return "bg-gray-100 text-gray-800";
     }

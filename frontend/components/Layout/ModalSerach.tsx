@@ -6,7 +6,7 @@ type Props = {
 const ModalSerach = ({ setIsSearchOpen}:Props) => {
   return (
       <div
-          className="fixed inset-0 bg-black/40 z-50 top-0 start-0  min-h-screen animate-fadeIn"
+          className="fixed inset-0 bg-black/40 z-[1000] top-0 start-0  min-h-screen animate-fadeIn"
           onClick={() => setIsSearchOpen(false)}
         >
           <div

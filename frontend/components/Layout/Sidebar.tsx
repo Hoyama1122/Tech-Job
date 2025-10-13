@@ -65,7 +65,7 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
       {/* Sidebar */}
       <div
         className={`bg-primary text-white w-64 fixed md:static 
-          md:h-screen min-h-screen h-full flex flex-col overflow-y-auto transform transition-transform duration-300 z-[1000]
+          md:h-screen min-h-screen h-full flex flex-col overflow-y-auto transform transition-transform duration-300 z-[999]
           ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         {/* Header */}
@@ -103,7 +103,7 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
         {/* Active Border */}
         <nav className="py-4 flex-1 relative min-h-0 overflow-y-auto">
           <div
-            className="absolute left-0 w-1 bg-white transition-all duration-[0.15s] ease-out"
+            className="absolute left-0 w-1 bg-white  rounded-r-full transition-all duration-[0.15s] ease-out"
             style={{
               top: `${borderStyle.top}px`,
               height: `${borderStyle.height}px`,
@@ -127,11 +127,11 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
                   <Link
                     href={basePath + link.path}
                     className={`flex items-center gap-3 px-4 py-3 text-lg transition-all duration-300 ${
-                      isActive ? "bg-white/10" : "hover:bg-white/20"
+                      isActive ? "bg-white/10 font-semibold" : "hover:bg-white/20 text-white/70"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
-                    <Icon size={20} />
+                    <Icon size={20} className={`${isActive ? "text-white" : "text-white/70"}`}/>
                     <span>{link.name}</span>
                   </Link>
                 </li>
