@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Bell, Mail, Search } from "lucide-react";
 import {
   NavNotifacation,
-  NavNotifacationMail,
 } from "@/lib/Mock/NavNotifacation";
 import profile from "@/public/profile/profile.jpg";
 import Image from "next/image";

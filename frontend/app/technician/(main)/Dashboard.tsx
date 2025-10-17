@@ -4,7 +4,7 @@ const Dashboard = () => {
   return (
     <div className=''>
         <div>
-            
+            main dashboard
         </div>
     </div>
   )

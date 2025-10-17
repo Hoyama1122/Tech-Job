@@ -43,7 +43,6 @@ const TeamMap = () => {
   });
 
   const [selectedMember, setSelectedMember] = useState<null | any>(null);
-
  
   if (!isLoaded)
     return (

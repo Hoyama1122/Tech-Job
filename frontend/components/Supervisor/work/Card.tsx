@@ -11,7 +11,7 @@ const Card = ({ CardWork }: CardProps) => {
   const getStatusClass = (status: string) => {
     switch (status) {
       case "รอการตรวจสอบ":
-        return "bg-[#f0ad4e] text-white";
+        return "bg-accent text-white";
       case "ตีกลับ":
         return "bg-red-100 text-red-700";
       case "รอการอนุมัติ":
@@ -23,7 +23,7 @@ const Card = ({ CardWork }: CardProps) => {
     }
   };
 
-  // ✅ ถ้าไม่มีข้อมูลเลย
+  //  No data
   if (CardWork.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center text-gray-500">
@@ -67,12 +67,12 @@ const Card = ({ CardWork }: CardProps) => {
               </p>
             </div>
             <div className="flex items-center mt-2 justify-between px-1">
-              <div className="flex items-center gap-2">
-                <User size={16} />
+              <div className="flex items-center  justify-center gap-2">
+                <User size={18} />
                 <p>{data.username}</p>
               </div>
               <div className="flex items-center gap-2">
-                <Clock size={16} />
+                <Clock size={18} className="text-accent"/>
                 <p className="text-sm">{data.date}</p>
               </div>
             </div>
