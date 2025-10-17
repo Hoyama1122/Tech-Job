@@ -18,7 +18,6 @@ const ReviewDashboard = () => {
     switch (status) {
       case "รอการตรวจสอบ":
         return "bg-[#f0ad4e] text-white";
-
       case "ตีกลับ":
         return "bg-red-100 text-red-700";
       default:
@@ -44,12 +43,12 @@ const ReviewDashboard = () => {
         <h1 className="text-base md:text-lg font-bold text-text px-2">
           รอการตรวจสอบ/อนุมัติ
         </h1>
-        {/* ✅ ตัวกรองสถานะ */}
+        {/* ตัวกรองสถานะ */}
         <select
           value={statusFilter}
           onChange={(e) => {
             setStatusFilter(e.target.value);
-            setCurrentPage(1); // reset หน้าเมื่อเปลี่ยน filter
+            setCurrentPage(1);        
           }}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
         >

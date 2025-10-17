@@ -1,7 +1,7 @@
-import Image from '@/uploads/Image.jpg';
-import { StaticImageData } from 'next/image';
+import Image from "@/uploads/Image.jpg";
+import { StaticImageData } from "next/image";
 
-type CardWorkTypes = {
+export type CardWorkTypes = {
   id: number;
   JobId: string;
   title: string;
@@ -12,6 +12,8 @@ type CardWorkTypes = {
   userId: number;
   username: string;
   image: StaticImageData;
+  lng: number;
+  lat: number;
 };
 
 export const CardWork: CardWorkTypes[] = [
@@ -26,6 +28,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 1,
     username: "สมชาย ใจดี",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 2,
@@ -38,6 +42,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 2,
     username: "นรา สำอัญ",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 3,
@@ -50,6 +56,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 3,
     username: "สุทธิ มาก",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 4,
@@ -62,6 +70,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 4,
     username: "พัชรินทร์ พานทอง",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 5,
@@ -74,6 +84,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 5,
     username: "จักปุ ลิ้มดี",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 6,
@@ -86,6 +98,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 6,
     username: "ธันวา มีสุข",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 7,
@@ -98,6 +112,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 7,
     username: "ภูมิ คงดี",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 8,
@@ -110,6 +126,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 8,
     username: "ภัทรา ดวงดี",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 9,
@@ -122,6 +140,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 9,
     username: "นเรศ สุขสันต์",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 10,
@@ -134,6 +154,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 10,
     username: "อัญชัน ชื่นใจ",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 11,
@@ -146,6 +168,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 11,
     username: "มงคล ภูมี",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 12,
@@ -158,6 +182,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 12,
     username: "ภานุวัฒน์ ชำนาญ",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 13,
@@ -170,6 +196,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 13,
     username: "เกศินี ปรีชา",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 14,
@@ -182,6 +210,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 14,
     username: "สุรีย์ พงษ์ไพร",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 15,
@@ -194,6 +224,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 15,
     username: "พงศ์เทพ คำรอด",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 16,
@@ -206,6 +238,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 16,
     username: "กิตติศักดิ์ แสงทอง",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 17,
@@ -218,6 +252,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 17,
     username: "บุญมา สุขใจ",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 18,
@@ -230,6 +266,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 18,
     username: "อารยา มณีดี",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 19,
@@ -242,6 +280,8 @@ export const CardWork: CardWorkTypes[] = [
     userId: 19,
     username: "สมพงษ์ เดชเด่น",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
   {
     id: 20,
@@ -254,5 +294,7 @@ export const CardWork: CardWorkTypes[] = [
     userId: 20,
     username: "ธิดา รัตน์ดี",
     image: Image,
+    lng: 100.585,
+    lat: 13.855,
   },
 ];

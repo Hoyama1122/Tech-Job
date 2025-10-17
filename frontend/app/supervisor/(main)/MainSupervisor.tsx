@@ -38,7 +38,7 @@ const MainSupervisor = () => {
             <h1 className="mt-2 px-2 text-lg md:text-xl font-bold text-gray-700">
               Team Map
             </h1>
-            <TeamMap />
+            {/* <TeamMap /> */}
           </div>
 
           {/* เพิ่มกราฟ/ตารางทีมได้ภายหลัง */}
