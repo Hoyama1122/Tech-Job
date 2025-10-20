@@ -16,7 +16,7 @@ const Calendar = () => {
     alert(`คุณคลิกวันที่: ${arg.dateStr}`);
   };
 
-  // 🎯 ฟังก์ชันกรอง event
+  
   const filteredEvents =
     filterItem === "ทั้งหมด"
       ? event
@@ -29,7 +29,7 @@ const Calendar = () => {
       </h1>
 
       <div className="p-4 bg-white rounded-lg shadow mt-5">
-        {/* 🔍 Dropdown Filter */}
+        {/*  Dropdown Filter */}
         <div className="flex gap-3 mb-4">
           <label htmlFor="filter" className="font-semibold text-gray-700">
             กรองตามประเภทงาน:
@@ -47,7 +47,7 @@ const Calendar = () => {
           </select>
         </div>
 
-        {/* 📅 FullCalendar */}
+        {/*  FullCalendar */}
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
