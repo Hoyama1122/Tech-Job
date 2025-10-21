@@ -46,13 +46,13 @@ const Calendar = () => {
         <div className="gap-2 flex justify-center ">
           <button
             onClick={handlePrevMonth}
-            className="bg-primary text-white p-1 md:p-2 rounded hover:bg-primary/80 active:scale-95 transition"
+            className="bg-primary text-white cursor-pointer p-1 md:p-2 rounded hover:bg-primary/80 active:scale-95 transition"
           >
             <ArrowLeft size={18} />
           </button>
           <button
             onClick={handleNextMonth}
-            className="bg-primary text-white p-1 md:p-2  rounded hover:bg-primary/80 active:scale-95 transition"
+            className="bg-primary text-white cursor-pointer p-1 md:p-2  rounded hover:bg-primary/80 active:scale-95 transition"
           >
             <ArrowRight size={18} />
           </button>
@@ -71,7 +71,7 @@ const Calendar = () => {
         {daysArray.map((day, idx) => (
           <div
             key={idx}
-            className={`flex flex-col items-center justify-center py-2 sm:py-3 rounded-lg text-sm sm:text-base transition-all ${
+            className={`flex flex-col items-center justify-center py-2 sm:py-3 rounded-lg cursor-pointer text-sm sm:text-base transition-all ${
               day
                 ? "hover:bg-primary/10 cursor-pointer"
                 : "text-transparent select-none"

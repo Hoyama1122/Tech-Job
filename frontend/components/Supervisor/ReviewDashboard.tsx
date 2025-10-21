@@ -1,18 +1,25 @@
 "use client";
 import { pendingApprovals } from "@/lib/Mock/PendingApprove";
+import { useSupervisorStore } from "@/store/useSupervisorStore";
 import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
 import React, { useState } from "react";
 
 const ReviewDashboard = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("ทั้งหมด");
-  const itemsPerPage = 5;
+  const {
+    jobs,
+    filterStatus,
+    currentPage,
+    itemsPerPage,
+    setJobs,
+    setCurrentPage,
+    setFilterStatus,
+  } = useSupervisorStore();
 
   // filter
   const filteredItems =
-    statusFilter === "ทั้งหมด"
+    filterStatus === "ทั้งหมด"
       ? pendingApprovals
-      : pendingApprovals.filter((item) => item.status === statusFilter);
+      : pendingApprovals.filter((item) => item.status === filterStatus);
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -45,10 +52,10 @@ const ReviewDashboard = () => {
         </h1>
         {/* ตัวกรองสถานะ */}
         <select
-          value={statusFilter}
+          value={filterStatus}
           onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setCurrentPage(1);        
+            setFilterStatus(e.target.value);
+            setCurrentPage(1);
           }}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
         >

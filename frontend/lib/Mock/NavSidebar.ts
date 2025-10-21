@@ -32,9 +32,9 @@ export const navLinkTechnician: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
   { name: "ใบงานของฉัน ", path: "/work", icon: Wrench },
   { name: "รายงานปัญหา", path: "/user", icon: AlertTriangle },
-  { name: "ประวัติงาน", path: "/calendar", icon: Clock },
+  { name: "ประวัติงาน", path: "/history", icon: Clock },
   { name: "ปฏิทิน", path: "/calendar", icon: CalendarDays },
-  { name: "ตั้งค่า", path: "/calendar", icon: Settings },
+  { name: "ตั้งค่า", path: "/settings", icon: Settings },
 ];
 
 export const navLinkSupervisor: NavItem[] = [
