@@ -18,11 +18,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className={`flex min-h-screen`}>
+    <div className={`min-h-screen bg-primary`}>
       <SidebarWrapper />
-      <div className="flex-1 flex flex-col">
-        {/* <Navbar /> */}
-        <main className="flex-1 p-6 bg-gray-50 md:ml-64">{children}</main>
+      <div
+        className="  flex flex-col 
+          min-h-screen 
+          bg-gradient-to-br from-[#e1e5ee] via-[#F4F6FB] to-[#DCE3F2]
+          transition-all duration-300
+          lg:ml-64  "
+      >
+        <Navbar />
+        <main className="flex-1 p-3 md:p-4 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
