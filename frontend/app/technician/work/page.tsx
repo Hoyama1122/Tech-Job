@@ -1,3 +1,4 @@
+import Work from '@/components/Technician/Work'
 import { ArrowDown } from 'lucide-react'
 import React from 'react'
 
@@ -15,7 +16,7 @@ const page = () => {
               </div>
         </div>
         <div>
-          Something
+          <Work/>
         </div>
       </div>
     </div>
