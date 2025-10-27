@@ -69,7 +69,7 @@ const Card = ({ CardWork }: CardProps) => {
             <div className="flex items-center mt-2 justify-between px-1">
               <div className="flex items-center  justify-center gap-2">
                 <User size={18} />
-                <p>{data.username}</p>
+                <p>{data.technician?.name}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={18} className="text-accent"/>
