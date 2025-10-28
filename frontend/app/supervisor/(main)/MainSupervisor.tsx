@@ -29,14 +29,14 @@ const MainSupervisor = () => {
             <TeamStatusBoard />
           </div>
         </div>
-
+    
         {/*  Team Map */}
         <div className="flex flex-col gap-4">
           <div className="shadow-xl bg-white rounded-xl min-h-[250px] p-3 md:p-4">
             <h1 className="mt-2 px-2 text-lg md:text-xl font-bold text-gray-700">
               Team Map
             </h1>
-            <TeamMap />
+            {/* <TeamMap /> */}
           </div>
 
           {/*  */}
