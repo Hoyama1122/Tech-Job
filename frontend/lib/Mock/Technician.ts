@@ -6,6 +6,7 @@ export type TechnicianType = {
   email: string;
   status: "ว่าง" | "กำลังทำงาน" | "ออฟไลน์";
   image: string;
+  
 };
 
 export const TechnicianMock: TechnicianType[] = [

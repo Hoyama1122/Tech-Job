@@ -13,6 +13,7 @@ const Allwork = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
+  // โหลดข้อมูลจาก LocalStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -27,16 +28,18 @@ const Allwork = () => {
     }
   }, []);
 
+  // บันทึกกลับ LocalStorage ทุกครั้งที่มีการเปลี่ยน
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cardWork));
   }, [cardWork]);
 
+  //  ฟิลเตอร์สถานะ
   const filteredStatus =
     statusSearch === "ทั้งหมด"
       ? cardWork
       : cardWork.filter((card) => card.status === statusSearch);
 
-  // เรียงตามวันที่
+  //  เรียงตามวันที่
   const sortedWork = [...filteredStatus].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
@@ -46,12 +49,13 @@ const Allwork = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = sortedWork.slice(startIndex, startIndex + itemsPerPage);
 
+  //  JOIN ใบงาน + Technician
   const workWithTech = currentItems.map((work) => ({
     ...work,
     technician: TechnicianMock.find((t) => t.id === work.userId) || null,
   }));
 
-  //  เปลี่ยนหน้า
+  // เปลี่ยนหน้า
   const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
   const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -84,6 +88,7 @@ const Allwork = () => {
       </div>
 
       <div className="mt-5">
+        {/* ✅ ส่งข้อมูลที่ join แล้วไปให้ Card */}
         <Card CardWork={workWithTech} />
 
         {/* Pagination */}
