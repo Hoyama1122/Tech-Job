@@ -44,7 +44,7 @@ const ReviewDashboard = () => {
     currentPage < totalPages && setCurrentPage(currentPage + 1);
 
   return (
-    <div className="mt-5 bg-white rounded-lg p-3 md:p-4 shadow-md">
+    <div className=" bg-white rounded-lg p-3 md:p-4 shadow-md">
       {/* Header */}
       <div className="flex mb-4 items-center justify-between">
         <h1 className="text-base md:text-lg font-bold text-text px-2">
