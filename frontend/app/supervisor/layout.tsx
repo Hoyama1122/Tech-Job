@@ -1,10 +1,29 @@
+"use client";
 import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 import SidebarWrapper from "@/components/Supervisor/SidebarWrapper";
+import { TechnicianMock } from "@/lib/Mock/Technician";
+import { useEffect, useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const [User, setUser] = useState(TechnicianMock);
+
+ 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("User");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      localStorage.setItem("User", JSON.stringify(TechnicianMock));
+    }
+  }, []);
+
+ 
+  useEffect(() => {
+    localStorage.setItem("User", JSON.stringify(User));
+  }, [User]);
+
   return (
     <div className="min-h-screen bg-primary">
-    
       <SidebarWrapper />
       <div
         className="
