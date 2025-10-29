@@ -24,7 +24,8 @@ type NavItem = {
 
 export const navLinkAdmin: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: HomeIcon },
-  { name: "ใบงาน", path: "/work", icon: FileText },
+  { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck },
+  { name: "สร้างใบงาน", path: "/add-work", icon: FileText },
   { name: "ผู้ใช้งาน", path: "/user", icon: Users },
   { name: "ปฏิทิน", path: "/calendar", icon: CalendarDays },
 ];

@@ -1,11 +1,14 @@
-import React from 'react'
-
+import React from "react";
+import Work from "./Work";
+export const metadata = {
+  title: "งานทั้งหทด",
+};
 const page = () => {
   return (
     <div>
-      <h1 className='font-title'>ใบงานของทั้งหมด</h1>
+      <Work />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

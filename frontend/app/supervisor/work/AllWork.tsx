@@ -13,7 +13,6 @@ const Allwork = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // โหลดข้อมูลจาก LocalStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -28,7 +27,6 @@ const Allwork = () => {
     }
   }, []);
 
-  // บันทึกกลับ LocalStorage ทุกครั้งที่มีการเปลี่ยน
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cardWork));
   }, [cardWork]);

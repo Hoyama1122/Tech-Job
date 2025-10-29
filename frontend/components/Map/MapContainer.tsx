@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   GoogleMap,
   Marker,
@@ -15,24 +15,19 @@ const containerStyle = {
   borderRadius: "12px",
 };
 
-
-const members = [
-  { id: 1, name: "ช่างเอ", lat: 13.855, lng: 100.585, status: "กำลังทำงาน" },
-  { id: 2, name: "ช่างบี", lat: 13.845, lng: 100.59, status: "ว่าง" },
-  { id: 3, name: "ช่างซี", lat: 13.841, lng: 100.598, status: "รอตรวจสอบ" },
-];
-
-
+//  icon marker
 const getIconByStatus = (status: string) => {
   let iconUrl = "/marker/gray.svg";
   if (status === "กำลังทำงาน") iconUrl = "/marker/red.svg";
   else if (status === "ว่าง") iconUrl = "/marker/green.svg";
-  else if (status === "รอตรวจสอบ") iconUrl = "/marker/yellow.svg";
+  else if (status === "รอการตรวจสอบ") iconUrl = "/marker/yellow.svg";
+  else if (status === "สำเร็จ") iconUrl = "/marker/blue.svg";
+  else if (status === "ตีกลับ") iconUrl = "/marker/purple.svg";
 
   return {
     url: iconUrl,
-    scaledSize: new google.maps.Size(40, 40),
-    anchor: new google.maps.Point(20, 40),
+    scaledSize: new google.maps.Size(38, 38),
+    anchor: new google.maps.Point(19, 38),
   };
 };
 
@@ -42,15 +37,26 @@ const TeamMap = () => {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   });
 
-  const [selectedMember, setSelectedMember] = useState<null | any>(null);
- 
+  const [members, setMembers] = useState<any[]>([]);
+  const [selectedMember, setSelectedMember] = useState<any | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("CardWork");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setMembers(parsed);
+      } catch (err) {
+        console.error(" Error parsing CardWork:", err);
+      }
+    }
+  }, []);
+
   if (!isLoaded)
     return (
       <div className="flex items-center justify-center w-full h-[400px] bg-gray-50 rounded-lg">
-        <div className="flex flex-col items-center gap-3 text-text">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm font-medium">กำลังโหลดแผนที่...</p>
-        </div>
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="ml-3 text-sm text-gray-600">กำลังโหลดแผนที่...</p>
       </div>
     );
 
@@ -59,44 +65,63 @@ const TeamMap = () => {
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={{ lat: 13.855, lng: 100.585 }}
-        zoom={14}
+        zoom={13.3}
         options={{
           streetViewControl: false,
           mapTypeControl: false,
           fullscreenControl: false,
         }}
       >
-        {members.map((m) => (
-          <Marker
-            key={m.id}
-            position={{ lat: m.lat, lng: m.lng }}
-            icon={getIconByStatus(m.status)}
-            onClick={() => setSelectedMember(m)}
-          />
-        ))}
+        {/*  แสดง Marker ทุกใบงาน */}
+        {members.map((m: any) => {
+          const lat = m.loc?.lat ?? m.lat;
+          const lng = m.loc?.lng ?? m.lng;
+          if (!lat || !lng) return null;
 
+          return (
+            <Marker
+              key={m.id}
+              position={{ lat, lng }}
+              icon={getIconByStatus(m.status)}
+              onClick={() => setSelectedMember(m)}
+              title={m.title}
+            />
+          );
+        })}
+
+        {/* ✅ แสดง InfoWindow เมื่อกด marker */}
         {selectedMember && (
           <InfoWindow
-            position={{ lat: selectedMember.lat, lng: selectedMember.lng }}
+            position={{
+              lat: selectedMember.loc?.lat ?? selectedMember.lat,
+              lng: selectedMember.loc?.lng ?? selectedMember.lng,
+            }}
             onCloseClick={() => setSelectedMember(null)}
           >
-            <div className="text-sm leading-5 font-sarabun">
-              <strong className="text-[15px]">{selectedMember.name}</strong>
+            <div className="text-sm font-sarabun">
+              <strong className="text-base">{selectedMember.title}</strong>
               <br />
-              สถานะ :{" "}
+              <span className="text-gray-600 text-xs">
+                {selectedMember.description}
+              </span>
+              <br />
               <span
                 className={`${
-                  selectedMember.status === "กำลังทำงาน"
-                    ? "text-red-500"
-                    : selectedMember.status === "รอตรวจสอบ"
+                  selectedMember.status === "สำเร็จ"
+                    ? "text-blue-500"
+                    : selectedMember.status === "ตีกลับ"
+                    ? "text-purple-500"
+                    : selectedMember.status === "รอการตรวจสอบ"
                     ? "text-yellow-500"
-                    : "text-green-500"
+                    : "text-red-500"
                 } font-semibold`}
               >
-                {selectedMember.status}
+                สถานะ: {selectedMember.status}
               </span>
               <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMember.lat},${selectedMember.lng}`}
+                href={`https://www.google.com/maps/dir/?api=1&destination=${
+                  selectedMember.loc?.lat ?? selectedMember.lat
+                },${selectedMember.loc?.lng ?? selectedMember.lng}`}
                 target="_blank"
                 className="block mt-2 text-blue-600 underline text-xs"
               >

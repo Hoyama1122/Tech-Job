@@ -1,5 +1,14 @@
 import Image from "@/uploads/Image.jpg";
 import { StaticImageData } from "next/image";
+const randomLocation = (
+  baseLat: number = 13.85,
+  baseLng: number = 100.58,
+  range: number = 0.02
+) => {
+  const lat = baseLat + (Math.random() - 0.5) * range;
+  const lng = baseLng + (Math.random() - 0.5) * range;
+  return { lat: Number(lat.toFixed(3)), lng: Number(lng.toFixed(3)) };
+};
 
 export type CardWorkTypes = {
   id: number;
@@ -10,10 +19,12 @@ export type CardWorkTypes = {
   date: string;
   sla: string;
   userId: number;
- 
+
   image: StaticImageData;
-  lng: number;
-  lat: number;
+  loc: {
+    lat: number;
+    lng: number;
+  };
 };
 
 export const CardWork: CardWorkTypes[] = [
@@ -26,10 +37,9 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-15 15:05",
     sla: "20m",
     userId: 1,
-    
+
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 2,
@@ -40,10 +50,9 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-14 10:32",
     sla: "30m",
     userId: 2,
-    
+
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 3,
@@ -54,10 +63,9 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-13 09:15",
     sla: "25m",
     userId: 3,
-    
+
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 4,
@@ -68,10 +76,9 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-12 16:00",
     sla: "45m",
     userId: 4,
-    
+
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 5,
@@ -82,10 +89,9 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-11 14:25",
     sla: "20m",
     userId: 5,
-    
+
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 6,
@@ -96,10 +102,9 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-10 13:00",
     sla: "35m",
     userId: 6,
-   
+
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 7,
@@ -111,8 +116,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "40m",
     userId: 7,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 8,
@@ -124,8 +128,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "25m",
     userId: 8,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 9,
@@ -137,8 +140,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "15m",
     userId: 9,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 10,
@@ -150,8 +152,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "10m",
     userId: 10,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 11,
@@ -163,8 +164,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "20m",
     userId: 11,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 12,
@@ -176,8 +176,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "15m",
     userId: 12,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 13,
@@ -189,8 +188,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "30m",
     userId: 13,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 14,
@@ -202,8 +200,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "40m",
     userId: 14,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 15,
@@ -215,8 +212,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "50m",
     userId: 15,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 16,
@@ -228,8 +224,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "30m",
     userId: 16,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 17,
@@ -241,8 +236,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "35m",
     userId: 17,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 18,
@@ -254,8 +248,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "40m",
     userId: 18,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 19,
@@ -267,8 +260,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "25m",
     userId: 19,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
   {
     id: 20,
@@ -280,7 +272,6 @@ export const CardWork: CardWorkTypes[] = [
     sla: "15m",
     userId: 20,
     image: Image,
-    lng: 100.585,
-    lat: 13.855,
+    loc: randomLocation(),
   },
 ];

@@ -1,11 +1,11 @@
 "use client";
 import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 import SidebarWrapper from "@/components/Supervisor/SidebarWrapper";
-import { TechnicianMock } from "@/lib/Mock/Technician";
+import { UserData } from "@/lib/Mock/User";
 import { useEffect, useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [User, setUser] = useState(TechnicianMock);
+  const [User, setUser] = useState(UserData);
 
  
   useEffect(() => {
@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      localStorage.setItem("User", JSON.stringify(TechnicianMock));
+      localStorage.setItem("User", JSON.stringify(UserData));
     }
   }, []);
 
