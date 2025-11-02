@@ -1,17 +1,25 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { DayPicker, DateRange } from "react-day-picker";
+import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { th } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
+import { useFormContext } from "react-hook-form";
 
-export default function DateRangePickerTH() {
-  const [range, setRange] = useState<DateRange | undefined>();
+export default function DatePickerTH() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { setValue, register, watch } = useFormContext();
 
- 
+  // อ่านค่าจากฟอร์ม (ถ้ามีค่าเก่า)
+  const formDate = watch("dueDate");
+
+  const [selected, setSelected] = useState<Date | undefined>(
+    formDate ? new Date(formDate) : undefined
+  );
+
+  // ปิด popup เมื่อคลิกข้างนอก
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -22,33 +30,45 @@ export default function DateRangePickerTH() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // เมื่อเลือกวัน
+  const handleSelect = (day?: Date) => {
+    setSelected(day);
+    if (day) {
+      setValue("dueDate", day.toISOString()); // ✅ set ค่าใน useForm
+      setOpen(false);
+    }
+  };
+
   const formatTH = (date?: Date) =>
-    date.toLocaleDateString("th-TH", {
+    date?.toLocaleDateString("th-TH", {
       day: "2-digit",
       month: "long",
       year: "numeric",
     });
 
-  const displayValue =
-    range?.from && range?.to
-      ? `${formatTH(range.from)} ถึงวันที่ ${formatTH(range.to)}`
-      : "เลือกช่วงวันที่ทำงาน"  ;
+  const displayValue = selected
+    ? formatTH(selected)
+    : "เลือกวันที่ทำงาน";
 
   return (
-    <div ref={ref} className="relative w-full max-w-md">
+    <div ref={ref} className="relative w-full max-w-md mt-4">
       <label className="block text-lg font-medium text-gray-700 mb-1">
-        ช่วงวันที่ <span className="text-red-500">*</span>
+        วันที่ทำงาน <span className="text-red-500">*</span>
       </label>
 
-      {/* Trigger Button */}
+      {/* Hidden input สำหรับ react-hook-form */}
+      <input type="hidden" {...register("dueDate")} />
+
+      {/* ปุ่ม trigger */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-gray-50 flex justify-between items-center focus:ring-2 focus:ring-primary/40 hover:shadow transition-all shadow-md hover:shadow"
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex justify-between items-center 
+        focus:ring-2 focus:ring-primary/40 transition-all shadow-md hover:shadow"
       >
         <span
           className={`text-sm md:text-base font-medium ${
-            range?.from && range?.to ? "text-gray-900" : "text-gray-500"
+            selected ? "text-gray-900" : "text-gray-500"
           }`}
         >
           {displayValue}
@@ -56,25 +76,19 @@ export default function DateRangePickerTH() {
         <CalendarDays className="text-gray-500" size={20} />
       </button>
 
-      {/* Dropdown Calendar */}
       {open && (
-        <div className="absolute top-[-30px] z-20 mt-2 bg-white p-4 border border-gray-200 rounded-xl shadow-lg">
+        <div className="absolute top-[-30px] z-20 mt-2 bg-white p-2 border border-gray-200 rounded-xl shadow-lg">
           <DayPicker
-            mode="range"
-            selected={range}
-            onSelect={setRange}
+            mode="single"
+            selected={selected}
+            onSelect={handleSelect}
             locale={th}
             classNames={{
               day_selected:
                 "bg-primary text-white hover:bg-primary rounded-lg",
-              day_range_start:
-                "bg-primary text-white rounded-l-full hover:bg-primary/90",
-              day_range_end:
-                "bg-primary text-white rounded-r-full hover:bg-primary/90",
-              day_today: "",
-              day: "w-5 h-5",
+              day_today: "border border-primary text-primary font-semibold",
+              day: "w-8 h-8",
             }}
-           
           />
           <div className="flex justify-end pt-2">
             <button

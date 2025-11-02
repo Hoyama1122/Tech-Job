@@ -15,11 +15,16 @@ export type CardWorkTypes = {
   JobId: string;
   title: string;
   description: string;
-  status: string;
+  status:
+    | "รอการตรวจสอบ"
+    | "กำลังทำงาน"
+    | "ว่าง"
+    | "สำเร็จ"
+    | "ตีกลับ"
+    | "รอการหมอบหมายงาน";
   date: string;
   sla: string;
   userId: number;
-
   image: StaticImageData;
   loc: {
     lat: number;
@@ -37,7 +42,6 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-15 15:05",
     sla: "20m",
     userId: 1,
-
     image: Image,
     loc: randomLocation(),
   },
@@ -151,126 +155,6 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-06 11:45",
     sla: "10m",
     userId: 10,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 11,
-    JobId: "JOB_011",
-    title: "ตรวจสอบระบบเสียงห้องประชุม A",
-    description: "ไมค์ไม่ทำงาน ตรวจสอบ Mixer และสายสัญญาณ",
-    status: "รอการตรวจสอบ",
-    date: "2025-01-05 13:25",
-    sla: "20m",
-    userId: 11,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 12,
-    JobId: "JOB_012",
-    title: "เปลี่ยนหัวก๊อกน้ำห้องครัว",
-    description: "หัวก๊อกน้ำรั่ว ต้องเปลี่ยนใหม่",
-    status: "สำเร็จ",
-    date: "2025-01-04 12:10",
-    sla: "15m",
-    userId: 12,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 13,
-    JobId: "JOB_013",
-    title: "ตั้งค่าเครื่องพิมพ์สำนักงาน",
-    description: "เพิ่มการเชื่อมต่อ Wi-Fi และตั้งค่าการแชร์เครื่องพิมพ์",
-    status: "รอการอนุมัติ",
-    date: "2025-01-03 09:50",
-    sla: "30m",
-    userId: 13,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 14,
-    JobId: "JOB_014",
-    title: "ตรวจสอบระบบกล้องวงจรปิด",
-    description: "กล้องตัวที่ 5 ไม่แสดงภาพ ตรวจสอบสาย LAN และ Switch",
-    status: "รอการตรวจสอบ",
-    date: "2025-01-02 16:40",
-    sla: "40m",
-    userId: 14,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 15,
-    JobId: "JOB_015",
-    title: "ทำความสะอาดหลังคาโรงจอดรถ",
-    description: "ขี้นกสะสมมาก ต้องล้างทำความสะอาดทั้งแถว",
-    status: "สำเร็จ",
-    date: "2025-01-01 08:30",
-    sla: "50m",
-    userId: 15,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 16,
-    JobId: "JOB_016",
-    title: "ติดตั้งเครื่องสแกนนิ้วใหม่",
-    description: "เพิ่มจุดสแกนหน้าอาคารหลัก",
-    status: "รอการตรวจสอบ",
-    date: "2024-12-31 14:05",
-    sla: "30m",
-    userId: 16,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 17,
-    JobId: "JOB_017",
-    title: "ตรวจเช็คระบบไฟฉุกเฉิน",
-    description: "หลอดไฟสำรองไม่ติด ตรวจสอบแบตเตอรี่และวงจร",
-    status: "ตีกลับ",
-    date: "2024-12-30 09:20",
-    sla: "35m",
-    userId: 17,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 18,
-    JobId: "JOB_018",
-    title: "แก้ไขระบบน้ำไม่ไหล อาคาร B",
-    description: "ตรวจสอบปั๊มน้ำและวาล์วทางเข้า",
-    status: "สำเร็จ",
-    date: "2024-12-29 10:10",
-    sla: "40m",
-    userId: 18,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 19,
-    JobId: "JOB_019",
-    title: "ตรวจสอบเครื่องปรับแรงดันไฟฟ้า",
-    description: "แรงดันไฟไม่คงที่ ตรวจสอบระบบ AVR",
-    status: "รอการตรวจสอบ",
-    date: "2024-12-28 11:35",
-    sla: "25m",
-    userId: 19,
-    image: Image,
-    loc: randomLocation(),
-  },
-  {
-    id: 20,
-    JobId: "JOB_020",
-    title: "เปลี่ยนหลอดไฟหน้าอาคาร",
-    description: "หลอดไฟหน้าอาคารดับ ต้องเปลี่ยนใหม่พร้อมตรวจวงจร",
-    status: "สำเร็จ",
-    date: "2024-12-27 08:00",
-    sla: "15m",
-    userId: 20,
     image: Image,
     loc: randomLocation(),
   },

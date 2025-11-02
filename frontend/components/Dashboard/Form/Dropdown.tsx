@@ -5,11 +5,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { UserStar, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { Supervisor } from "@/lib/Mock/Supervisor";
+import { useFormContext } from "react-hook-form";
 
 export default function DropdownSupervisor() {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const { setValue, register } = useFormContext();
 
   // ปิด dropdown เมื่อคลิกข้างนอก
   useEffect(() => {
@@ -24,25 +26,29 @@ export default function DropdownSupervisor() {
 
   const handleSelect = (item: any) => {
     setSelected(item);
+    setValue("supervisorId", String(item.id)); 
     setIsOpen(false);
   };
 
   return (
-    <div ref={ref} className="relative w-full max-w-md">
-      <label className="block text-lg font-medium text-tex t mb-1">
+    <div ref={ref} className="relative w-full max-w-md mt-4">
+      <label className="block text-lg font-medium text-text mb-1">
         หัวหน้างานที่รับผิดชอบ <span className="text-red-500">*</span>
       </label>
+
+      {/* Hidden input for form binding */}
+      <input type="hidden" {...register("supervisorId")} />
 
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         type="button"
         className={`w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-xl shadow-md bg-gray-50 hover:shadow transition-all duration-200 ${
-          isOpen ? "ring-2 ring-accent border-accent" : ""
+          isOpen ? "ring-2 ring-primary border-primary" : ""
         }`}
       >
         {selected ? (
-          <div className="flex items-center gap-2 ">
+          <div className="flex items-center gap-2">
             <Image
               src={selected.image}
               alt={selected.name}

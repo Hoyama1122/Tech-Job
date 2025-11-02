@@ -16,9 +16,7 @@ const Page = () => {
       </h1>
 
       {/* Form */}
-      
-        <WorkForm />
-       
+      <WorkForm />
     </div>
   );
 };

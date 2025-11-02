@@ -14,7 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     } else {
-      localStorage.setItem("User", JSON.stringify(TechnicianMock));
+      localStorage.setItem("Technician", JSON.stringify(TechnicianMock));
       setUser(TechnicianMock);
     }
   }, [setUser]);

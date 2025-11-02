@@ -24,7 +24,7 @@ export default function ClientLayout({
         setCardWork(CardWork);
       }
     } catch (error) {
-      console.error("โหลดข้อมูลใบงานไม่สำเร็จ:", error);
+      console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
     }
   }, [setCardWork]);
 
