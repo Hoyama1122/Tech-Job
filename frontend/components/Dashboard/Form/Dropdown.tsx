@@ -37,12 +37,12 @@ export default function DropdownSupervisor() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         type="button"
-        className={`w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-xl shadow-sm bg-gray-50 hover:shadow transition-all duration-200 ${
-          isOpen ? "ring-2 ring-primary/40 border-primary" : ""
+        className={`w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-xl shadow-md bg-gray-50 hover:shadow transition-all duration-200 ${
+          isOpen ? "ring-2 ring-accent border-accent" : ""
         }`}
       >
         {selected ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ">
             <Image
               src={selected.image}
               alt={selected.name}

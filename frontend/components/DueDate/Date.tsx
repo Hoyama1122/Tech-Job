@@ -31,20 +31,20 @@ export default function DateRangePickerTH() {
 
   const displayValue =
     range?.from && range?.to
-      ? `${formatTH(range.from)} - ${formatTH(range.to)}`
-      : "เลือกช่วงวันที่ทำงาน";
+      ? `${formatTH(range.from)} ถึงวันที่ ${formatTH(range.to)}`
+      : "เลือกช่วงวันที่ทำงาน"  ;
 
   return (
     <div ref={ref} className="relative w-full max-w-md">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        ช่วงวันที่
+      <label className="block text-lg font-medium text-gray-700 mb-1">
+        ช่วงวันที่ <span className="text-red-500">*</span>
       </label>
 
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-gray-50 flex justify-between items-center focus:ring-2 focus:ring-primary/40 hover:shadow transition-all"
+        className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-gray-50 flex justify-between items-center focus:ring-2 focus:ring-primary/40 hover:shadow transition-all shadow-md hover:shadow"
       >
         <span
           className={`text-sm md:text-base font-medium ${

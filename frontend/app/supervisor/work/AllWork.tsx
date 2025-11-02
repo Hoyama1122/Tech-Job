@@ -8,7 +8,7 @@ import { AppLoader } from "@/store/AppLoader";
 const STORAGE_KEY = "CardWork";
 
 const Allwork = () => {
-    const { cardWork } = AppLoader();
+  const { cardWork } = AppLoader();
   const [statusSearch, setStatusSearch] = useState("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
