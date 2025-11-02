@@ -1,27 +1,38 @@
 "use client";
 import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 import SidebarWrapper from "@/components/Supervisor/SidebarWrapper";
-import { UserData } from "@/lib/Mock/User";
+import { CardWork } from "@/lib/Mock/CardWork";
+import { TechnicianMock } from "@/lib/Mock/Technician";
+
+import { AppLoader } from "@/store/AppLoader";
 import { useEffect, useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [User, setUser] = useState(UserData);
-
- 
+  const { setUser, setCardWork } = AppLoader();
   useEffect(() => {
-    const storedUser = localStorage.getItem("User");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const savedUser = localStorage.getItem("User");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     } else {
-      localStorage.setItem("User", JSON.stringify(UserData));
+      localStorage.setItem("User", JSON.stringify(TechnicianMock));
+      setUser(TechnicianMock);
     }
-  }, []);
+  }, [setUser]);
 
- 
+  // Loader
   useEffect(() => {
-    localStorage.setItem("User", JSON.stringify(User));
-  }, [User]);
-
+    try {
+      const savedWork = localStorage.getItem("CardWork");
+      if (savedWork) {
+        setCardWork(JSON.parse(savedWork));
+      } else {
+        localStorage.setItem("CardWork", JSON.stringify(CardWork));
+        setCardWork(CardWork);
+      }
+    } catch (error) {
+      console.error("โหลดข้อมูลใบงานไม่สำเร็จ:", error);
+    }
+  }, [setCardWork]);
   return (
     <div className="min-h-screen bg-primary">
       <SidebarWrapper />

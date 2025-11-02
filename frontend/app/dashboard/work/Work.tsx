@@ -1,5 +1,6 @@
 import DateFormat from "@/lib/Format/DateFormat";
 import { CirclePlus } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 const Work = () => {
@@ -14,9 +15,9 @@ const Work = () => {
           </h1>
         </div>
         <div>
-          <button className="button-create">
+          <Link href="/dashboard/add-work" className="button-create" >
             สร้างงานใหม่ <CirclePlus />
-          </button>
+          </Link>
         </div>
       </div>
       {/* Work */}

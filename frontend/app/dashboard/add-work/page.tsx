@@ -1,11 +1,27 @@
-import React from 'react'
+import WorkForm from "@/components/Dashboard/Form/WorkForm";
+import { FileDiff } from "lucide-react";
+import React from "react";
+
 export const metadata = {
   title: "สร้างใบงาน",
 };
-const page = () => {
-  return (
-    <div>page</div>
-  )
-}
 
-export default page
+const Page = () => {
+  return (
+    <div className="p-4">
+      {/* Title */}
+      <h1 className="font-title flex items-center gap-2  text-primary font-semibold">
+        <FileDiff size={28} className="text-primary" />
+        สร้างใบงาน
+      </h1>
+
+      {/* Form */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <WorkForm />
+        <div>Map</div>
+      </div>
+    </div>
+  );
+};
+
+export default Page;

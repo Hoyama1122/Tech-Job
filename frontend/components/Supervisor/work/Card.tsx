@@ -44,6 +44,8 @@ const Card = ({ CardWork }: CardProps) => {
             <Image
               src={data.image}
               alt={data.JobId}
+              width={0}
+              height={0}
               className="h-48 w-full object-cover rounded-t-xl"
             />
             <span

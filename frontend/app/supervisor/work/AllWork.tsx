@@ -1,61 +1,50 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { CardWork as defaultWork } from "@/lib/Mock/CardWork";
+import React, { useEffect, useMemo, useState } from "react";
 import { TechnicianMock } from "@/lib/Mock/Technician";
 import Card from "@/components/Supervisor/work/Card";
 import { ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
+import { AppLoader } from "@/store/AppLoader";
 
 const STORAGE_KEY = "CardWork";
 
 const Allwork = () => {
-  const [cardWork, setCardWork] = useState(defaultWork);
+    const { cardWork } = AppLoader();
   const [statusSearch, setStatusSearch] = useState("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setCardWork(JSON.parse(saved));
-      } else {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultWork));
-      }
-    } catch (error) {
-      console.error("โหลดข้อมูลไม่สำเร็จ:", error);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultWork));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cardWork));
-  }, [cardWork]);
-
-  //  ฟิลเตอร์สถานะ
-  const filteredStatus =
-    statusSearch === "ทั้งหมด"
+  // 🔍 ฟิลเตอร์สถานะ
+  const filteredStatus = useMemo(() => {
+    return statusSearch === "ทั้งหมด"
       ? cardWork
       : cardWork.filter((card) => card.status === statusSearch);
+  }, [cardWork, statusSearch]);
 
-  //  เรียงตามวันที่
-  const sortedWork = [...filteredStatus].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  // 📅 เรียงตามวันที่ล่าสุดก่อน
+  const sortedWork = useMemo(() => {
+    return [...filteredStatus].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }, [filteredStatus]);
 
-  //  Pagination
+  // 📄 Pagination
   const totalPages = Math.ceil(sortedWork.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = sortedWork.slice(startIndex, startIndex + itemsPerPage);
 
-  //  JOIN ใบงาน + Technician
-  const workWithTech = currentItems.map((work) => ({
-    ...work,
-    technician: TechnicianMock.find((t) => t.id === work.userId) || null,
-  }));
+  // Join ใบงาน + Technician
+  const workWithTech = useMemo(() => {
+    return currentItems.map((work) => ({
+      ...work,
+      technician: TechnicianMock.find((t) => t.id === work.userId) || null,
+    }));
+  }, [currentItems]);
 
-  // เปลี่ยนหน้า
+  // 🔁 เปลี่ยนหน้า
   const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const handleNext = () =>
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusSearch(e.target.value);
     setCurrentPage(1);

@@ -7,7 +7,8 @@ import {
   InfoWindow,
   useJsApiLoader,
 } from "@react-google-maps/api";
-import { Loader2 } from "lucide-react";
+import { CircleCheck, Loader2, Phone, User } from "lucide-react";
+import { TechnicianMock } from "@/lib/Mock/Technician"; // ✅ import ช่างมาด้วย
 
 const containerStyle = {
   width: "100%",
@@ -15,7 +16,7 @@ const containerStyle = {
   borderRadius: "12px",
 };
 
-//  icon marker
+// 📍 icon marker ตามสถานะ
 const getIconByStatus = (status: string) => {
   let iconUrl = "/marker/gray.svg";
   if (status === "กำลังทำงาน") iconUrl = "/marker/red.svg";
@@ -41,14 +42,27 @@ const TeamMap = () => {
   const [selectedMember, setSelectedMember] = useState<any | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("CardWork");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setMembers(parsed);
-      } catch (err) {
-        console.error(" Error parsing CardWork:", err);
-      }
+    try {
+      const savedWork = localStorage.getItem("CardWork");
+      if (!savedWork) return;
+
+      const works = JSON.parse(savedWork);
+
+      // ✅ join ใบงานกับ TechnicianMock
+      const joined = works.map((work: any) => {
+        const technician = TechnicianMock.find((t) => t.id === work.userId);
+        return {
+          ...work,
+          technicianName: technician ? technician.name : "ไม่ระบุช่าง",
+          technicianStatus: technician ? technician.status : "ไม่ระบุสถานะ",
+          technicianPhone: technician ? technician.phone : "",
+          technicianImg: technician ? technician.image : "",
+        };
+      });
+
+      setMembers(joined);
+    } catch (err) {
+      console.error("❌ Error parsing CardWork:", err);
     }
   }, []);
 
@@ -72,7 +86,7 @@ const TeamMap = () => {
           fullscreenControl: false,
         }}
       >
-        {/*  แสดง Marker ทุกใบงาน */}
+        {/* 🧭 แสดง Marker ทุกใบงาน */}
         {members.map((m: any) => {
           const lat = m.loc?.lat ?? m.lat;
           const lng = m.loc?.lng ?? m.lng;
@@ -89,7 +103,7 @@ const TeamMap = () => {
           );
         })}
 
-        {/* ✅ แสดง InfoWindow เมื่อกด marker */}
+        {/* 💬 InfoWindow เมื่อกด Marker */}
         {selectedMember && (
           <InfoWindow
             position={{
@@ -106,18 +120,29 @@ const TeamMap = () => {
               </span>
               <br />
               <span
-                className={`${
+                className={` mt-1 flex  items-center gap-2 ${
                   selectedMember.status === "สำเร็จ"
                     ? "text-blue-500"
                     : selectedMember.status === "ตีกลับ"
                     ? "text-purple-500"
                     : selectedMember.status === "รอการตรวจสอบ"
                     ? "text-yellow-500"
-                    : "text-red-500"
+                    : selectedMember.status === "กำลังทำงาน"
+                    ? "text-red-500"
+                    : "text-gray-500"
                 } font-semibold`}
               >
-                สถานะ: {selectedMember.status}
+                <CircleCheck size={16} /> สถานะใบงาน: {selectedMember.status}
               </span>
+
+              <div className="mt-2 flex items-center  border-t pt-1 text-xs text-gray-700 gap-2">
+                <User size={16} className="text-accent" />{" "}
+                <strong>{selectedMember.technicianName}</strong>
+              </div>
+              <div className="mt-2 flex items-center pt-1 text-xs text-gray-700 gap-2">
+                <Phone size={16} className="text-accent" />{" "}
+                {selectedMember.technicianPhone}
+              </div>
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${
                   selectedMember.loc?.lat ?? selectedMember.lat
@@ -125,7 +150,7 @@ const TeamMap = () => {
                 target="_blank"
                 className="block mt-2 text-blue-600 underline text-xs"
               >
-                🔗 เปิดนำทาง
+                🔗 เปิดนำทางด้วย Google Maps
               </a>
             </div>
           </InfoWindow>

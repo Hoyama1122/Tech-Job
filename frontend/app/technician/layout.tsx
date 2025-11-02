@@ -1,13 +1,12 @@
 import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 import NavbarTech from "@/components/Technician/NavbarTech";
 
-
 import SidebarWrapper from "@/components/Technician/SidebarWrapper";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  
   return (
     <div className="min-h-screen bg-primary">
-    
       <SidebarWrapper />
       <div
         className="

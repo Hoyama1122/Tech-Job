@@ -1,6 +1,6 @@
 "use client";
 import { pendingApprovals } from "@/lib/Mock/PendingApprove";
-import { useSupervisorStore } from "@/store/useSupervisorStore";
+import { useSupervisorStore } from "@/store/Supervisor/useSupervisorStore";
 import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
 import React, { useState } from "react";
 
