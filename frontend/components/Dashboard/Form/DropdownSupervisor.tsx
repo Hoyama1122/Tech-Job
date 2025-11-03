@@ -78,7 +78,7 @@ export default function DropdownSupervisor() {
 
       {/* Dropdown List */}
       {isOpen && (
-        <div className="absolute z-20 mt-2 w-full bg-white border border-gray-100 shadow-lg rounded-xl overflow-hidden animate-in fade-in-80 slide-in-from-top-1">
+        <div className="absolute z-20  w-full bg-white border border-gray-100 shadow-lg rounded-xl overflow-hidden animate-in fade-in-80 slide-in-from-top-1">
           {Supervisor.map((sup) => (
             <button
               key={sup.id}
