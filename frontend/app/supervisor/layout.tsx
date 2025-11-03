@@ -3,14 +3,25 @@ import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 import SidebarWrapper from "@/components/Supervisor/SidebarWrapper";
 import { CardWork } from "@/lib/Mock/CardWork";
 import { TechnicianMock } from "@/lib/Mock/Technician";
-
 import { AppLoader } from "@/store/AppLoader";
-import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { setUser, setCardWork } = AppLoader();
+
   useEffect(() => {
-    const savedUser = localStorage.getItem("User");
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (!token || !role) {
+      redirect("/");
+    }
+    if (role !== "supervisor") {
+      redirect("/");
+    }
+  }, []);
+  useEffect(() => {
+    const savedUser = localStorage.getItem("Technician");
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     } else {
@@ -18,7 +29,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setUser(TechnicianMock);
     }
   }, [setUser]);
-
   // Loader
   useEffect(() => {
     try {

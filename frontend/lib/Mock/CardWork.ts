@@ -23,6 +23,8 @@ export type CardWorkTypes = {
     | "ตีกลับ"
     | "รอการหมอบหมายงาน";
   date: string;
+  supervisorId: number;
+
   sla: string;
   userId: number;
   image: StaticImageData;
@@ -42,6 +44,7 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-15 15:05",
     sla: "20m",
     userId: 1,
+    supervisorId: 1,
     image: Image,
     loc: randomLocation(),
   },
@@ -54,7 +57,7 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-14 10:32",
     sla: "30m",
     userId: 2,
-
+    supervisorId: 2,
     image: Image,
     loc: randomLocation(),
   },
@@ -67,7 +70,7 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-13 09:15",
     sla: "25m",
     userId: 3,
-
+    supervisorId: 1,
     image: Image,
     loc: randomLocation(),
   },
@@ -80,7 +83,7 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-12 16:00",
     sla: "45m",
     userId: 4,
-
+    supervisorId: 1,
     image: Image,
     loc: randomLocation(),
   },
@@ -93,7 +96,7 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-11 14:25",
     sla: "20m",
     userId: 5,
-
+    supervisorId: 1,
     image: Image,
     loc: randomLocation(),
   },
@@ -106,7 +109,7 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-10 13:00",
     sla: "35m",
     userId: 6,
-
+    supervisorId: 2,
     image: Image,
     loc: randomLocation(),
   },
@@ -119,6 +122,8 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-09 10:40",
     sla: "40m",
     userId: 7,
+    supervisorId: 2,
+
     image: Image,
     loc: randomLocation(),
   },
@@ -131,6 +136,8 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-08 09:20",
     sla: "25m",
     userId: 8,
+    supervisorId: 1,
+
     image: Image,
     loc: randomLocation(),
   },
@@ -143,6 +150,8 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-07 15:50",
     sla: "15m",
     userId: 9,
+    supervisorId: 1,
+
     image: Image,
     loc: randomLocation(),
   },
@@ -154,6 +163,8 @@ export const CardWork: CardWorkTypes[] = [
     status: "ตีกลับ",
     date: "2025-01-06 11:45",
     sla: "10m",
+    supervisorId: 2,
+
     userId: 10,
     image: Image,
     loc: randomLocation(),

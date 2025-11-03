@@ -5,7 +5,7 @@ import ClientLayout from "./ClientLayout";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Dashboard",
+    template: "%s | Admin",
     default: APP_NAME,
   },
   description: APP_DESCRIPTION,
