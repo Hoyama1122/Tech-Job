@@ -53,7 +53,7 @@ const WorkForm = () => {
 
       const newWork = {
         id: current.length + 1,
-        JobId: "JOB_" + (current.length + 1),
+        JobId: "หมายใบงาน" + (current.length + 1),
         ...data,
         images,
         status: "รอการมอบหมายงาน",
@@ -243,7 +243,7 @@ const WorkForm = () => {
                 </div>
               </div>
             </div>
-            <div >
+            <div className="mt-6 bg-white shadow-md rounded-md p-6 border border-gray-100">
               <h1>Map</h1>
             </div>
           </div>

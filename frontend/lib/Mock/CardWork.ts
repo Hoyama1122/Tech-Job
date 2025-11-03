@@ -53,7 +53,7 @@ export const CardWork: CardWorkTypes[] = [
     JobId: "JOB_002",
     title: "ซ่อมแอร์ห้องประชุมใหญ่",
     description: "แอร์ไม่เย็น ตรวจสอบระบบคอมเพรสเซอร์และน้ำยาแอร์",
-    status: "รอการอนุมัติ",
+    status: "กำลังทำงาน",
     date: "2025-01-14 10:32",
     sla: "30m",
     userId: 2,

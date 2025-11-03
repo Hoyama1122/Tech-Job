@@ -10,7 +10,7 @@ const SidebarWrapper = () => {
   return (
     <Sidebar
       navLinks={navLinkAdmin}
-      basePath="/dashboard"
+      basePath="/admin"
       isOpen={isOpen}
       setIsOpen={setIsOpen}
     />
