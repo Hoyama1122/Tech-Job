@@ -24,9 +24,8 @@ export type CardWorkTypes = {
     | "รอการหมอบหมายงาน";
   date: string;
   supervisorId: number;
-
   sla: string;
-  userId: number;
+  userId: number | null;
   image: StaticImageData;
   loc: {
     lat: number;
@@ -56,7 +55,7 @@ export const CardWork: CardWorkTypes[] = [
     status: "กำลังทำงาน",
     date: "2025-01-14 10:32",
     sla: "30m",
-    userId: 2,
+    userId: null,
     supervisorId: 2,
     image: Image,
     loc: randomLocation(),
@@ -100,19 +99,7 @@ export const CardWork: CardWorkTypes[] = [
     image: Image,
     loc: randomLocation(),
   },
-  {
-    id: 6,
-    JobId: "JOB_006",
-    title: "เปลี่ยนกรองน้ำระบบกลาง",
-    description: "ระบบกรองน้ำไม่ผ่าน ต้องเปลี่ยนไส้กรองใหม่ทั้งหมด",
-    status: "รอการอนุมัติ",
-    date: "2025-01-10 13:00",
-    sla: "35m",
-    userId: 6,
-    supervisorId: 2,
-    image: Image,
-    loc: randomLocation(),
-  },
+  
   {
     id: 7,
     JobId: "JOB_007",

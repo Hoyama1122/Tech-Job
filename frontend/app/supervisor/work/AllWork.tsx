@@ -87,14 +87,14 @@ const Allwork = () => {
             <button
               onClick={handlePrev}
               disabled={currentPage === 1}
-              className="px-3 py-1 border rounded hover:bg-primary hover:text-white disabled:opacity-50"
+              className="px-3 py-1 flex  items-center justify-center border rounded hover:bg-primary hover:text-white disabled:opacity-50"
             >
               <ArrowLeft size={14} className="mr-1" /> ก่อนหน้า
             </button>
             <button
               onClick={handleNext}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 border rounded hover:bg-primary hover:text-white disabled:opacity-50"
+              className="px-3 py-1 flex  items-center justify-center border rounded hover:bg-primary hover:text-white disabled:opacity-50"
             >
               ถัดไป <ArrowRight size={14} className="ml-1" />
             </button>

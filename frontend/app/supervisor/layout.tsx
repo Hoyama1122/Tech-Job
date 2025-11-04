@@ -4,22 +4,27 @@ import SidebarWrapper from "@/components/Supervisor/SidebarWrapper";
 import { CardWork } from "@/lib/Mock/CardWork";
 import { TechnicianMock } from "@/lib/Mock/Technician";
 import { AppLoader } from "@/store/AppLoader";
+import { useAuthStore } from "@/store/useAuthStore";
 import { redirect } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { setUser, setCardWork } = AppLoader();
+  const { role, supervisorId } = useAuthStore();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-    if (!token || !role) {
-      redirect("/");
-    }
-    if (role !== "supervisor") {
-      redirect("/");
-    }
+    setIsReady(true);
   }, []);
+
+  //  ตรวจ role
+  useEffect(() => {
+    if (!isReady) return;
+    if (!role || role !== "supervisor") {
+      redirect("/");
+    }
+  }, [isReady, role]);
+
   useEffect(() => {
     const savedUser = localStorage.getItem("Technician");
     if (savedUser) {
@@ -29,20 +34,35 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setUser(TechnicianMock);
     }
   }, [setUser]);
-  // Loader
+
   useEffect(() => {
+    if (!isReady) return;
+    if (!supervisorId) return;
+
+    console.log("📦 โหลดใบงานสำหรับหัวหน้า:", supervisorId);
+
     try {
-      const savedWork = localStorage.getItem("CardWork");
-      if (savedWork) {
-        setCardWork(JSON.parse(savedWork));
-      } else {
-        localStorage.setItem("CardWork", JSON.stringify(CardWork));
-        setCardWork(CardWork);
-      }
+  
+      const allWork = JSON.parse(localStorage.getItem("CardWork")) || [];
+
+      // ✅ กรองเฉพาะใบงานของหัวหน้าคนนี้
+      const filtered = allWork.filter(
+        (work) => Number(work.supervisorId) === Number(supervisorId)
+      );
+
+      // ✅ Sync ไปยัง localStorage เฉพาะ supervisor ด้วย
+      const storageKey = `CardWork_supervisor_${supervisorId}`;
+      localStorage.setItem(storageKey, JSON.stringify(filtered));
+
+      // ✅ อัปเดต Zustand state
+      setCardWork(filtered);
     } catch (error) {
-      console.error("โหลดข้อมูลใบงานไม่สำเร็จ:", error);
+      console.error("❌ โหลดข้อมูลใบงานไม่สำเร็จ:", error);
     }
-  }, [setCardWork]);
+  }, [isReady, supervisorId, setCardWork]);
+
+  if (!isReady) return null;
+
   return (
     <div className="min-h-screen bg-primary">
       <SidebarWrapper />

@@ -34,28 +34,35 @@ const Card = ({ CardWork }: CardProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {CardWork.map((data, idx) => (
         <div
           key={idx}
           className="bg-white rounded-lg overflow-hidden shadow-2xl"
         >
           <div className="relative">
-            <Image
-              src={data.image}
-              alt={data.JobId}
-              width={0}
-              height={0}
-              className="h-48 w-full object-cover rounded-t-xl"
-            />
+            {data?.image?.src ? (
+              <Image
+                src={data.image.src}
+                alt={data?.JobId ? `ภาพงาน ${data.JobId}` : "ภาพประกอบงาน"}
+                width={400}
+                height={300}
+                className="h-48 w-full object-cover rounded-t-xl"
+              />
+            ) : (
+              <div className="h-48 w-full bg-gray-200 flex items-center justify-center rounded-t-xl text-gray-500">
+                ไม่มีรูปภาพ
+              </div>
+            )}
             <span
-              className={`absolute top-3 right-3 ${getStatusClass(
+              className={`absolute top-2 right-2 px-3 py-1 rounded-lg text-xs font-medium ${getStatusClass(
                 data.status
-              )} font-semibold text-xs px-3 py-1 rounded-full shadow`}
+              )}`}
             >
               {data.status}
             </span>
           </div>
+
           <div className="p-6">
             <div className="flex justify-between items-center mb-1">
               <p className="text-sm text-text-secondaryfont-medium">
@@ -74,12 +81,11 @@ const Card = ({ CardWork }: CardProps) => {
                 <p>{data.technician?.name}</p>
               </div>
               <div className="flex items-center gap-2">
-                <Clock size={18} className="text-accent"/>
+                <Clock size={18} className="text-accent" />
                 <p className="text-sm">{data.date}</p>
               </div>
             </div>
             <div className="flex justify-end items-center mt-3 ">
-              
               <button className="flex items-center bg-primary px-4 py-2 rounded-lg hover:bg-primary-hover duration-300 transition-all text-white cursor-pointer gap-2">
                 <Eye />
                 ดูรายละเอียด

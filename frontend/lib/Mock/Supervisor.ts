@@ -7,7 +7,6 @@ type SupervisorType = {
   email: string;
   role: string;
   department: string;
-  status: string;
   image: StaticImageData;
 };
 
@@ -15,19 +14,17 @@ export const Supervisor: SupervisorType[] = [
   {
     id: 1,
     name: "สมชาย กุลชัย",
-    email: "lM6QW@example.com",
+    email: "somchai@gmail.com",
     role: "Supervisor",
-    department: "IT",
-    status: "ว่าง",
+    department: "ช่างไฟฟ้า",
     image: Somchai,
   },
   {
     id: 2,
     name: "อนุชา แซ่ลี้",
-    email: "anu@example.com",
+    email: "anucha@gmail.com",
     role: "Supervisor",
-    department: "Maintenance",
-    status: "กำลังทำงาน",
+    department: "ช่างแอร์",
     image: Anucha,
   },
 ];

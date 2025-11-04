@@ -143,6 +143,9 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
             })}
           </ul>
         </nav>
+        <div>
+          Logout
+        </div>
       </aside>
 
       {/* Modal Search */}

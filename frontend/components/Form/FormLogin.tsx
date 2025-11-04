@@ -1,86 +1,74 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, LoginFormInputs } from "@/lib/Validations/validation";
 import { toast } from "react-toastify";
-import { redirect } from "next/navigation";
-import { toLowerCase } from "zod";
+import { useAuthStore } from "@/store/useAuthStore";
+
+type LoginFormInputs = {
+  email: string;
+  password: string;
+};
 
 const FormLogin = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormInputs>({
-    resolver: zodResolver(loginSchema),
-  });
+  const { login } = useAuthStore();
+  const router = useRouter();
+  const { register, handleSubmit } = useForm<LoginFormInputs>();
+
   const onSubmit = (data: LoginFormInputs) => {
-    if (
-      data.email.toLocaleLowerCase() === "admin@gmail.com" &&
-      data.password === "admin123"
-    ) {
-      localStorage.setItem("token", "admin-token");
-      localStorage.setItem("role", "admin");
-      toast.success("เข้าสู่ระบบสําเร็จ ! ");
-      redirect("/admin");
-    }
-    if (
-      data.email === "supervisor@gmail.com" &&
-      data.password === "supervisor"
-    ) {
-      localStorage.setItem("token", "supervisor-token");
-      localStorage.setItem("role", "supervisor");
-      toast.success("เข้าสู่ระบบสําเร็จ ! ");
-      redirect("/supervisor");
-    }
-    if (
-      data.email === "technician@gmail.com" &&
-      data.password === "technician"
-    ) {
-      localStorage.setItem("token", "technician-token");
-      localStorage.setItem("role", "technician");
-      toast.success("เข้าสู่ระบบสําเร็จ ! ");
-      redirect("/technician");
+    const role = login(data.email, data.password); // ✅ return role
+
+    if (role) {
+      toast.success("เข้าสู่ระบบสำเร็จ!");
+      switch (role) {
+        case "admin":
+          router.push("/admin");
+          break;
+        case "supervisor":
+          console.log("supervisor");
+
+          router.push("/supervisor");
+          break;
+        case "technician":
+          router.push("/technician");
+          break;
+        case "executive":
+          router.push("/executive");
+          break;
+        default:
+          toast.error("ไม่สามารถเข้าสู่ระบบได้!");
+          router.push("/");
+      }
     } else {
-      toast.error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง ! ");
+      toast.error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!");
     }
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-sm mx-auto p-4 border rounded"
+      className="max-w-sm mx-auto border p-4 rounded space-y-4"
     >
-      {/* Email */}
       <div>
-        <label className="block mb-1 font-medium">ชื่อผู้ใช้</label>
+        <label className="block mb-1">อีเมล</label>
         <input
-          type="text"
           {...register("email")}
+          type="text"
+          className="w-full border rounded p-2"
           placeholder="ชื่อผู้ใช้"
-          className="w-full border rounded p-2"
         />
-        {errors.email && (
-          <p className="text-red-500 text-sm">{errors.email.message}</p>
-        )}
       </div>
 
-      {/* Password */}
       <div>
-        <label className="block mb-1 font-medium">รหัสผ่าน</label>
+        <label className="block mb-1">รหัสผ่าน</label>
         <input
-          type="password"
           {...register("password")}
-          placeholder="รหัสผ่าน"
+          type="password"
           className="w-full border rounded p-2"
+          placeholder="รหัสผ่าน"
         />
-        {errors.password && (
-          <p className="text-red-500 text-sm">{errors.password.message}</p>
-        )}
       </div>
 
-      {/* Submit */}
       <button
         type="submit"
         className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"

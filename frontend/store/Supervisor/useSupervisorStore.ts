@@ -1,6 +1,6 @@
 "use client"
 import { create } from "zustand";
-import { UserData } from "@/lib/Mock/User";
+
 import { TechnicianMock } from "@/lib/Mock/Technician";
 
 type Job = {
