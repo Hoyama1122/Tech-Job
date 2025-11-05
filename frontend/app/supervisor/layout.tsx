@@ -42,15 +42,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     console.log("📦 โหลดใบงานสำหรับหัวหน้า:", supervisorId);
 
     try {
-  
       const allWork = JSON.parse(localStorage.getItem("CardWork")) || [];
 
-      // ✅ กรองเฉพาะใบงานของหัวหน้าคนนี้
       const filtered = allWork.filter(
         (work) => Number(work.supervisorId) === Number(supervisorId)
       );
-
-      // ✅ Sync ไปยัง localStorage เฉพาะ supervisor ด้วย
+      // sync storage cardwork to cardworksupervisor
       const storageKey = `CardWork_supervisor_${supervisorId}`;
       localStorage.setItem(storageKey, JSON.stringify(filtered));
 

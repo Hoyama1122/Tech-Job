@@ -16,7 +16,7 @@ const FormLogin = () => {
   const { register, handleSubmit } = useForm<LoginFormInputs>();
 
   const onSubmit = (data: LoginFormInputs) => {
-    const role = login(data.email, data.password); // ✅ return role
+    const role = login(data.email, data.password); 
 
     if (role) {
       toast.success("เข้าสู่ระบบสำเร็จ!");
@@ -25,8 +25,6 @@ const FormLogin = () => {
           router.push("/admin");
           break;
         case "supervisor":
-          console.log("supervisor");
-
           router.push("/supervisor");
           break;
         case "technician":

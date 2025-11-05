@@ -1,8 +1,8 @@
 import React from "react";
 import MainDashboard from "./MainDashboard";
 export const metadata = {
-  title: "Main",
-  description: "เข้าสู่ระบบ Tech Job",
+  title: "หน้าหลัก",
+  description: "Tech Job",
 };
 const page = () => {
   return (

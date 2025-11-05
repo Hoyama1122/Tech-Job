@@ -8,7 +8,7 @@ interface AuthState {
   role: Role;
   supervisorId?: string;
   token?: string;
-  login: (email: string, password: string) => Role; // ✅ return role แทน boolean
+  login: (email: string, password: string) => Role;
   logout: () => void;
 }
 
@@ -99,7 +99,7 @@ export const useAuthStore = create<AuthState>()(
         }),
     }),
     {
-      name: "auth-storage", // key ที่ใช้เก็บใน localStorage
+      name: "auth-storage", 
     }
   )
 );
