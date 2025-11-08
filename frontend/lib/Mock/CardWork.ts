@@ -27,6 +27,7 @@ export type CardWorkTypes = {
   sla: string;
   userId: number | null;
   image: StaticImageData;
+  technicianId: number[];
   loc: {
     lat: number;
     lng: number;
@@ -44,6 +45,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "20m",
     userId: 1,
     supervisorId: 1,
+    technicianId: [1, 2],
     image: Image,
     loc: randomLocation(),
   },
@@ -58,6 +60,7 @@ export const CardWork: CardWorkTypes[] = [
     userId: null,
     supervisorId: 2,
     image: Image,
+    technicianId: [6, 10],
     loc: randomLocation(),
   },
   {
@@ -71,6 +74,7 @@ export const CardWork: CardWorkTypes[] = [
     userId: 3,
     supervisorId: 1,
     image: Image,
+    technicianId: [7, 3],
     loc: randomLocation(),
   },
   {
@@ -83,6 +87,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "45m",
     userId: 4,
     supervisorId: 1,
+    technicianId: [5, 2],
     image: Image,
     loc: randomLocation(),
   },
@@ -96,10 +101,11 @@ export const CardWork: CardWorkTypes[] = [
     sla: "20m",
     userId: 5,
     supervisorId: 1,
+    technicianId: [5, 7],
     image: Image,
     loc: randomLocation(),
   },
-  
+
   {
     id: 7,
     JobId: "JOB_007",
@@ -110,7 +116,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "40m",
     userId: 7,
     supervisorId: 2,
-
+    technicianId: [3, 6],
     image: Image,
     loc: randomLocation(),
   },
@@ -124,7 +130,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "25m",
     userId: 8,
     supervisorId: 1,
-
+    technicianId: [9, 6],
     image: Image,
     loc: randomLocation(),
   },
@@ -138,7 +144,7 @@ export const CardWork: CardWorkTypes[] = [
     sla: "15m",
     userId: 9,
     supervisorId: 1,
-
+    technicianId: [2, 7],
     image: Image,
     loc: randomLocation(),
   },
@@ -151,7 +157,7 @@ export const CardWork: CardWorkTypes[] = [
     date: "2025-01-06 11:45",
     sla: "10m",
     supervisorId: 2,
-
+    technicianId: [9, 6],
     userId: 10,
     image: Image,
     loc: randomLocation(),

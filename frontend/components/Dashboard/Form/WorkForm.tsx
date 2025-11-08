@@ -11,14 +11,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import DropdownCategory from "./DropdownCategory";
+import CurrentTime from "@/components/DueDate/CurrentTime";
 
 const WorkForm = () => {
-  const [Loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState<string[]>([]); // ✅ สำหรับพรีวิวรูป
-
+  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState<string[]>([]);
   const methods = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
   });
+
+ 
   const {
     register,
     handleSubmit,
@@ -27,46 +29,63 @@ const WorkForm = () => {
     setValue,
   } = methods;
 
-  const convertToBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
+  const convertToBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
     });
 
-  const onsubmit = async (data: WorkFormValues) => {
+  const handleFiles = (files: FileList | null) => {
+    if (!files?.length) return;
+    if (files.length > 6) return toast.warning("อัปโหลดได้สูงสุด 6 รูป");
+    setValue("image", files);
+    setPreview(Array.from(files).map(URL.createObjectURL));
+  };
+
+  const removeImage = (index: number) => {
+    const newPreviews = preview.filter((_, i) => i !== index);
+    setPreview(newPreviews);
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const dt = new DataTransfer();
+    if (input?.files) {
+      Array.from(input.files).forEach(
+        (file, i) => i !== index && dt.items.add(file)
+      );
+      setValue("image", dt.files);
+    }
+  };
+
+  const onSubmit = async (data: WorkFormValues) => {
     try {
       setLoading(true);
       await new Promise((r) => setTimeout(r, 1000));
-
       const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
+      const images = data.image?.length
+        ? await Promise.all(Array.from(data.image).map(convertToBase64))
+        : [];
 
-      //  แปลงรูปภาพทั้งหมดเป็น base64
-      const images: string[] = [];
-      if (data.image && data.image.length > 0) {
-        for (const file of Array.from(data.image)) {
-          const base64 = await convertToBase64(file);
-          images.push(base64);
-        }
-      }
-
+    
       const newWork = {
         id: current.length + 1,
-        JobId: "หมายใบงาน" + (current.length + 1),
+        JobId: `หมายใบงาน${current.length + 1}`,
         ...data,
-        images,
+        image: images,
+        date: `${data.date} เวลา ${data.startTime} น.`,
         status: "รอการมอบหมายงาน",
+        technicianId: [],
         createdAt: new Date().toISOString(),
       };
 
       localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
       reset();
       setPreview([]);
-      toast.success("เพิ่มใบงานสำเร็จ");
+      toast.success("เพิ่มใบงานสำเร็จ!");
     } catch (error) {
-      console.error(error);
-      toast.error("เพิ่มใบงานไม่สำเร็จ");
+      toast.error("เพิ่มใบงานไม่สำเร็จ!");
     } finally {
       setLoading(false);
     }
@@ -74,179 +93,169 @@ const WorkForm = () => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onsubmit)}>
-        <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="mt-6 bg-white shadow-md rounded-md p-6 border border-gray-100">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold mb-2 text-primary/90 flex items-center gap-2">
-                  ข้อมูลใบงาน <FileText size={30} />
-                </h2>
-                <div>
-                  <DropdownCategory />
-                </div>
-              </div>
-              <div className="h-[3px] w-[170px] bg-gradient-to-t from-primary to-secondary rounded-full"></div>
-
-              <div className="mt-4 space-y-5">
-                {/* Title */}
-                <div>
-                  <label className="block text-lg font-medium text-text mb-1">
-                    ชื่อใบงาน <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    {...register("title")}
-                    type="text"
-                    placeholder="โปรดกรอกชื่อใบงาน"
-                    className="input-field"
-                  />
-                  {errors.title ? (
-                    <p className="text-xs text-red-500 mt-1 px-2">
-                      {errors.title.message}
-                    </p>
-                  ) : (
-                    <p className="text-xs px-2 text-text-secondary mt-1">
-                      กรุณาระบุชื่อใบงานให้ชัดเจน
-                    </p>
-                  )}
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-lg font-medium text-text mb-1">
-                    คำอธิบายงาน
-                  </label>
-                  <textarea
-                    {...register("description")}
-                    placeholder="รายละเอียดของงาน"
-                    className="input-field"
-                  />
-                </div>
-
-                {/* Supervisor */}
-                <DropdownSupervisor />
-                {errors.supervisorId && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {errors.supervisorId.message}
-                  </p>
-                )}
-
-                {/* Date & Time */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <DateField />
-                  <Time />
-                </div>
-
-                {/* Upload Image */}
-                <div className="mt-4">
-                  <label className="block text-lg font-medium text-text mb-1">
-                    รูปภาพประกอบงาน
-                  </label>
-
-                  {/* กล่องอัปโหลด */}
-                  <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500">
-                      <ImageUp className="text-gray-600" size={32} />
-                      <p className="mt-2 text-sm">
-                        <span className="font-semibold">
-                          กดเพื่ออัปโหลดรูปภาพ
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        (รองรับหลายรูป สูงสุด 6 รูป)
-                      </p>
-                    </div>
-
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      multiple
-                      onChange={(e) => {
-                        const files = e.target.files;
-                        if (files && files.length > 0) {
-                          setValue("image", files);
-                          const previewURLs = Array.from(files).map((file) =>
-                            URL.createObjectURL(file)
-                          );
-                          setPreview(previewURLs);
-                          if (files.length > 6) {
-                            toast.warning("อัปโหลดได้สูงสุด 6 รูปเท่านั้น");
-                            return;
-                          }
-                        }
-                      }}
-                    />
-                  </label>
-
-                  {/* แสดงพรีวิวเป็น grid */}
-                  {preview.length > 0 && (
-                    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {preview.map((src, i) => (
-                        <div
-                          key={i}
-                          className="relative group border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
-                        >
-                          <Image
-                            width={0}
-                            height={0}
-                            src={src}
-                            alt={`preview-${i}`}
-                            className="w-full h-40 object-cover"
-                          />
-
-                          {/* ปุ่มลบรูป */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newPreviews = preview.filter(
-                                (_, index) => index !== i
-                              );
-                              setPreview(newPreviews);
-                              // อัปเดตค่าของ react-hook-form ด้วย
-                              const dt = new DataTransfer();
-                              newPreviews.forEach((_, idx) => {
-                                if (e.target?.files && e.target.files[idx]) {
-                                  dt.items.add(e.target.files[idx]);
-                                }
-                              });
-                              setValue("image", dt.files);
-                            }}
-                            className="absolute cursor-pointer top-1 right-1 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Submit */}
-                <div className="flex justify-end">
-                  <button
-                    className="button-create mt-4"
-                    type="submit"
-                    disabled={Loading}
-                  >
-                    {Loading ? (
-                      <>
-                        <Loader2 className="animate-spin" size={20} />
-                        กำลังสร้าง
-                      </>
-                    ) : (
-                      <>
-                        สร้างใบงาน <FileDiff size={20} />
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Left Column */}
+          <div className="bg-white shadow rounded-lg p-6  space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-primary/90 flex items-center gap-2">
+                ข้อมูลใบงาน <FileText size={22} />
+              </h2>
+              <DropdownCategory />
             </div>
-            <div className="mt-6 bg-white shadow-md rounded-md p-6 border border-gray-100">
-              <h1>Map</h1>
+            <div className="h-1 w-36 bg-gradient-to-r from-primary to-secondary rounded"></div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                ชื่อใบงาน <span className="text-red-500">*</span>
+              </label>
+              <input
+                {...register("title")}
+                className="input-field text-sm"
+                placeholder="ระบุชื่อใบงาน"
+              />
+              {errors.title && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                คำอธิบายงาน
+              </label>
+              <textarea
+                {...register("description")}
+                className="input-field text-sm"
+                rows={3}
+                placeholder="รายละเอียด"
+              />
+            </div>
+
+            <DropdownSupervisor />
+            {errors.supervisorId && (
+              <p className="text-xs text-red-500">
+                {errors.supervisorId.message}
+              </p>
+            )}
+
+            <div className="grid grid-cols-2 gap-2">
+              <DateField />
+              <CurrentTime />
+              <Time />
+            </div>
+
+            <div>
+              <input type="hidden" {...register("image")} />
+              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <ImageUp size={24} className="text-gray-500" />
+                <span className="text-sm font-medium mt-2">กดเพื่ออัปโหลด</span>
+                <span className="text-xs text-gray-400">สูงสุด 6 รูป</span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => handleFiles(e.target.files)}
+                />
+              </label>
+
+              {preview.length > 0 && (
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {preview.map((src, i) => (
+                    <div key={i} className="relative group">
+                      <Image
+                        src={src}
+                        alt={`preview-${i}`}
+                        width={120}
+                        height={120}
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-1 right-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Right Column */}
+          <div className="bg-white shadow rounded-lg p-6  space-y-4">
+            <h2 className="text-xl font-semibold text-primary/90">แผนที่</h2>
+            <div className="h-1 w-20 bg-gradient-to-r from-primary to-secondary rounded mb-2"></div>
+
+            <div className="bg-gray-100 border rounded-lg h-72 flex items-center justify-center">
+              <span className="text-gray-500 text-sm">พื้นที่แสดงแผนที่</span>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                ชื่อลูกค้า <span className="text-red-500">*</span>
+              </label>
+              <input
+                {...register("customerName")}
+                className="input-field text-sm"
+                placeholder="กรอกชื่อลูกค้า"
+              />
+              {errors.customerName && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.customerName.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                เบอร์โทรศัพท์ลูกค้า <span className="text-red-500">*</span>
+              </label>
+              <input
+                {...register("customerPhone")}
+                type="tel"
+                className="input-field text-sm"
+                placeholder="กรอกเบอร์โทร"
+              />
+              {errors.customerPhone && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.customerPhone.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                ที่อยู่ <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                {...register("address")}
+                className="input-field text-sm"
+                rows={3}
+                placeholder="กรอกที่อยู่ลูกค้า"
+              />
+              {errors.address && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.address.message}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end mt-4">
+          <button type="submit" disabled={loading} className="button-create">
+            {loading ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <FileDiff size={18} />
+            )}
+            {loading ? "กำลังสร้าง" : "สร้างใบงาน"}
+          </button>
         </div>
       </form>
     </FormProvider>

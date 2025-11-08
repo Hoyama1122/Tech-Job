@@ -13,7 +13,7 @@ export default function DatePickerTH() {
   const { setValue, register, watch } = useFormContext();
 
   // อ่านค่าจากฟอร์ม (ถ้ามีค่าเก่า)
-  const formDate = watch("dueDate");
+  const formDate = watch("date");
 
   const [selected, setSelected] = useState<Date | undefined>(
     formDate ? new Date(formDate) : undefined
@@ -32,12 +32,17 @@ export default function DatePickerTH() {
 
   // เมื่อเลือกวัน
   const handleSelect = (day?: Date) => {
-    setSelected(day);
-    if (day) {
-      setValue("dueDate", day.toISOString()); // ✅ set ค่าใน useForm
-      setOpen(false);
-    }
-  };
+  setSelected(day);
+  if (day) {
+    const formattedDate = day.toLocaleDateString("th-TH", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    setValue("date", formattedDate);
+    setOpen(false);
+  }
+};
 
   const formatTH = (date?: Date) =>
     date?.toLocaleDateString("th-TH", {
@@ -46,9 +51,7 @@ export default function DatePickerTH() {
       year: "numeric",
     });
 
-  const displayValue = selected
-    ? formatTH(selected)
-    : "เลือกวันที่ทำงาน";
+  const displayValue = selected ? formatTH(selected) : "เลือกวันที่ทำงาน";
 
   return (
     <div ref={ref} className="relative w-full max-w-md mt-4">
@@ -57,7 +60,7 @@ export default function DatePickerTH() {
       </label>
 
       {/* Hidden input สำหรับ react-hook-form */}
-      <input type="hidden" {...register("dueDate")} />
+      <input type="hidden" {...register("date")} />
 
       {/* ปุ่ม trigger */}
       <button
@@ -84,8 +87,7 @@ export default function DatePickerTH() {
             onSelect={handleSelect}
             locale={th}
             classNames={{
-              day_selected:
-                "bg-primary text-white hover:bg-primary rounded-lg",
+              day_selected: "bg-primary text-white hover:bg-primary rounded-lg",
               day_today: "border border-primary text-primary font-semibold",
               day: "w-8 h-8",
             }}

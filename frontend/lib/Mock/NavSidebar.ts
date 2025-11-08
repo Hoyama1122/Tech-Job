@@ -14,6 +14,7 @@ import {
   UserCog,
   Users2,
   BarChart3,
+  Warehouse 
 } from "lucide-react";
 
 type NavItem = {
@@ -26,6 +27,7 @@ export const navLinkAdmin: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: HomeIcon },
   { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck },
   { name: "สร้างใบงาน", path: "/add-work", icon: FileText },
+  { name: "ข้อมูลงานเบิก", path: "/material", icon: Warehouse },
   { name: "ผู้ใช้งาน", path: "/user", icon: Users },
   { name: "ปฏิทิน", path: "/calendar", icon: CalendarDays },
 ];

@@ -8,10 +8,20 @@ export const workSchema = z
       .max(100, "ชื่อใบงานยาวเกินไป"),
     description: z.string().optional(),
     supervisorId: z.string().min(1, "กรุณาเลือกหัวหน้างาน"),
-    dueDate: z.string().min(1, "กรุณาเลือกวันที่ทำงาน"),
+    date: z.string().min(1, "กรุณาเลือกวันที่ทำงาน"),
     startTime: z.string().min(1, "กรุณาเลือกเวลาเริ่มต้น"),
     endTime: z.string().min(1, "กรุณาเลือกเวลาสิ้นสุด"),
-    
+
+    //  เพิ่มส่วนข้อมูลลูกค้า
+    customerName: z.string().min(1, "กรุณาระบุชื่อลูกค้า"),
+    customerPhone: z
+      .string()
+      .min(10, "เบอร์โทรต้องมีอย่างน้อย 10 หลัก")
+      .regex(/^[0-9-+\s]+$/, "รูปแบบเบอร์โทรไม่ถูกต้อง"),
+    address: z.string().min(1, "กรุณาระบุที่อยู่"),
+
+    // เพิ่ม image ให้ zod รู้จัก
+    image: z.any().optional(),
   })
   .refine((data) => data.endTime > data.startTime, {
     message: "เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มต้น",

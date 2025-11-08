@@ -3,25 +3,13 @@ import Image from "next/image";
 import React from "react";
 import NotFound from "@/public/assets/notfounddata.webp";
 import { Clock, Eye, User } from "lucide-react";
+import { getStatusClass } from "@/components/getStatusclass";
 type CardProps = {
   CardWork: CardWorkTypes[];
 };
 
 const Card = ({ CardWork }: CardProps) => {
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case "รอการตรวจสอบ":
-        return "bg-accent text-white";
-      case "ตีกลับ":
-        return "bg-red-100 text-red-700";
-      case "รอการอนุมัติ":
-        return "bg-blue-100 text-blue-700";
-      case "สำเร็จ":
-        return "bg-green-100 text-green-700";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+ 
 
   //  No data
   if (CardWork.length === 0) {

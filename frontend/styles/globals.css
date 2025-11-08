@@ -19,7 +19,7 @@
   /* 🧱 Backgrounds */
   --color-bg: #e1e5ee; /* พื้นหลังทั่วไป */
   --color-bg-dark: #29335c; /* พื้นหลังเข้ม เช่น navbar หรือ footer */
-
+  ---color-bg-card: #f1f1f1; /* พื้นหลังของ card */
   /* 📝 Text */
   --color-text: #1a1a1a; /* ตัวอักษรหลัก */
   --color-text-secondary: #4a4a4a; /* ตัวอักษรรอง */
@@ -29,7 +29,7 @@
   --color-highlight: #e99f0c; /* สีเน้นข้อความหรือ icon */
 }
 * {
-  font-family: "Sarabun", sans-serif;
+  font-family: "Kanit", sans-serif;
 }
 .font-title {
   @apply font-bold text-primary text-2xl md:text-4xl;
