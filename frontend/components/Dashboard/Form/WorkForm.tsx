@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import DropdownCategory from "./DropdownCategory";
 import CurrentTime from "@/components/DueDate/CurrentTime";
+import Map from "../Map/Map";
 
 const WorkForm = () => {
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,6 @@ const WorkForm = () => {
     resolver: zodResolver(workSchema),
   });
 
- 
   const {
     register,
     handleSubmit,
@@ -59,6 +59,16 @@ const WorkForm = () => {
     }
   };
 
+  const handlePhoneInput = (e) => {
+    let value = e.target.value.replace(/\D/g, ""); 
+    if (value.length > 3 && value.length <= 6) {
+      value = value.replace(/(\d{3})(\d+)/, "$1-$2");
+    } else if (value.length > 6) {
+      value = value.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
+    }
+    e.target.value = value.slice(0, 12); 
+  };
+
   const onSubmit = async (data: WorkFormValues) => {
     try {
       setLoading(true);
@@ -68,7 +78,6 @@ const WorkForm = () => {
         ? await Promise.all(Array.from(data.image).map(convertToBase64))
         : [];
 
-    
       const newWork = {
         id: current.length + 1,
         JobId: `หมายใบงาน${current.length + 1}`,
@@ -189,11 +198,7 @@ const WorkForm = () => {
           {/* Right Column */}
           <div className="bg-white shadow rounded-lg p-6  space-y-4">
             <h2 className="text-xl font-semibold text-primary/90">แผนที่</h2>
-            <div className="h-1 w-20 bg-gradient-to-r from-primary to-secondary rounded mb-2"></div>
-
-            <div className="bg-gray-100 border rounded-lg h-72 flex items-center justify-center">
-              <span className="text-gray-500 text-sm">พื้นที่แสดงแผนที่</span>
-            </div>
+            <Map/>
 
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -219,7 +224,9 @@ const WorkForm = () => {
                 {...register("customerPhone")}
                 type="tel"
                 className="input-field text-sm"
-                placeholder="กรอกเบอร์โทร"
+                placeholder="000-000-0000"
+                onInput={handlePhoneInput}
+                maxLength={12}
               />
               {errors.customerPhone && (
                 <p className="text-xs text-red-500 mt-1">
