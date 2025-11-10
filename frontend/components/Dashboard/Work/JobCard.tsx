@@ -27,7 +27,7 @@ const getStatusStyle = (status: string) => {
     case "รอการตรวจสอบ":
       return "bg-blue-100 text-blue-700 border-blue-200";
     case "รอการมอบหมายงาน":
-      return "bg-purple-100 text-purple-700 border-purple-200"; // สีม่วงสำหรับสถานะใหม่
+      return "bg-primary/80 text-purple-700 border-primary"; 
     default:
       return "bg-gray-100 text-gray-700 border-gray-200";
   }
@@ -68,7 +68,7 @@ export default function JobCard({ job }: Props) {
                 <User className="w-4 h-4" />
                 <span>หัวหน้างาน:</span>
               </div>
-              <span className="font-medium text-gray-900">{job.supervisor?.name || "ไม่ระบุ"}</span>
+              <span className="font-medium text-gray-900">{job.supervisorName.name || "ไม่ระบุ"}</span>
             </div>
 
             <div className="flex items-center justify-between text-sm">

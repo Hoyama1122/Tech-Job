@@ -8,6 +8,8 @@ interface AuthState {
   role: Role;
   supervisorId?: string;
   token?: string;
+  name?: string;
+  email?: string;
   login: (email: string, password: string) => Role;
   logout: () => void;
 }
@@ -27,6 +29,8 @@ export const useAuthStore = create<AuthState>()(
           set({
             role: "admin",
             token: "admin-token",
+            name: "สมศรี จันทร์เจริญ",
+            email:email,
           });
           return "admin";
         }

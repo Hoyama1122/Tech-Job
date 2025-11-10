@@ -60,8 +60,7 @@ useEffect(() => {
 
         return {
           ...job,
-          supervisorName: supervisor ? supervisor.name : "ยังไม่ได้มอบหมายหัวหน้า",
-          supervisor: supervisor || null,
+          supervisorName: supervisor ||"ยังไม่ได้มอบหมายหัวหน้า",
           formattedDate,
         };
       });

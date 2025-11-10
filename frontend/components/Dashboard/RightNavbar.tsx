@@ -1,23 +1,31 @@
-import React, { useState } from "react";
-import {
-  NavNotifacation,
-} from "@/lib/Mock/NavNotifacation";
+import React, { useEffect, useState } from "react";
+import { NavNotifacation } from "@/lib/Mock/NavNotifacation";
 import profile from "@/public/profile/profile.jpg";
 import Image from "next/image";
 import NotifacationBell from "../Dashboard/NotifacationBell";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 const RightNavbar = () => {
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);
+  const [user, setuser] = useState([]);
+  useEffect(() => {
+    const GetUser = localStorage.getItem("auth-storage");
+    if (GetUser) {
+      setuser(JSON.parse(GetUser));
+    } else {
+      toast.error("ไม่พบข้อมูลผู้ใช้");
+    }
+
+  }, [setuser]);
   return (
     <div className="flex items-center gap-3 px-4 ">
-      
       <div className="relative">
         <button
           className="btn-noti group cursor-pointer"
           onClick={() => setShowNotificationsBell(!showNotificationsBell)}
         >
-         <FontAwesomeIcon icon={faBell} size='lg'/>
+          <FontAwesomeIcon icon={faBell} size="lg" />
           {NavNotifacation.length > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
               {NavNotifacation.length}
@@ -42,9 +50,9 @@ const RightNavbar = () => {
         />
         <div className=" leading-4">
           <h1 className="text-md text-primary-test font-semibold">
-            Supervisor
+            ธุรการ
           </h1>
-          <p className="text-sm">นายจัก ปูหอม</p>
+          <p className="text-sm">{user.state?.name}</p>
         </div>
       </div>
     </div>
