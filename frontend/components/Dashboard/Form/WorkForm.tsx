@@ -103,7 +103,7 @@ const WorkForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           {/* Left Column */}
           <div className="bg-white shadow rounded-lg p-6  space-y-4">
             <div className="flex items-center justify-between">

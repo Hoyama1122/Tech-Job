@@ -37,7 +37,7 @@ export default function JobCard({ job }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-200 overflow-hidden group flex flex-col h-full">
       {/* Card Header */}
-      <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-4 border-b border-gray-100">
+      <div className="bg-gradient-to-r from-primary/5 to-accent/10 p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
@@ -61,7 +61,8 @@ export default function JobCard({ job }: Props) {
           )}
 
           {/* Metadata */}
-          <div className="space-y-3 mb-4">
+        </div>
+          <div className="space-y-3 mb-2">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-gray-600">
                 <User className="w-4 h-4" />
@@ -88,7 +89,6 @@ export default function JobCard({ job }: Props) {
               </div>
             )}
           </div>
-        </div>
 
         {/* Action Button - อยู่ล่างสุดเสมอ */}
         <Link

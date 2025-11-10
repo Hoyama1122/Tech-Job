@@ -27,31 +27,55 @@ export default function Work() {
   const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    setIsLoading(true);
-    try {
-      const cardData = localStorage.getItem("CardWork");
-      const supervisorData = localStorage.getItem("Supervisor");
+useEffect(() => {
+  setIsLoading(true);
+  try {
+    const cardData = localStorage.getItem("CardWork");
+    const supervisorData = localStorage.getItem("Supervisor");
 
-      if (cardData) {
-        const parsedCards = JSON.parse(cardData);
-        const parsedSupervisors = supervisorData ? JSON.parse(supervisorData) : [];
+    if (cardData) {
+      const parsedCards = JSON.parse(cardData);
+      const parsedSupervisors = supervisorData ? JSON.parse(supervisorData) : [];
 
-        const joinedJobs = parsedCards.map((job: any) => {
-          const supervisor = parsedSupervisors.find(
-            (sup: any) => String(sup.id) === String(job.supervisorId)
-          );
-          return { ...job, supervisor: supervisor || null };
-        });
+      const joinedJobs = parsedCards.map((job: any) => {
+        // ถ้าไม่มี supervisorId ก็ข้ามเลย
+        const supervisor = job.supervisorId
+          ? parsedSupervisors.find(
+              (sup: any) => String(sup.id) === String(job.supervisorId)
+            )
+          : null;
 
-        setJobs(joinedJobs);
-      }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
-    } finally {
-      setTimeout(() => setIsLoading(false), 400);
+        const jobDate =
+          job.date ||
+          job.createdAt ||
+          job.dueDate ||
+          null;
+
+        const formattedDate = jobDate
+          ? new Date(jobDate).toLocaleString("th-TH", {
+              dateStyle: "short",
+              timeStyle: "short",
+            })
+          : "ไม่ระบุวันที่";
+
+        return {
+          ...job,
+          supervisorName: supervisor ? supervisor.name : "ยังไม่ได้มอบหมายหัวหน้า",
+          supervisor: supervisor || null,
+          formattedDate,
+        };
+      });
+
+      setJobs(joinedJobs);
     }
-  }, [setJobs]);
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+  } finally {
+    setTimeout(() => setIsLoading(false), 400);
+  }
+}, [setJobs]);
+
+
 
   const filteredJobs = useMemo(() => {
     if (!jobs.length) return [];
@@ -74,6 +98,7 @@ export default function Work() {
       return matchSearch && matchStatus;
     });
   }, [jobs, search, filterStatus]);
+console.log(jobs);
 
   // ✅ สำคัญ: เพิ่ม "รอการมอบหมายงาน" ใน stats
   const stats = useMemo(() => ({
