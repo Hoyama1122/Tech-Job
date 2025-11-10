@@ -8,7 +8,7 @@ import TeamPerformance from "@/components/Supervisor/RechartsPie";
 import AssignJobs from "@/components/Supervisor/AssignJobs";
 import TeamStatusBoard from "@/components/Supervisor/TeamStatusBoard";
 
-const TeamMap = dynamic(() => import("@/components/Map/MapContainer"), {
+const TeamMap = dynamic(() => import("@/components/Supervisor/Map/MapContainer"), {
   ssr: false,
 });
 
