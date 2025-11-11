@@ -1,5 +1,5 @@
-import  Somchai  from "@/public/supervisor/somchai.jpg";
-import  Anucha  from "@/public/supervisor/Anucha.jpg";
+import  Somchai  from "@/public/supervisor/somchai.png";
+import  Anucha  from "@/public/supervisor/Anucha.png";
 import { StaticImageData } from "next/image";
 type SupervisorType = {
   id: number;

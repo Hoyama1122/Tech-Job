@@ -5,15 +5,10 @@ import { notFound, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   FileText,
-  User,
-  Calendar,
-  Clock,
   CheckCircle,
   XCircle,
   Edit,
   Download,
-  Share2,
-  MapPin,
   Image as ImageIcon,
   Users,
   AlertCircle,
@@ -87,7 +82,7 @@ export default function WorkDetailPage({ params }: PageProps) {
         }
       }
     } catch (error) {
-      console.error("❌ Error loading job details:", error);
+      console.error("Error loading job details:", error);
     } finally {
       setTimeout(() => setIsLoading(false), 300);
     }
@@ -112,7 +107,7 @@ export default function WorkDetailPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="p-4">
         <LoadingSkeleton />
       </div>
     );
@@ -123,7 +118,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="p-4">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
