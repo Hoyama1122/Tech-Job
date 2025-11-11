@@ -59,10 +59,10 @@ export default function DatePickerTH() {
         วันที่ทำงาน <span className="text-red-500">*</span>
       </label>
 
-      {/* Hidden input สำหรับ react-hook-form */}
+  
       <input type="hidden" {...register("date")} />
 
-      {/* ปุ่ม trigger */}
+    
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -85,7 +85,6 @@ export default function DatePickerTH() {
             mode="single"
             selected={selected}
             onSelect={handleSelect}
-            locale={th}
             classNames={{
               day_selected: "bg-primary text-white hover:bg-primary rounded-lg",
               day_today: "border border-primary text-primary font-semibold",

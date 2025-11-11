@@ -60,30 +60,68 @@ const WorkForm = () => {
   };
 
   const handlePhoneInput = (e) => {
-    let value = e.target.value.replace(/\D/g, ""); 
+    let value = e.target.value.replace(/\D/g, "");
     if (value.length > 3 && value.length <= 6) {
       value = value.replace(/(\d{3})(\d+)/, "$1-$2");
     } else if (value.length > 6) {
       value = value.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
     }
-    e.target.value = value.slice(0, 12); 
+    e.target.value = value.slice(0, 12);
   };
 
   const onSubmit = async (data: WorkFormValues) => {
     try {
       setLoading(true);
       await new Promise((r) => setTimeout(r, 1000));
+
       const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
       const images = data.image?.length
         ? await Promise.all(Array.from(data.image).map(convertToBase64))
         : [];
 
+   
+      let formattedDate = "";
+      if (data.date) {
+        // ถ้า input เป็น yyyy-mm-dd (จาก date picker)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+          formattedDate = `${data.date}T${data.startTime || "00:00"}`;
+        } else {
+         
+          const months: Record<string, number> = {
+            มกราคม: 0,
+            กุมภาพันธ์: 1,
+            มีนาคม: 2,
+            เมษายน: 3,
+            พฤษภาคม: 4,
+            มิถุนายน: 5,
+            กรกฎาคม: 6,
+            สิงหาคม: 7,
+            กันยายน: 8,
+            ตุลาคม: 9,
+            พฤศจิกายน: 10,
+            ธันวาคม: 11,
+          };
+          const match = data.date.match(/(\d{1,2}) (\S+) (\d{4})/);
+          if (match) {
+            const [, d, m, y] = match;
+            const year = parseInt(y) - 543;
+            const month = months[m];
+            const day = parseInt(d);
+            const hours = data.startTime?.split(":")[0] || "00";
+            const minutes = data.startTime?.split(":")[1] || "00";
+            formattedDate = new Date(year, month, day, hours, minutes)
+              .toISOString()
+              .slice(0, 16);
+          }
+        }
+      }
+
       const newWork = {
         id: current.length + 1,
-        JobId: `หมายใบงาน${current.length + 1}`,
+        JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
         ...data,
+        date: formattedDate,
         image: images,
-        date: `${data.date} เวลา ${data.startTime} น.`,
         status: "รอการมอบหมายงาน",
         technicianId: [],
         createdAt: new Date().toISOString(),
@@ -198,7 +236,7 @@ const WorkForm = () => {
           {/* Right Column */}
           <div className="bg-white shadow rounded-lg p-6  space-y-4">
             <h2 className="text-xl font-semibold text-primary/90">แผนที่</h2>
-            <Map/>
+            <Map />
 
             <div>
               <label className="block text-sm font-medium mb-1">

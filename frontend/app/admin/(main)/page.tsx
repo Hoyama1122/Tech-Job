@@ -10,7 +10,7 @@ const page = () => {
   return (
     <div className="">   
       <MainDashboard />
-      1
+      
     </div>
   );
 };

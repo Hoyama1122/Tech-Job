@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // components/Dashboard/Work/JobCard.tsx
+import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import { FileText, User, Clock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -76,7 +77,7 @@ export default function JobCard({ job }: Props) {
                 <Clock className="w-4 h-4" />
                 <span>วันที่สร้าง:</span>
               </div>
-              <span className="font-medium text-gray-900">{job.date}</span>
+              <span className="font-medium text-gray-900">{formatThaiDateTime(job.date, job.startTime)}</span>
             </div>
 
             {job.technician && job.technician.length > 0 && (
