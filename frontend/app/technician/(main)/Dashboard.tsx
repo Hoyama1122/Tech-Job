@@ -7,7 +7,7 @@ const Dashboard = () => {
     <div className="">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
         <div className="p-6 bg-gray-300 rounded-lg">
-          <p className="" fs-1>
+          <p className="text-sm">
             Mr. Jason John
           </p>
           <p>รหัสพนักงาน 67696969</p>
