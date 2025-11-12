@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 
 interface Technician {
   id: string;
@@ -49,27 +50,32 @@ export default function WorkDetailPage({ params }: PageProps) {
   const { slug } = params;
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     setIsLoading(true);
     try {
       const cardData = localStorage.getItem("CardWork");
-      const supervisorData = localStorage.getItem("Supervisor");
-      const technicianData = localStorage.getItem("Technician");
+      const userData = localStorage.getItem("Users");
 
       if (cardData) {
         const parsedJobs = JSON.parse(cardData);
+        const parsedUsers = userData ? JSON.parse(userData) : [];
+
         const foundJob = parsedJobs.find((j: any) => j.JobId === slug);
 
         if (foundJob) {
-          const supervisors = supervisorData ? JSON.parse(supervisorData) : [];
-          const technicians = technicianData ? JSON.parse(technicianData) : [];
-
-          const supervisor = supervisors.find(
-            (sup: any) => String(sup.id) === String(foundJob.supervisorId)
+          //  หาหัวหน้างานจาก Users
+          const supervisor = parsedUsers.find(
+            (u: any) =>
+              u.role === "supervisor" &&
+              String(u.id) === String(foundJob.supervisorId)
           );
-          const assignedTechnicians = technicians.filter((tech: any) =>
-            foundJob.technicianId?.includes(tech.id)
+
+          // 🔍 หาช่างจาก Users
+          const assignedTechnicians = parsedUsers.filter(
+            (u: any) =>
+              u.role === "technician" &&
+              Array.isArray(foundJob.technicianId) &&
+              foundJob.technicianId.includes(u.id)
           );
 
           setJob({
@@ -116,6 +122,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   if (!job) {
     return <NotFoundPage jobId={slug} />;
   }
+  console.log(job);
 
   return (
     <div className="p-4">
@@ -179,7 +186,7 @@ export default function WorkDetailPage({ params }: PageProps) {
               />
               <InfoRow
                 label="วันที่สร้าง"
-                value={job.date || job.createdAt || "-"}
+                value={job.date || formatThaiDateTime(job.createdAt) || "-"}
               />
               {job.location && <InfoRow label="สถานที่" value={job.location} />}
             </div>
@@ -198,22 +205,45 @@ export default function WorkDetailPage({ params }: PageProps) {
           )}
 
           {/* Evidence Images */}
-          {job.images && job.images.length > 0 && (
+
+          {job.image && (
             <div className="bg-white rounded-xl shadow-md p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <ImageIcon className="w-6 h-6 text-primary" />
-                หลักฐานการทำงาน ({job.images.length} รูป)
+                หลักฐานการทำงาน
               </h2>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {job.images.map((img, idx) => (
+                {/* ถ้าเป็น array */}
+                {Array.isArray(job.image) ? (
+                  job.image.map((img: any, idx: number) => {
+                    const src =
+                      typeof img === "object"
+                        ? img.src || img.blurDataURL
+                        : img;
+
+                    return (
+                      <img
+                        key={idx}
+                        src={src}
+                        alt={`หลักฐาน ${idx + 1}`}
+                        className="w-full h-48 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => window.open(src, "_blank")}
+                      />
+                    );
+                  })
+                ) : (
+                  // ถ้าเป็น object หรือ string เดี่ยว
                   <img
-                    key={idx}
-                    src={img}
-                    alt={`หลักฐาน ${idx + 1}`}
-                    className="w-full h-48 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => window.open(img, "_blank")}
+                    src={
+                      typeof job.image === "object"
+                        ? job.image.src || job.image.blurDataURL
+                        : job.image
+                    }
+                    alt="หลักฐาน"
+                    className="w-full h-48 object-cover rounded-lg shadow-sm"
                   />
-                ))}
+                )}
               </div>
             </div>
           )}
@@ -242,11 +272,12 @@ export default function WorkDetailPage({ params }: PageProps) {
               </div>
             )}
 
+            <p className="text-xs text-gray-500 mb-3">
+              ช่างที่รับผิดชอบ ({job.technician.length} คน)
+            </p>
+            <div className="w-full h-[0.5px] bg-primary"></div>
             {job.technician && job.technician.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <p className="text-xs text-gray-500 mb-3">
-                  ช่างที่รับผิดชอบ ({job.technician.length} คน)
-                </p>
+              <div className="py-3  border-gray-200">
                 <div className="space-y-2">
                   {job.technician.map((tech) => (
                     <div key={tech.id} className="flex items-center gap-3">

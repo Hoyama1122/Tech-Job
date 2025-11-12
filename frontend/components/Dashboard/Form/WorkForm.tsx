@@ -3,16 +3,14 @@
 import { FileDiff, FileText, ImageUp, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import DropdownSupervisor from "./DropdownSupervisor";
-import DateField from "@/components/DueDate/Date";
-import Time from "@/components/DueDate/Time";
 import { FormProvider, useForm } from "react-hook-form";
 import { WorkFormValues, workSchema } from "@/lib/Validations/SchemaForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import DropdownCategory from "./DropdownCategory";
-import CurrentTime from "@/components/DueDate/CurrentTime";
 import Map from "../Map/Map";
+import DatePickerTH from "@/components/DueDate/Date";
 
 const WorkForm = () => {
   const [loading, setLoading] = useState(false);
@@ -69,75 +67,101 @@ const WorkForm = () => {
     e.target.value = value.slice(0, 12);
   };
 
-  const onSubmit = async (data: WorkFormValues) => {
-    try {
-      setLoading(true);
-      await new Promise((r) => setTimeout(r, 1000));
+const onSubmit = async (data: WorkFormValues) => {
+  try {
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 1000));
 
-      const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
-      const images = data.image?.length
-        ? await Promise.all(Array.from(data.image).map(convertToBase64))
-        : [];
+    const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
 
-   
-      let formattedDate = "";
-      if (data.date) {
-        // ถ้า input เป็น yyyy-mm-dd (จาก date picker)
-        if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
-          formattedDate = `${data.date}T${data.startTime || "00:00"}`;
-        } else {
-         
-          const months: Record<string, number> = {
-            มกราคม: 0,
-            กุมภาพันธ์: 1,
-            มีนาคม: 2,
-            เมษายน: 3,
-            พฤษภาคม: 4,
-            มิถุนายน: 5,
-            กรกฎาคม: 6,
-            สิงหาคม: 7,
-            กันยายน: 8,
-            ตุลาคม: 9,
-            พฤศจิกายน: 10,
-            ธันวาคม: 11,
-          };
-          const match = data.date.match(/(\d{1,2}) (\S+) (\d{4})/);
-          if (match) {
-            const [, d, m, y] = match;
-            const year = parseInt(y) - 543;
-            const month = months[m];
-            const day = parseInt(d);
-            const hours = data.startTime?.split(":")[0] || "00";
-            const minutes = data.startTime?.split(":")[1] || "00";
-            formattedDate = new Date(year, month, day, hours, minutes)
-              .toISOString()
-              .slice(0, 16);
-          }
+    // แปลงรูปภาพเป็น base64
+    const images = data.image?.length
+      ? await Promise.all(Array.from(data.image).map(convertToBase64))
+      : [];
+
+    // 🔧 format วันที่นัดหมาย
+    let formattedDate = "";
+    if (data.date) {
+      // ✅ กรณีเป็น yyyy-mm-dd (จาก date picker)
+      if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+        formattedDate = `${data.date}T${data.startTime || "00:00"}`;
+      } else {
+        // ✅ กรณีเป็นภาษาไทย (เช่น 15 มกราคม 2568)
+        const months: Record<string, number> = {
+          มกราคม: 0,
+          กุมภาพันธ์: 1,
+          มีนาคม: 2,
+          เมษายน: 3,
+          พฤษภาคม: 4,
+          มิถุนายน: 5,
+          กรกฎาคม: 6,
+          สิงหาคม: 7,
+          กันยายน: 8,
+          ตุลาคม: 9,
+          พฤศจิกายน: 10,
+          ธันวาคม: 11,
+        };
+        const match = data.date.match(/(\d{1,2}) (\S+) (\d{4})/);
+        if (match) {
+          const [, d, m, y] = match;
+          const year = parseInt(y) - 543;
+          const month = months[m];
+          const day = parseInt(d);
+          const hours = data.startTime?.split(":")[0] || "00";
+          const minutes = data.startTime?.split(":")[1] || "00";
+          formattedDate = new Date(year, month, day, hours, minutes)
+            .toISOString()
+            .slice(0, 16);
         }
       }
-
-      const newWork = {
-        id: current.length + 1,
-        JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
-        ...data,
-        date: formattedDate,
-        image: images,
-        status: "รอการมอบหมายงาน",
-        technicianId: [],
-        createdAt: new Date().toISOString(),
-      };
-
-      localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
-      reset();
-      setPreview([]);
-      toast.success("เพิ่มใบงานสำเร็จ!");
-    } catch (error) {
-      toast.error("เพิ่มใบงานไม่สำเร็จ!");
-    } finally {
-      setLoading(false);
     }
-  };
 
+    // 🆕 เวลาสร้างใบงาน
+    const now = new Date();
+
+    // 🧩 job object ใหม่
+    const newWork = {
+      id: current.length + 1,
+      JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
+      title: data.title,
+      description: data.description,
+     
+      date: formattedDate,
+      status: "รอการมอบหมายงาน",
+
+      // 🕓 เวลาสำคัญในระบบ
+      createdAt: now.toISOString(),
+      assignedAt: null,     
+      dueDate: null,        
+      completedAt: null,
+      approvedAt: null,
+
+      // 🧑‍💼 ความสัมพันธ์กับผู้ใช้
+      userId: 1, // id ของ admin ที่ login อยู่
+      supervisorId: Number(data.supervisorId) || 0,
+      technicianId: [],
+
+      // 📷 รูปภาพ + location
+      image: images,
+      loc: { lat: 13.85, lng: 100.58 },
+    };
+
+    // 💾 บันทึกลง localStorage
+    localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
+
+    reset();
+    setPreview([]);
+    toast.success("เพิ่มใบงานสำเร็จ!");
+  } catch (error) {
+    console.error(error);
+    toast.error("เพิ่มใบงานไม่สำเร็จ!");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  console.log(errors);
+  
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -187,11 +211,7 @@ const WorkForm = () => {
               </p>
             )}
 
-            <div className="grid grid-cols-2 gap-2">
-              <DateField />
-              <CurrentTime />
-              <Time />
-            </div>
+            <DatePickerTH/>
 
             <div>
               <input type="hidden" {...register("image")} />

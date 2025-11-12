@@ -57,33 +57,38 @@ const MainDashboard = () => {
 
   useEffect(() => {
     const CardData = localStorage.getItem("CardWork");
-    const TechnicianData = localStorage.getItem("Technician");
-    const SuervisorData = localStorage.getItem("Supervisor");
+    const UsersData = localStorage.getItem("Users"); 
 
-    if (CardData && TechnicianData && SuervisorData) {
+    if (CardData && UsersData) {
       const parsedCard = JSON.parse(CardData);
-      const parsedTech = JSON.parse(TechnicianData);
-      const parsedSupervisor = JSON.parse(SuervisorData);
+      const parsedUsers = JSON.parse(UsersData);
 
-      // Join ใบงาน + Technician
       const joined = parsedCard.map((job: any) => {
-        const technicians = parsedTech.filter((tech: any) =>
-          Array.isArray(job.technicianId)
-            ? job.technicianId.includes(tech.id)
-            : false
-        );
-        const supervisor = parsedSupervisor.find(
-          (sup: any) => sup.id === job.supervisorId
+       
+        const supervisor = parsedUsers.find(
+          (u: any) =>
+            u.role === "supervisor" && String(u.id) === String(job.supervisorId)
         );
 
-        return { ...job, technicians, supervisor: supervisor || null };
+        // 👷 หาช่างทั้งหมดในงาน
+        const technicians = parsedUsers.filter(
+          (u: any) =>
+            u.role === "technician" &&
+            Array.isArray(job.technicianId) &&
+            job.technicianId.includes(u.id)
+        );
+
+        return {
+          ...job,
+          supervisor: supervisor || null,
+          technicians: technicians || [],
+        };
       });
 
       setcard(joined);
     }
   }, [setcard]);
-
-//  Pagination
+  //  Pagination
   const itemsPerPage = 6;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -128,7 +133,6 @@ const MainDashboard = () => {
               <div className="flex-1">
                 <p className="text-sm font-medium text-text-secondary">
                   {item.title}
-                  
                 </p>
                 <p className="text-2xl font-bold text-primary mt-1">
                   {item.value.toLocaleString()}

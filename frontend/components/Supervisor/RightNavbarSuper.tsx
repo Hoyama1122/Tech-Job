@@ -3,15 +3,13 @@ import { Bell, Mail, Search } from "lucide-react";
 import {
   NavNotifacation,
 } from "@/lib/Mock/NavNotifacation";
-import profile from "@/public/profile/profile.jpg";
+import profile from "@/public/profile/profile.png";
 import Image from "next/image";
 import NotifacationBell from "../Dashboard/NotifacationBell";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell } from '@fortawesome/free-solid-svg-icons';
 const RightNavbar = () => {
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);
-  const [showNotificationsMail, setShowNotificationsMail] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
   return (
     <div className="flex items-center gap-3 px-4 ">
       

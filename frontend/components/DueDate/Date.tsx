@@ -85,6 +85,7 @@ export default function DatePickerTH() {
             mode="single"
             selected={selected}
             onSelect={handleSelect}
+            locale={th}
             classNames={{
               day_selected: "bg-primary text-white hover:bg-primary rounded-lg",
               day_today: "border border-primary text-primary font-semibold",

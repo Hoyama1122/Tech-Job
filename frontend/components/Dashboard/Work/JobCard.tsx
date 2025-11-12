@@ -28,7 +28,7 @@ const getStatusStyle = (status: string) => {
     case "รอการตรวจสอบ":
       return "bg-blue-100 text-blue-700 border-blue-200";
     case "รอการมอบหมายงาน":
-      return "bg-primary/80 text-white border-primary"; 
+      return "bg-primary/80 text-white border-primary";
     default:
       return "bg-gray-100 text-gray-700 border-gray-200";
   }
@@ -42,9 +42,15 @@ export default function JobCard({ job }: Props) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
-            <span className="text-sm font-mono font-bold text-primary">#{job.JobId}</span>
+            <span className="text-sm font-mono font-bold text-primary">
+              #{job.JobId}
+            </span>
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(job.status)}`}>
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(
+              job.status
+            )}`}
+          >
             {job.status?.trim()}
           </span>
         </div>
@@ -58,38 +64,50 @@ export default function JobCard({ job }: Props) {
             {job.title}
           </h3>
           {job.description && (
-            <p className="text-sm text-gray-600 mb-4 line-clamp-2">{job.description}</p>
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+              {job.description}
+            </p>
           )}
 
           {/* Metadata */}
         </div>
-          <div className="space-y-3 mb-2">
+        <div className="space-y-3 mb-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <User className="w-4 h-4" />
+              <span>หัวหน้างาน:</span>
+            </div>
+            <span className="font-medium text-gray-900">
+             
+              {typeof job.supervisorName === "object"
+                ? job.supervisorName.name
+                : job.supervisorName || "ไม่ระบุ"}
+                ({job.supervisorName.department})
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Clock className="w-4 h-4" />
+              <span>วันที่สร้าง:</span>
+            </div>
+            <span className="font-medium text-gray-900">
+              {formatThaiDateTime(job.createdAt)}
+            </span>
+          </div>
+
+          {job.technician && job.technician.length > 0 && (
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-gray-600">
                 <User className="w-4 h-4" />
-                <span>หัวหน้างาน:</span>
+                <span>ช่างที่รับผิดชอบ:</span>
               </div>
-              <span className="font-medium text-gray-900">{job.supervisorName.name || "ไม่ระบุ"}</span>
+              <span className="font-medium text-gray-900">
+                {job.technician.length} คน
+              </span>
             </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Clock className="w-4 h-4" />
-                <span>วันที่สร้าง:</span>
-              </div>
-              <span className="font-medium text-gray-900">{formatThaiDateTime(job.date, job.startTime)}</span>
-            </div>
-
-            {job.technician && job.technician.length > 0 && (
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <User className="w-4 h-4" />
-                  <span>ช่างที่รับผิดชอบ:</span>
-                </div>
-                <span className="font-medium text-gray-900">{job.technician.length} คน</span>
-              </div>
-            )}
-          </div>
+          )}
+        </div>
 
         {/* Action Button - อยู่ล่างสุดเสมอ */}
         <Link

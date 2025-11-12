@@ -1,5 +1,6 @@
 import Image from "@/uploads/Image.jpg";
 import { StaticImageData } from "next/image";
+
 const randomLocation = (
   baseLat: number = 13.85,
   baseLng: number = 100.58,
@@ -21,13 +22,20 @@ export type CardWorkTypes = {
     | "ว่าง"
     | "สำเร็จ"
     | "ตีกลับ"
-    | "รอการหมอบหมายงาน";
-  date: string;
-  supervisorId: number;
-  sla: string;
+    | "รอการมอบหมายงาน";
+
+
+  // 🕓 เวลาต่าง ๆ
+  createdAt: string;      // วันที่สร้างใบงาน
+  assignedAt?: string;    // วันที่หัวหน้ามอบหมาย
+  dueDate?: string;       // วันครบกำหนด
+  completedAt?: string;   // วันที่ช่างส่งงาน
+  approvedAt?: string;    // วันที่อนุมัติปิดงาน
+
   userId: number | null;
-  image: StaticImageData;
+  supervisorId: number;
   technicianId: number[];
+  image: StaticImageData;
   loc: {
     lat: number;
     lng: number;
@@ -35,17 +43,22 @@ export type CardWorkTypes = {
 };
 
 export const CardWork: CardWorkTypes[] = [
-   {
+  {
     id: 1,
     JobId: "JOB_001",
     title: "ตรวจเช็คระบบไฟฟ้า อาคาร A ชั้น 3",
-    description: "ตรวจสอบการทำงานของระบบไฟฟ้าและเปลี่ยนหลอดไฟที่ชำรุด",
+    description:
+      "ตรวจสอบการทำงานของระบบไฟฟ้าและเปลี่ยนหลอดไฟที่ชำรุด",
     status: "รอการตรวจสอบ",
-    date: "2025-01-15T15:05",
     sla: "20m",
+    createdAt: "2025-01-14T08:30",
+    assignedAt: "2025-01-14T10:00",
+    dueDate: "2025-01-15T18:00",
+    completedAt: null,
+    approvedAt: null,
     userId: 1,
-    supervisorId: 1,
-    technicianId: [1, 2],
+    supervisorId: 2,
+    technicianId: [5, 6],
     image: Image,
     loc: randomLocation(),
   },
@@ -55,12 +68,16 @@ export const CardWork: CardWorkTypes[] = [
     title: "ซ่อมแอร์ห้องประชุมใหญ่",
     description: "แอร์ไม่เย็น ตรวจสอบระบบคอมเพรสเซอร์และน้ำยาแอร์",
     status: "กำลังทำงาน",
-    date: "2025-01-14T10:32",
     sla: "30m",
-    userId: null,
-    supervisorId: 2,
+    createdAt: "2025-01-13T09:00",
+    assignedAt: "2025-01-13T10:15",
+    dueDate: "2025-01-14T18:00",
+    completedAt: null,
+    approvedAt: null,
+    userId: 1,
+    supervisorId: 3,
+    technicianId: [8, 9],
     image: Image,
-    technicianId: [6, 10],
     loc: randomLocation(),
   },
   {
@@ -69,12 +86,16 @@ export const CardWork: CardWorkTypes[] = [
     title: "เปลี่ยนหลอดไฟโถงกลาง อาคาร B",
     description: "หลอดไฟชั้น 2 ดับทั้งแถว ต้องเปลี่ยนใหม่ทั้งหมด",
     status: "สำเร็จ",
-    date: "2025-01-13T09:15",
-    sla: "25m",
+  
+    createdAt: "2025-01-12T10:30",
+    assignedAt: "2025-01-12T11:00",
+    dueDate: "2025-01-13T17:30",
+    completedAt: "2025-01-13T09:15",
+    approvedAt: "2025-01-13T10:00",
     userId: 3,
-    supervisorId: 1,
+    supervisorId: 2,
+    technicianId: [7, 5],
     image: Image,
-    technicianId: [7, 3],
     loc: randomLocation(),
   },
   {
@@ -83,11 +104,15 @@ export const CardWork: CardWorkTypes[] = [
     title: "ตรวจสอบระบบน้ำรั่ว อาคาร C",
     description: "น้ำหยดจากเพดาน คาดว่าท่อรั่ว ตรวจหาจุดรั่ว",
     status: "ตีกลับ",
-    date: "2025-01-12T16:00",
-    sla: "45m",
+   
+    createdAt: "2025-01-11T09:45",
+    assignedAt: "2025-01-11T11:00",
+    dueDate: "2025-01-12T18:00",
+    completedAt: "2025-01-12T16:00",
+    approvedAt: null,
     userId: 4,
-    supervisorId: 1,
-    technicianId: [5, 2],
+    supervisorId: 4,
+    technicianId: [10, 11],
     image: Image,
     loc: randomLocation(),
   },
@@ -97,11 +122,33 @@ export const CardWork: CardWorkTypes[] = [
     title: "ติดตั้งปลั๊กไฟห้องทำงานใหม่",
     description: "เพิ่มปลั๊กไฟสำหรับอุปกรณ์ IT และเครื่องถ่ายเอกสาร",
     status: "รอการตรวจสอบ",
-    date: "2025-01-11T14:25",
-    sla: "20m",
+    
+    createdAt: "2025-01-10T14:00",
+    assignedAt: "2025-01-10T15:00",
+    dueDate: "2025-01-11T18:00",
+    completedAt: null,
+    approvedAt: null,
     userId: 5,
-    supervisorId: 1,
+    supervisorId: 2,
     technicianId: [5, 7],
+    image: Image,
+    loc: randomLocation(),
+  },
+  {
+    id: 6,
+    JobId: "JOB_006",
+    title: "ตรวจสอบระบบระบายอากาศ ห้อง Server",
+    description: "พัดลมระบายอากาศไม่ทำงาน ตรวจสอบและซ่อมแซม",
+    status: "กำลังทำงาน",
+   
+    createdAt: "2025-01-09T13:00",
+    assignedAt: "2025-01-09T14:00",
+    dueDate: "2025-01-10T18:00",
+    completedAt: null,
+    approvedAt: null,
+    userId: 6,
+    supervisorId: 3,
+    technicianId: [8],
     image: Image,
     loc: randomLocation(),
   },
@@ -111,11 +158,15 @@ export const CardWork: CardWorkTypes[] = [
     title: "ซ่อมระบบ Wi-Fi อาคาร D",
     description: "สัญญาณ Wi-Fi ชั้น 4 ขาด ๆ หาย ๆ ตรวจสอบ Access Point",
     status: "รอการตรวจสอบ",
-    date: "2025-01-09T10:40",
-    sla: "40m",
+   
+    createdAt: "2025-01-08T08:50",
+    assignedAt: "2025-01-08T09:30",
+    dueDate: "2025-01-09T18:00",
+    completedAt: null,
+    approvedAt: null,
     userId: 7,
     supervisorId: 2,
-    technicianId: [3, 6],
+    technicianId: [5, 6],
     image: Image,
     loc: randomLocation(),
   },
@@ -125,11 +176,15 @@ export const CardWork: CardWorkTypes[] = [
     title: "ทำความสะอาดระบบปรับอากาศ",
     description: "ล้างแผงคอยล์เย็นและเปลี่ยนกรองอากาศใหม่",
     status: "สำเร็จ",
-    date: "2025-01-08T09:20",
-    sla: "25m",
+   
+    createdAt: "2025-01-07T09:00",
+    assignedAt: "2025-01-07T10:00",
+    dueDate: "2025-01-08T18:00",
+    completedAt: "2025-01-08T09:20",
+    approvedAt: "2025-01-08T10:00",
     userId: 8,
-    supervisorId: 1,
-    technicianId: [9, 6],
+    supervisorId: 3,
+    technicianId: [8, 9],
     image: Image,
     loc: randomLocation(),
   },
@@ -139,11 +194,15 @@ export const CardWork: CardWorkTypes[] = [
     title: "ตรวจสอบระบบแจ้งเตือนไฟไหม้",
     description: "ทดสอบระบบสัญญาณไฟและเสียงแจ้งเตือน",
     status: "รอการตรวจสอบ",
-    date: "2025-01-07T15:50",
-    sla: "15m",
+    
+    createdAt: "2025-01-06T14:30",
+    assignedAt: "2025-01-06T15:00",
+    dueDate: "2025-01-07T17:30",
+    completedAt: null,
+    approvedAt: null,
     userId: 9,
-    supervisorId: 1,
-    technicianId: [2, 7],
+    supervisorId: 2,
+    technicianId: [5, 7],
     image: Image,
     loc: randomLocation(),
   },
@@ -153,11 +212,15 @@ export const CardWork: CardWorkTypes[] = [
     title: "ซ่อมบานประตูห้องน้ำหญิง",
     description: "บานพับหลวมและกลอนประตูไม่ทำงาน",
     status: "ตีกลับ",
-    date: "2025-01-06T11:45",
-    sla: "10m",
-    supervisorId: 2,
-    technicianId: [9, 6],
+   
+    createdAt: "2025-01-05T10:15",
+    assignedAt: "2025-01-05T11:00",
+    dueDate: "2025-01-06T18:00",
+    completedAt: "2025-01-06T11:45",
+    approvedAt: null,
     userId: 10,
+    supervisorId: 4,
+    technicianId: [10, 11],
     image: Image,
     loc: randomLocation(),
   },

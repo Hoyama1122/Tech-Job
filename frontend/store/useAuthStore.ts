@@ -1,109 +1,76 @@
+import { Users } from "@/lib/Mock/UserMock";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-
-type Role = "admin" | "supervisor" | "technician" | "executive" | null;
+type Role = "admin" | "supervisor" | "technician" | "executive" | "ceo" | null;
 
 interface AuthState {
   role: Role;
-  supervisorId?: string;
   token?: string;
   name?: string;
   email?: string;
+  userId?: number;
+  supervisorId?: string;
   login: (email: string, password: string) => Role;
   logout: () => void;
 }
 
-//
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       role: null,
-      supervisorId: undefined,
       token: undefined,
+      name: undefined,
+      email: undefined,
+      userId: undefined,
+
 
       login: (email, password) => {
         const emailLower = email.toLowerCase();
+        const foundUser = Users.find(
+          (u) => u.email?.toLowerCase() === emailLower && u.password === password
+        );
 
-        if (emailLower === "admin@gmail.com" && password === "admin123") {
+        if (foundUser) {
           set({
-            role: "admin",
-            token: "admin-token",
-            name: "สมศรี จันทร์เจริญ",
-            email:email,
+            role:
+              foundUser.role === "ceo"
+                ? "executive" 
+                : (foundUser.role as Role),
+            token: `${foundUser.role}-token-${foundUser.id}`,
+            name: foundUser.name,
+            email: foundUser.email,
+            userId: foundUser.id,
+            supervisorId:
+              foundUser.role === "supervisor"
+                ? String(foundUser.id)
+                : foundUser.department
+                ? String(
+                    Users.find(
+                      (s) =>
+                        s.role === "supervisor" &&
+                        s.department === foundUser.department
+                    )?.id || ""
+                  )
+                : undefined,
           });
-          return "admin";
+
+          return foundUser.role as Role;
         }
 
-        //  Supervisor 1
-        if (
-          emailLower === "supervisor1@gmail.com" &&
-          password === "supervisor"
-        ) {
-          set({
-            role: "supervisor",
-            supervisorId: "1",
-            token: "supervisor-token-1",
-          });
-          return "supervisor";
-        }
-
-        //  Supervisor 2
-        if (
-          emailLower === "supervisor2@gmail.com" &&
-          password === "supervisor"
-        ) {
-          set({
-            role: "supervisor",
-            supervisorId: "2",
-            token: "supervisor-token-2",
-          });
-          return "supervisor";
-        }
-
-        // Technician 1
-        if (emailLower === "tech1@gmail.com" && password === "technician") {
-          set({
-            role: "technician",
-            supervisorId: "1",
-            token: "technician-token-1",
-          });
-          return "technician";
-        }
-
-        //  Technician 2
-        if (emailLower === "tech2@gmail.com" && password === "technician") {
-          set({
-            role: "technician",
-            supervisorId: "2",
-            token: "technician-token-2",
-          });
-          return "technician";
-        }
-
-       
-        if (emailLower === "executive@gmail.com" && password === "executive") {
-          set({
-            role: "executive",
-            token: "executive-token",
-          });
-          return "executive";
-        }
-
-      
         return null;
       },
 
-      // 🚪 Logout
       logout: () =>
         set({
           role: null,
-          supervisorId: undefined,
           token: undefined,
+          name: undefined,
+          email: undefined,
+          userId: undefined,
+          supervisorId: undefined,
         }),
     }),
-    {
-      name: "auth-storage", 
-    }
+    { name: "auth-storage" }
   )
 );

@@ -27,54 +27,49 @@ export default function Work() {
   const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
   const [isLoading, setIsLoading] = useState(true);
 
-useEffect(() => {
-  setIsLoading(true);
-  try {
-    const cardData = localStorage.getItem("CardWork");
-    const supervisorData = localStorage.getItem("Supervisor");
+  useEffect(() => {
+    setIsLoading(true);
+    try {
+      const cardData = localStorage.getItem("CardWork");
+      const userData = localStorage.getItem("Users"); //
 
-    if (cardData) {
-      const parsedCards = JSON.parse(cardData);
-      const parsedSupervisors = supervisorData ? JSON.parse(supervisorData) : [];
+      if (cardData) {
+        const parsedCards = JSON.parse(cardData);
+        const parsedUsers = userData ? JSON.parse(userData) : [];
 
-      const joinedJobs = parsedCards.map((job: any) => {
-        // ถ้าไม่มี supervisorId ก็ข้ามเลย
-        const supervisor = job.supervisorId
-          ? parsedSupervisors.find(
-              (sup: any) => String(sup.id) === String(job.supervisorId)
-            )
-          : null;
+        const joinedJobs = parsedCards.map((job: any) => {
+          const supervisor = parsedUsers.find(
+            (user: any) =>
+              user.role === "supervisor" &&
+              String(user.id) === String(job.supervisorId)
+          );
 
-        const jobDate =
-          job.date ||
-          job.createdAt ||
-          job.dueDate ||
-          null;
+          const jobDate = job.date || job.createdAt || job.dueDate || null;
+          const formattedDate = jobDate
+            ? new Date(jobDate).toLocaleString("th-TH", {
+                dateStyle: "short",
+                timeStyle: "short",
+              })
+            : "ไม่ระบุวันที่";
 
-        const formattedDate = jobDate
-          ? new Date(jobDate).toLocaleString("th-TH", {
-              dateStyle: "short",
-              timeStyle: "short",
-            })
-          : "ไม่ระบุวันที่";
+          return {
+            ...job,
+            supervisorName: supervisor
+              ? { name: supervisor.name, department: supervisor.department }
+              : { name: "ไม่ระบุ", department: "-" },
+            formattedDate,
+          };
+        });
 
-        return {
-          ...job,
-          supervisorName: supervisor ||"ยังไม่ได้มอบหมายหัวหน้า",
-          formattedDate,
-        };
-      });
-
-      setJobs(joinedJobs);
+        setJobs(joinedJobs);
+      }
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+    } finally {
+      setTimeout(() => setIsLoading(false), 400);
     }
-  } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
-  } finally {
-    setTimeout(() => setIsLoading(false), 400);
-  }
-}, [setJobs]);
-
-
+  }, [setJobs]);
+  console.log(jobs);
 
   const filteredJobs = useMemo(() => {
     if (!jobs.length) return [];
@@ -97,16 +92,21 @@ useEffect(() => {
       return matchSearch && matchStatus;
     });
   }, [jobs, search, filterStatus]);
-console.log(jobs);
 
   // ✅ สำคัญ: เพิ่ม "รอการมอบหมายงาน" ใน stats
-  const stats = useMemo(() => ({
-    "รอการตรวจสอบ": jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ").length,
-    "รอการมอบหมายงาน": jobs.filter((j) => j.status?.trim() === "รอการมอบหมายงาน").length,
-    "กำลังทำงาน": jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
-    "สำเร็จ": jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
-    "ตีกลับ": jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
-  }), [jobs]);
+  const stats = useMemo(
+    () => ({
+      รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
+        .length,
+      รอการมอบหมายงาน: jobs.filter(
+        (j) => j.status?.trim() === "รอการมอบหมายงาน"
+      ).length,
+      กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
+      สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
+      ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
+    }),
+    [jobs]
+  );
 
   return (
     <div className="p-4">
@@ -118,7 +118,9 @@ console.log(jobs);
               <ClipboardList className="w-8 h-8" />
               ใบงานทั้งหมด
             </h1>
-            <p className="text-sm text-gray-500 mt-1">จัดการและติดตามใบงานทั้งระบบ</p>
+            <p className="text-sm text-gray-500 mt-1">
+              จัดการและติดตามใบงานทั้งระบบ
+            </p>
           </div>
 
           <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm">
