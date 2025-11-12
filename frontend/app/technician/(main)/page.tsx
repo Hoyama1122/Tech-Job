@@ -12,7 +12,7 @@ const page = () => {
     <div className="">
       <Dashboard />
 
-      <Openwork />
+      {/* <Openwork /> */}
 
     </div>
   );

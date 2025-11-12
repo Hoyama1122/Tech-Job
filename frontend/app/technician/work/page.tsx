@@ -11,8 +11,6 @@ const page = () => {
           {/* Filter */}
               <div className='flex items-center space-x-4'>
                 <button className='flex items-center justify-center gap-2 rounded bg-accent text-white hover:bg-accent-hover cursor-pointer px-4 py-2'>ทั้งหมด<ArrowDown size={16}/></button>
-                <button className='flex items-center justify-center gap-2 rounded bg-accent text-white hover:bg-accent-hover cursor-pointer px-4 py-2'>ทั้งหมด<ArrowDown size={16}/></button>
-                <button className='flex items-center justify-center gap-2 rounded bg-accent text-white hover:bg-accent-hover cursor-pointer px-4 py-2'>ทั้งหมด<ArrowDown size={16}/></button>
               </div>
         </div>
         <div>
