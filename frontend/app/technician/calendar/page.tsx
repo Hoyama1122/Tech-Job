@@ -115,7 +115,116 @@ export default function Calendar() {
       
     </div>
     <div>
-      jjjj
+      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
+        <div>
+          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
+          <p>รายละเอียดงาน</p>
+          <p>ทีม: 5หัวหน้าสมิง</p>
+          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
+        </div>
+
+        <div className="flex flex-col justify-between text-right">
+          <p className="">เลขที่ใบงาน : 0001</p>
+          <div className="">
+            <div className="flex justify-end mr-1">
+              <svg
+                className="w-6 h-6 text-red-800 "
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
+            <p>map</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
+        <div>
+          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
+          <p>รายละเอียดงาน</p>
+          <p>ทีม: 5หัวหน้าสมิง</p>
+          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
+        </div>
+
+        <div className="flex flex-col justify-between text-right">
+          <p className="">เลขที่ใบงาน : 0001</p>
+          <div className="">
+            <div className="flex justify-end mr-1">
+              <svg
+                className="w-6 h-6 text-red-800 "
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
+            <p>map</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
+        <div>
+          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
+          <p>รายละเอียดงาน</p>
+          <p>ทีม: 5หัวหน้าสมิง</p>
+          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
+        </div>
+
+        <div className="flex flex-col justify-between text-right">
+          <p className="">เลขที่ใบงาน : 0001</p>
+          <div className="">
+            <div className="flex justify-end mr-1">
+              <svg
+                className="w-6 h-6 text-red-800 "
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
+            <p>map</p>
+          </div>
+        </div>
+      </div>
     </div>
     </div>
   );
