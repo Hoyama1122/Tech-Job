@@ -128,31 +128,26 @@ export default function WorkDetailPage({ params }: PageProps) {
     <div className="p-4">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-primary hover:text-primary-hover font-medium transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            กลับไปยังรายการ
-          </button>
-
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <FileText className="w-8 h-8 text-primary" />
+            <div>
+              <h1 className="text-3xl font-bold text-primary">
+                รายละเอียดใบงาน
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                หมายเลข: #{job.JobId}
+              </p>
+            </div>
+          </div>
+          <div className="flex  gap-2">
             <button
-              onClick={() => alert("📥 กำลังดาวน์โหลดรายงาน...")}
+              onClick={() => alert(" กำลังดาวน์โหลดรายงาน...")}
               className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary py-2 px-3 rounded-lg text-sm transition-colors"
             >
               <Download className="w-4 h-4" />
               ดาวน์โหลด
             </button>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <FileText className="w-8 h-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold text-primary">รายละเอียดใบงาน</h1>
-            <p className="text-sm text-gray-500 mt-1">หมายเลข: #{job.JobId}</p>
           </div>
         </div>
       </div>

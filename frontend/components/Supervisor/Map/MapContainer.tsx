@@ -8,7 +8,7 @@ import {
   useJsApiLoader,
 } from "@react-google-maps/api";
 import { CircleCheck, Loader2, Phone, User } from "lucide-react";
-import { TechnicianMock } from "@/lib/Mock/Technician"; // ✅ import ช่างมาด้วย
+
 
 const containerStyle = {
   width: "100%",
@@ -41,30 +41,6 @@ const TeamMap = () => {
   const [members, setMembers] = useState<any[]>([]);
   const [selectedMember, setSelectedMember] = useState<any | null>(null);
 
-  useEffect(() => {
-    try {
-      const savedWork = localStorage.getItem("CardWork");
-      if (!savedWork) return;
-
-      const works = JSON.parse(savedWork);
-
-      // ✅ join ใบงานกับ TechnicianMock
-      const joined = works.map((work: any) => {
-        const technician = TechnicianMock.find((t) => t.id === work.userId);
-        return {
-          ...work,
-          technicianName: technician ? technician.name : "ไม่ระบุช่าง",
-          technicianStatus: technician ? technician.status : "ไม่ระบุสถานะ",
-          technicianPhone: technician ? technician.phone : "",
-          technicianImg: technician ? technician.image : "",
-        };
-      });
-
-      setMembers(joined);
-    } catch (err) {
-      console.error("❌ Error parsing CardWork:", err);
-    }
-  }, []);
 
   if (!isLoaded)
     return (
