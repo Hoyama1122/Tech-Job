@@ -98,3 +98,11 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #d48d00;
 }
+/* ===== FIX AUTOFILL BACKGROUND + TEXT ===== */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff !important;     /* ตัวหนังสือให้เป็นขาว */
+  transition: background-color 9999s ease-in-out 0s !important;
+  box-shadow: 0 0 0px 1000px #1e3a8a inset !important; /* bg = เทา/น้ำเงินเอง */
+}
