@@ -2,7 +2,7 @@
 "use client";
 
 import { create } from "zustand";
-import { CardWork } from "@/lib/Mock/CardWork";
+import { CardWork } from "@/lib/Mock/Jobs";
 import { Users } from "@/lib/Mock/UserMock";
 
 type AppStore = {

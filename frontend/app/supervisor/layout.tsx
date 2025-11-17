@@ -1,7 +1,7 @@
 "use client";
 import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 import SidebarWrapper from "@/components/Supervisor/SidebarWrapper";
-import { CardWork } from "@/lib/Mock/CardWork";
+import { CardWork } from "@/lib/Mock/Jobs";
 
 import { AppLoader } from "@/store/AppLoader";
 import { useAuthStore } from "@/store/useAuthStore";

@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import SidebarWrapper from "@/components/Dashboard/SidebarWrapper";
 import { AppLoader } from "@/store/AppLoader";
 import Navbar from "@/components/Dashboard/Navbar";
-import { CardWork } from "@/lib/Mock/CardWork";
+import { CardWork } from "@/lib/Mock/Jobs";
 import { Users } from "@/lib/Mock/UserMock";
 
 

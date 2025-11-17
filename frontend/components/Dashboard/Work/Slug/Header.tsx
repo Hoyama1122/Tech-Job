@@ -1,5 +1,6 @@
 import { FileText, Download } from "lucide-react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function Header({ job }: any) {
   return (
     <div className="flex items-center justify-between mb-6">
