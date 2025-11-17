@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 const Dashboard = () => {
   const [time, setTime] = useState<string>("");
 
+  const [activeTab, setActiveTab] = useState<"today" | "week">("today");
+
+  const handleTabClick = (tab: "today" | "week") => {
+    setActiveTab(tab);
+  };
+
   const router = useRouter();
 
   useEffect(() => {
@@ -55,18 +61,31 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-4">
+      <div className="mt-4">
         <div className="inline-flex rounded-md shadow-xs" role="group">
           <button
             type="button"
-            className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+            onClick={() => setActiveTab("today")}
+            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-s-lg
+      ${
+        activeTab === "today"
+          ? "bg-blue-600 text-white"
+          : "bg-white text-gray-900 opacity-50"
+      }
+    `}
           >
             งานวันนี้
           </button>
-
           <button
             type="button"
-            className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+            onClick={() => setActiveTab("week")}
+            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-e-lg
+      ${
+        activeTab === "week"
+          ? "bg-blue-600 text-white"
+          : "bg-white text-gray-900 opacity-50"
+      }
+    `}
           >
             งานสัปดาห์นี้
           </button>
@@ -127,7 +146,8 @@ const Dashboard = () => {
 
           <div
             className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}>
+            onClick={goToOpenwork}
+          >
             <div className="flex justify-end mr-1">
               <svg
                 className="w-6 h-6 text-red-800 "
@@ -167,7 +187,8 @@ const Dashboard = () => {
 
           <div
             className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}>
+            onClick={goToOpenwork}
+          >
             <div className="flex justify-end mr-1">
               <svg
                 className="w-6 h-6 text-red-800 "
@@ -207,7 +228,8 @@ const Dashboard = () => {
 
           <div
             className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}>
+            onClick={goToOpenwork}
+          >
             <div className="flex justify-end mr-1">
               <svg
                 className="w-6 h-6 text-red-800 "
@@ -244,10 +266,11 @@ const Dashboard = () => {
 
         <div className="flex flex-col justify-between text-right">
           <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
-          
+
           <div
             className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}>
+            onClick={goToOpenwork}
+          >
             <div className="flex justify-end mr-1">
               <svg
                 className="w-6 h-6 text-red-800 "
