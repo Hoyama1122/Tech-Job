@@ -1,7 +1,5 @@
 import React from "react";
 import Dashboard from "./Dashboard";
-import { Openwork } from "./Openwork";
-
 
 export const metadata = {
   title: "Technician",
@@ -11,9 +9,6 @@ const page = () => {
   return (
     <div className="">
       <Dashboard />
-
-      {/* <Openwork /> */}
-
     </div>
   );
 };

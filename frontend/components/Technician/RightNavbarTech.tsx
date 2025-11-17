@@ -43,12 +43,12 @@ const RightNavbar = () => {
           alt="profile"
           className="w-10 h-10 rounded-full bg-cover bg-no-repeat"
         />
-        <div className=" leading-4">
+        {/* <div className=" leading-4">
           <h1 className="text-md text-primary-test font-semibold">
             Technician
           </h1>
           <p className="text-sm">นายสมอน</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
