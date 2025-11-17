@@ -125,7 +125,9 @@ const Dashboard = () => {
         <div className="flex flex-col justify-between text-right">
           <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
 
-          <div>
+          <div
+            className="cursor-pointer hover:opacity-75 transition-opacity"
+            onClick={goToOpenwork}>
             <div className="flex justify-end mr-1">
               <svg
                 className="w-6 h-6 text-red-800 "
@@ -163,7 +165,9 @@ const Dashboard = () => {
         <div className="flex flex-col justify-between text-right">
           <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
 
-          <div>
+          <div
+            className="cursor-pointer hover:opacity-75 transition-opacity"
+            onClick={goToOpenwork}>
             <div className="flex justify-end mr-1">
               <svg
                 className="w-6 h-6 text-red-800 "
@@ -200,7 +204,10 @@ const Dashboard = () => {
 
         <div className="flex flex-col justify-between text-right">
           <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
-          <div>
+
+          <div
+            className="cursor-pointer hover:opacity-75 transition-opacity"
+            onClick={goToOpenwork}>
             <div className="flex justify-end mr-1">
               <svg
                 className="w-6 h-6 text-red-800 "
@@ -237,7 +244,10 @@ const Dashboard = () => {
 
         <div className="flex flex-col justify-between text-right">
           <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
-          <div className="">
+          
+          <div
+            className="cursor-pointer hover:opacity-75 transition-opacity"
+            onClick={goToOpenwork}>
             <div className="flex justify-end mr-1">
               <svg
                 className="w-6 h-6 text-red-800 "
