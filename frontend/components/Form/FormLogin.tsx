@@ -120,25 +120,8 @@ const FormLogin = () => {
       >
         <span>เข้าสู่ระบบด้วย Google</span>
       </button>
-<<<<<<< HEAD
       
     </form>
-=======
-
-      {/* Footer */}
-      <p className="text-sm text-gray-400 text-center leading-relaxed">
-        การเข้าสู่ระบบของคุณถือว่ายอมรับ
-        <br />
-        <a href="#" className="underline hover:text-gray-300">
-          เงื่อนไขการให้บริการ
-        </a>{" "}
-        และ{" "}
-        <a href="#" className="underline hover:text-gray-300">
-          นโยบายความเป็นส่วนตัว
-        </a>
-      </p>
-    </div>
->>>>>>> main
   );
 };
 
