@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Metadata } from "next";
-import AssignJobsClient from "@/components/Supervisor/work/AssignJobsCilent";
+import AssignJobsClient from "@/components/Supervisor/work/AssignJobsClient";
 
 export const metadata: Metadata = {
   title: "มอบหมายงาน",
