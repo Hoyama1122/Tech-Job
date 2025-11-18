@@ -19,6 +19,10 @@ const Allwork = () => {
     if (cardWork) {
       setjobs(JSON.parse(cardWork));
     }
+    if(!cardWork) {
+    console.log("ไม่มีข้อมูลในlocalstorage");
+    
+    }
   },[setjobs])
   const myWork = useMemo(() => {
     if (!userId) return [];
