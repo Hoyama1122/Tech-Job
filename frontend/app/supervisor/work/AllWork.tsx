@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import { TechnicianMock } from "@/lib/Mock/Technician";
+import { Users } from "@/lib/Mock/UserMock";
 import Card from "@/components/Supervisor/work/Card";
 import { ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
 import { AppLoader } from "@/store/AppLoader";
@@ -36,7 +36,7 @@ const Allwork = () => {
   const workWithTech = useMemo(() => {
     return currentItems.map((work) => ({
       ...work,
-      technician: TechnicianMock.find((t) => t.id === work.userId) || null,
+      technician: Users.find((t) => t.id === work.userId) || null,
     }));
   }, [currentItems]);
 
