@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 
 const AssignPage = () => {
   return (
+<<<<<<< HEAD
     <div className="p-4">
       <h1 className="font-title text-primary mb-4">มอบหมายงานให้ช่าง</h1>
       <p className="text-text-secondary mb-6">
@@ -20,5 +21,10 @@ const AssignPage = () => {
     </div>
   );
 };
+=======
+    <div>page</div>
+  )
+}
+>>>>>>> parent of abafa40 (fix mock work)
 
 export default AssignPage;
