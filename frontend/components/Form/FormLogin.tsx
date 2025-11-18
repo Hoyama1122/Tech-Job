@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import logo from "@/public/Logo/Logotechjob.png";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
+
 type LoginFormInputs = {
   email: string;
   password: string;
@@ -46,8 +47,11 @@ const FormLogin = () => {
   };
 
   return (
-    <form className="w-full max-w-sm space-y-6 ">
-      <div className="flex justify-center ">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full max-w-sm space-y-6"
+    >
+      <div className="flex justify-center">
         <Image
           src={logo}
           alt="Tech Job"
@@ -61,7 +65,7 @@ const FormLogin = () => {
         ยินดีต้อนรับกลับ!
       </h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="space-y-5">
         {/* Email */}
         <div>
           <label className="block text-base font-medium text-white/80 mb-2">
@@ -71,8 +75,9 @@ const FormLogin = () => {
             {...register("email")}
             type="email"
             className="w-full border-transparent rounded-lg p-4 
-      bg-blue-900 text-white text-lg placeholder-white/80 
-      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-950 focus:ring-blue-500"
+            bg-blue-900 text-white text-lg placeholder-white/80 
+            focus:outline-none focus:ring-2 focus:ring-offset-2 
+            focus:ring-offset-blue-950 focus:ring-blue-500"
             placeholder="example@gmail.com"
           />
         </div>
@@ -97,23 +102,20 @@ const FormLogin = () => {
           </button>
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           className="w-full bg-gray-100 text-blue-950 py-3 rounded-full font-semibold text-lg hover:bg-gray-200 transition-colors mt-4 cursor-pointer"
         >
           เข้าสู่ระบบ
         </button>
-      </form>
+      </div>
 
-      {/* OR Divider */}
       <div className="flex items-center justify-between mt-6">
         <span className="w-full border-t border-gray-700"></span>
         <span className="px-4 text-gray-400 text-sm flex-shrink-0">หรือ</span>
         <span className="w-full border-t border-gray-700"></span>
       </div>
 
-      {/* Google */}
       <button
         type="button"
         className="w-full bg-red-600 text-white py-3 rounded-full font-semibold text-lg hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
