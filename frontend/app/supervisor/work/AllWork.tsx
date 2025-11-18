@@ -4,33 +4,47 @@ import Card from "@/components/Supervisor/work/Card";
 import { ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
 import { AppLoader } from "@/store/AppLoader";
 import { Users } from "@/lib/Mock/UserMock";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const STORAGE_KEY = "CardWork";
 
 const Allwork = () => {
-  const { cardWork } = AppLoader();
+  const [jobs, setjobs] = useState([])
+  const { userId } = useAuthStore();
   const [statusSearch, setStatusSearch] = useState("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+  useEffect(() => {
+    const cardWork = localStorage.getItem("CardWork");
+    if (cardWork) {
+      setjobs(JSON.parse(cardWork));
+    }
+  },[setjobs])
+  const myWork = useMemo(() => {
+    if (!userId) return [];
+    return jobs.filter((work) => work.supervisorId === userId);
+  }, [jobs, userId]);
 
-  // 🔍 ฟิลเตอร์สถานะ
   const filteredStatus = useMemo(() => {
     return statusSearch === "ทั้งหมด"
-      ? cardWork
-      : cardWork.filter((card) => card.status === statusSearch);
-  }, [cardWork, statusSearch]);
+      ? myWork
+      : myWork.filter((card) => card.status === statusSearch);
+  }, [myWork, statusSearch]);
 
-  // 📅 เรียงตามวันที่ล่าสุดก่อน
   const sortedWork = useMemo(() => {
     return [...filteredStatus].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
   }, [filteredStatus]);
 
-  // 📄 Pagination
   const totalPages = Math.ceil(sortedWork.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = sortedWork.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusSearch(e.target.value);
+    setCurrentPage(1);
+  };
 
   const workWithTech = useMemo(() => {
     return currentItems.map((work) => ({
@@ -39,15 +53,9 @@ const Allwork = () => {
     }));
   }, [currentItems]);
 
-  // 🔁 เปลี่ยนหน้า
   const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
   const handleNext = () =>
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStatusSearch(e.target.value);
-    setCurrentPage(1);
-  };
 
   return (
     <div className="mt-4">
@@ -74,7 +82,6 @@ const Allwork = () => {
       </div>
 
       <div className="mt-5">
-        {/* ✅ ส่งข้อมูลที่ join แล้วไปให้ Card */}
         <Card CardWork={workWithTech} />
 
         {/* Pagination */}

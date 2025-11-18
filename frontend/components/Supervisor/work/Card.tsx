@@ -1,4 +1,4 @@
-import { CardWorkTypes } from "@/lib/Mock/Jobs";
+import { CardWorkTypes } from "@/lib/Mock/CardWork";
 import Image from "next/image";
 import React from "react";
 import NotFound from "@/public/assets/notfounddata.webp";
