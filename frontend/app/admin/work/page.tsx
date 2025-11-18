@@ -1,26 +1,17 @@
-// app/admin/work/page.tsx
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-import { ClipboardList, Calendar } from "lucide-react";
-import DateFormat from "@/lib/Format/DateFormat";
-import SearchBar from "@/components/Dashboard/Work/SearchBar";
-import StatsSummary from "@/components/Dashboard/Work/StatsSummary";
-import LoadingSkeleton from "@/components/Dashboard/Work/LoadingSkeleton";
-import EmptyState from "@/components/Dashboard/Work/EmptyState";
-import JobCard from "@/components/Dashboard/Work/JobCard";
-
-interface Job {
-  id: string;
-  JobId: string;
-  title: string;
-  description: string;
-  status: string;
-  supervisor?: { name: string };
-  technician?: any[];
-  date: string;
+import React from 'react'
+import Work from './AllJobs';
+export const metadata = {
+  title: "ใบงานทั้งหมด",
+};
+const page = () => {
+  return (
+    <div>
+      <Work/>
+    </div>
+  )
 }
 
+<<<<<<< HEAD
 export default function Work() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [search, setSearch] = useState("");
@@ -160,3 +151,6 @@ console.log(jobs);
     </div>
   );
 }
+=======
+export default page
+>>>>>>> main

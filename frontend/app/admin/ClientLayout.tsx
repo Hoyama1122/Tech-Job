@@ -4,16 +4,17 @@ import React, { useEffect } from "react";
 import SidebarWrapper from "@/components/Dashboard/SidebarWrapper";
 import { AppLoader } from "@/store/AppLoader";
 import Navbar from "@/components/Dashboard/Navbar";
-import { CardWork } from "@/lib/Mock/CardWork";
-import { TechnicianMock } from "@/lib/Mock/Technician";
-import { Supervisor } from "@/lib/Mock/Supervisor";
+
+import { Users } from "@/lib/Mock/UserMock";
+import { CardWork } from "@/lib/Mock/Jobs";
+
 
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { setCardWork, setUser ,setsupervisor} = AppLoader();
+  const { setCardWork, setUsers ,} = AppLoader();
 
   // Loader
   useEffect(() => {
@@ -29,34 +30,22 @@ export default function ClientLayout({
       console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
     }
   }, [setCardWork]);
+  // Loader
+  useEffect(() => {
+    try {
+      const users = localStorage.getItem("Users");
+      if (users) {
+        setUsers(JSON.parse(users));
+      } else {
+        localStorage.setItem("Users", JSON.stringify(Users));
+        setUsers(Users);
+      }
+    } catch (error) {
+      console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
+    }
+  }, [setUsers]);
 
-  useEffect(() => {
-    try {
-      const savedTechnician = localStorage.getItem("Technician");
-      if (savedTechnician) {
-        setCardWork(JSON.parse(savedTechnician));
-      } else {
-        localStorage.setItem("Technician", JSON.stringify(TechnicianMock));
-        setCardWork(TechnicianMock);
-      }
-    } catch (error) {
-      console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
-    }
-  }, [setUser]);
   
-  useEffect(() => {
-    try {
-      const savedSupervisor = localStorage.getItem("Supervisor");
-      if (savedSupervisor) {
-        setsupervisor(JSON.parse(savedSupervisor));
-      } else {
-        localStorage.setItem("Supervisor", JSON.stringify(Supervisor));
-        setsupervisor(Supervisor);
-      }
-    } catch (error) {
-      console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
-    }
-  }, [setsupervisor]);
 
   return (
     <div className={`min-h-screen bg-primary`}>

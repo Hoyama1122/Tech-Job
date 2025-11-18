@@ -11,6 +11,7 @@ const page = () => {
     <div className="">   
       <MainDashboard />
       1
+      
     </div>
   );
 };

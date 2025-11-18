@@ -1,4 +1,3 @@
-// app/layout.tsx หรือ RootLayout.tsx
 import type { Metadata } from "next";
 import { Sarabun } from "next/font/google";
 import "@/styles/globals.css";
@@ -6,7 +5,6 @@ import "@/styles/calendar.css";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
 import ToastProvider from "@/components/ToastProvider";
 
-// ✅ โหลดฟอนต์ Sarabun จาก Google Fonts
 const sarabun = Sarabun({
   subsets: ["thai", "latin"],
   weight: ["300", "400", "500", "600", "700"],

@@ -59,10 +59,10 @@ export default function DatePickerTH() {
         วันที่ทำงาน <span className="text-red-500">*</span>
       </label>
 
-      {/* Hidden input สำหรับ react-hook-form */}
+  
       <input type="hidden" {...register("date")} />
 
-      {/* ปุ่ม trigger */}
+    
       <button
         type="button"
         onClick={() => setOpen(!open)}

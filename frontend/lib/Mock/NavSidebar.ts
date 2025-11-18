@@ -29,7 +29,6 @@ export const navLinkAdmin: NavItem[] = [
   { name: "สร้างใบงาน", path: "/add-work", icon: FileText },
   { name: "ข้อมูลงานเบิก", path: "/material", icon: Warehouse },
   { name: "ผู้ใช้งาน", path: "/user", icon: Users },
-  { name: "ปฏิทิน", path: "/calendar", icon: CalendarDays },
 ];
 export const navLinkTechnician: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },

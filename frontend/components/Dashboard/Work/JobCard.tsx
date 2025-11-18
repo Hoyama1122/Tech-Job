@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // components/Dashboard/Work/JobCard.tsx
+import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import { FileText, User, Clock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -27,7 +28,7 @@ const getStatusStyle = (status: string) => {
     case "รอการตรวจสอบ":
       return "bg-blue-100 text-blue-700 border-blue-200";
     case "รอการมอบหมายงาน":
-      return "bg-purple-100 text-purple-700 border-purple-200"; // สีม่วงสำหรับสถานะใหม่
+      return "bg-primary/80 text-white border-primary";
     default:
       return "bg-gray-100 text-gray-700 border-gray-200";
   }
@@ -41,9 +42,15 @@ export default function JobCard({ job }: Props) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
-            <span className="text-sm font-mono font-bold text-primary">#{job.JobId}</span>
+            <span className="text-sm font-mono font-bold text-primary">
+              #{job.JobId}
+            </span>
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(job.status)}`}>
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(
+              job.status
+            )}`}
+          >
             {job.status?.trim()}
           </span>
         </div>
@@ -57,19 +64,53 @@ export default function JobCard({ job }: Props) {
             {job.title}
           </h3>
           {job.description && (
-            <p className="text-sm text-gray-600 mb-4 line-clamp-2">{job.description}</p>
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+              {job.description}
+            </p>
           )}
 
           {/* Metadata */}
         </div>
+<<<<<<< HEAD
           <div className="space-y-3 mb-2">
+=======
+        <div className="space-y-3 mb-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <User className="w-4 h-4" />
+              <span>หัวหน้างาน:</span>
+            </div>
+            <span className="font-medium text-gray-900">
+             
+              {typeof job.supervisorName === "object"
+                ? job.supervisorName.name
+                : job.supervisorName || "ไม่ระบุ"}
+                ({job.supervisorName.department})
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Clock className="w-4 h-4" />
+              <span>วันที่สร้าง:</span>
+            </div>
+            <span className="font-medium text-gray-900">
+              {formatThaiDateTime(job.createdAt)}
+            </span>
+          </div>
+
+          {job.technician && job.technician.length > 0 && (
+>>>>>>> main
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-gray-600">
                 <User className="w-4 h-4" />
-                <span>หัวหน้างาน:</span>
+                <span>ช่างที่รับผิดชอบ:</span>
               </div>
-              <span className="font-medium text-gray-900">{job.supervisor?.name || "ไม่ระบุ"}</span>
+              <span className="font-medium text-gray-900">
+                {job.technician.length} คน
+              </span>
             </div>
+<<<<<<< HEAD
 
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-gray-600">
@@ -89,6 +130,10 @@ export default function JobCard({ job }: Props) {
               </div>
             )}
           </div>
+=======
+          )}
+        </div>
+>>>>>>> main
 
         {/* Action Button - อยู่ล่างสุดเสมอ */}
         <Link
