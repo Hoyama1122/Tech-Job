@@ -46,7 +46,7 @@ const FormLogin = () => {
   };
 
   return (
-    <div className="w-full max-w-sm space-y-6 ">
+    <form className="w-full max-w-sm space-y-6 ">
       <div className="flex justify-center ">
         <Image
           src={logo}
@@ -120,7 +120,6 @@ const FormLogin = () => {
       >
         <span>เข้าสู่ระบบด้วย Google</span>
       </button>
-      
     </form>
   );
 };
