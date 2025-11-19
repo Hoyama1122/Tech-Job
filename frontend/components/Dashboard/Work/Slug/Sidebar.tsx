@@ -38,25 +38,7 @@ export default function Sidebar({ job }: any) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md p-6 space-y-3">
-        <Link
-          href={`/admin/work/${job.JobId}/edit`}
-          className="flex items-center justify-center gap-2 bg-accent text-white py-3 rounded-lg shadow"
-        >
-          <Edit className="w-5 h-5" />
-          แก้ไขใบงาน
-        </Link>
-
-        <button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3 rounded-lg shadow">
-          <CheckCircle className="w-5 h-5" />
-          อนุมัติงาน
-        </button>
-
-        <button className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 py-3 rounded-lg">
-          <XCircle className="w-5 h-5" />
-          ส่งกลับแก้ไข
-        </button>
-      </div>
+    
     </div>
   );
 }

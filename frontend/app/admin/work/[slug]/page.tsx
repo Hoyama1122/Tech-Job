@@ -10,8 +10,6 @@ import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 
-
-
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

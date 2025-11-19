@@ -1,6 +1,13 @@
 "use client";
 
-import { FileDiff, FileText, ImageUp, Loader2, Plus } from "lucide-react";
+import {
+  FileDiff,
+  FileText,
+  ImageUp,
+  Loader2,
+  MapPin,
+  Plus,
+} from "lucide-react";
 import React, { useState } from "react";
 import DropdownSupervisor from "./DropdownSupervisor";
 import { FormProvider, useForm } from "react-hook-form";
@@ -180,31 +187,35 @@ const WorkForm = () => {
               <DropdownCategory register={register} />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
                 ชื่อใบงาน <span className="text-red-500">*</span>
               </label>
               <input
                 {...register("title")}
-                className="input-field text-sm"
-                placeholder="ระบุชื่อใบงาน"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
+                placeholder="ระบุชื่อใบงานให้ชัดเจน"
               />
               {errors.title && (
-                <p className="text-xs text-red-500 mt-1">
+                <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
                   {errors.title.message}
-                </p>
+                </div>
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            {/* Description */}
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
                 คำอธิบายงาน
               </label>
               <textarea
                 {...register("description")}
-                className="input-field text-sm"
-                rows={3}
-                placeholder="รายละเอียด"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400 resize-none"
+                rows={4}
+                placeholder="รายละเอียดงาน, ข้อมูลเพิ่มเติม, หมายเหตุ..."
               />
             </div>
 
@@ -264,7 +275,15 @@ const WorkForm = () => {
 
           {/* Right Column */}
           <div className="bg-white shadow rounded-lg p-6  space-y-4">
-            <h2 className="text-xl font-semibold text-primary/90">แผนที่</h2>
+            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
+                <MapPin className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">ตำแหน่งงาน</h2>
+                <p className="text-sm text-gray-500">เลือกตำแหน่งในแผนที่</p>
+              </div>
+            </div>
             <Map onLocationSelect={(pos) => setLoc(pos)} />
 
             <div>

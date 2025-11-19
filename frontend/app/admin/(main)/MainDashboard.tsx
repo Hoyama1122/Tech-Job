@@ -94,7 +94,6 @@ const MainDashboard = () => {
     });
   }, [card, searchTerm, statusFilter]);
 
-  // คำนวณสถิติ (เปลี่ยนเป็นข้อมูลที่กรองแล้วเมื่อมีการกรอง)
   const summary = useMemo(() => {
     const baseStats = [
       {
@@ -220,14 +219,8 @@ const MainDashboard = () => {
             <CirclePlus className="w-5 h-5" />
             สร้างงานใหม่
           </Link>
-
-          <button className="flex items-center gap-2 bg-primary/90 hover:bg-primary-hover transition-all duration-200 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg hover:-translate-y-0.5">
-            <Share strokeWidth={2.5} className="w-5 h-5" />
-            Export PDF
-          </button>
         </div>
       </div>
-
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
@@ -313,7 +306,7 @@ const MainDashboard = () => {
             )}
           </div>
         </div>
-           <Activities/>             
+        <Activities />
       </div>
     </div>
   );

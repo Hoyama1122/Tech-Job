@@ -29,7 +29,7 @@ const Page = () => {
     // แปลงเป็น blob แล้วเปิดแท็บใหม่
     const pdfBlob = pdf.output("blob");
     const pdfURL = URL.createObjectURL(pdfBlob);
-    window.open(pdfURL, "_blank"); // 👈 เด้งแท็บใหม่เหมือนที่มึงบอกว่าโอเค
+    window.open(pdfURL, "_blank"); 
   };
 
   return (
@@ -282,7 +282,6 @@ const Page = () => {
   );
 };
 
-/* 🧩 small sub components ให้โค้ดอ่านง่ายขึ้น */
 
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div

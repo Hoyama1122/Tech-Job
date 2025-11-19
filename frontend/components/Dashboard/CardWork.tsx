@@ -1,5 +1,6 @@
+import { Eye } from "lucide-react";
+import Link from "next/link";
 import React from "react";
-
 
 export const getBadgeStatusClass = (status: JobStatus): string => {
   const statusMap: Record<JobStatus, string> = {
@@ -13,12 +14,10 @@ export const getBadgeStatusClass = (status: JobStatus): string => {
 };
 
 export const getStatusClass = (status: JobStatus): string => {
-  
   return getBadgeStatusClass(status);
 };
 
 const CardWork = ({ card }) => {
-  
   const DesktopView = () => (
     <div className="hidden md:block overflow-x-auto">
       <table className="w-full border-collapse rounded-lg overflow-hidden shadow">
@@ -38,6 +37,9 @@ const CardWork = ({ card }) => {
             </th>
             <th className="px-4 py-3 text-left font-semibold text-white">
               สถานะ
+            </th>
+            <th className="px-4 py-3 text-left font-semibold text-white">
+              ดำเนินการ
             </th>
           </tr>
         </thead>
@@ -78,6 +80,13 @@ const CardWork = ({ card }) => {
                     {work.status}
                   </span>
                 </td>
+                <td className="px-4 py-3 text-sm text-gray-700 text-center">
+                  <Link
+                    href={`/admin/work/${work.JobId}`}
+                  className="flex items-center justify-center">
+                    <Eye className="w-6 h-6 text-primary cursor-pointer" />
+                  </Link>
+                </td>
               </tr>
             ))
           ) : (
@@ -105,7 +114,9 @@ const CardWork = ({ card }) => {
             className="bg-white p-4 rounded-lg shadow border border-gray-200"
           >
             <div className="flex justify-between items-start mb-3">
-              <span className="font-bold text-sm text-primary">{work.JobId}</span>
+              <span className="font-bold text-sm text-primary">
+                {work.JobId}
+              </span>
               <span
                 className={`px-2 py-1 text-xs font-semibold rounded ${getBadgeStatusClass(
                   work.status
