@@ -24,6 +24,7 @@ const AssignTechnicianModal = ({ job, technicians, onClose, onAssign }: Props) =
       prev.includes(id) ? prev.filter((techId) => techId !== id) : [...prev, id]
     );
   };
+              console.log(technicians);
 
   const handleSubmit = () => {
     onAssign(job.JobId, selectedTechIds);
@@ -59,6 +60,7 @@ const AssignTechnicianModal = ({ job, technicians, onClose, onAssign }: Props) =
         <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
           {technicians.length > 0 ? (
             technicians.map((tech) => (
+              
               <label
                 key={tech.id}
                 className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border-2 ${

@@ -61,6 +61,15 @@ export const Users: UserType[] = [
 // Technician (ฝ่ายไฟฟ้า)
 {
   id: 5,
+  name: "ช่างหนึ่งs",
+  role: "technician",
+  department: "ไฟฟ้า",
+  phone: "081-400-0001",
+  email: "tech1@techjob.com",
+  password: "tech123",
+},
+{
+  id: 12,
   name: "ช่างหนึ่ง",
   role: "technician",
   department: "ไฟฟ้า",

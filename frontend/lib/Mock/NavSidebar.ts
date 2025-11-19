@@ -45,6 +45,6 @@ export const navLinkSupervisor: NavItem[] = [
   { name: "มอบหมายงาน", path: "/assign", icon: UserCog }, 
   { name: "ตรวจงาน", path: "/review", icon: Wrench }, 
   { name: "ทีมของฉัน", path: "/team", icon: Users2 },
-  { name: "สถิติทีม", path: "/report", icon: BarChart3 }, 
+  // { name: "สถิติทีม", path: "/report", icon: BarChart3 }, 
   { name: "ตั้งค่า", path: "/settings", icon: Settings }, 
 ];
