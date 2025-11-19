@@ -1,6 +1,6 @@
 export default function InfoRow({ label, value, isBadge, valueClass }: any) {
   return (
-    <div className="flex justify-between py- border-b border-gray-100 last:border-0">
+    <div className="flex justify-between py-[6px] border-b border-gray-100 last:border-0">
       <span className="text-sm text-gray-600">{label}</span>
 
       {isBadge ? (

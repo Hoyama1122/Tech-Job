@@ -94,71 +94,73 @@ const MainDashboard = () => {
     });
   }, [card, searchTerm, statusFilter]);
 
-  const summary = useMemo(() => {
-    const baseStats = [
-      {
-        title: "จำนวนช่างทั้งหมด",
-        value: 132,
-        icon: <Users className="w-8 h-8" />,
-        bg: "bg-blue-50",
-        iconColor: "text-blue-600",
-      },
-      {
-        title: "จำนวนหัวหน้าทีมทั้งหมด",
-        value: 28,
-        icon: <UserCog className="w-8 h-8" />,
-        bg: "bg-amber-50",
-        iconColor: "text-amber-600",
-      },
-      {
-        title: "จำนวนทีมทั้งหมด",
-        value: 48,
-        icon: <Users2 className="w-8 h-8" />,
-        bg: "bg-gray-50",
-        iconColor: "text-gray-700",
-      },
-    ];
+ const summary = useMemo(() => {
+  const users = JSON.parse(localStorage.getItem("Users") || "[]");
 
-    // ถ้ามีการกรอง ให้แสดงจำนวนที่กรอง
-    if (searchTerm || statusFilter !== "all") {
-      return [
-        ...baseStats,
-        {
-          title: "จำนวนใบงาน (กรองแล้ว)",
-          value: filteredCard.length,
-          icon: <ClipboardList className="w-8 h-8" />,
-          bg: "bg-emerald-50",
-          iconColor: "text-emerald-600",
-        },
-        {
-          title: "ใบงานที่รอดำเนินการ",
-          value: filteredCard.filter((j) => j.status === "รอการตรวจสอบ").length,
-          icon: <Clock className="w-8 h-8" />,
-          bg: "bg-orange-50",
-          iconColor: "text-orange-600",
-        },
-      ];
-    }
+  const technicians = users.filter(u => u.role === "technician").length;
+  const supervisors = users.filter(u => u.role === "supervisor").length;
 
-    // ถ้าไม่มีการกรอง แสดงทั้งหมด
+  const teams = users.filter(u => u.role === "team").length;
+
+  const waitingJobs = card.filter(j => j.status === "รอการตรวจสอบ").length;
+
+  const baseStats = [
+    {
+      title: "จำนวนช่างทั้งหมด",
+      value: technicians,
+      icon: <Users className="w-8 h-8" />,
+      bg: "bg-blue-50",
+      iconColor: "text-blue-600",
+    },
+    {
+      title: "จำนวนหัวหน้าทีมทั้งหมด",
+      value: supervisors,
+      icon: <UserCog className="w-8 h-8" />,
+      bg: "bg-amber-50",
+      iconColor: "text-amber-600",
+    },
+   
+  ];
+
+  if (searchTerm || statusFilter !== "all") {
     return [
       ...baseStats,
       {
-        title: "จำนวนใบงานทั้งหมด",
-        value: card.length,
+        title: "จำนวนใบงาน (กรองแล้ว)",
+        value: filteredCard.length,
         icon: <ClipboardList className="w-8 h-8" />,
         bg: "bg-emerald-50",
         iconColor: "text-emerald-600",
       },
       {
         title: "ใบงานที่รอดำเนินการ",
-        value: card.filter((j) => j.status === "รอการตรวจสอบ").length,
+        value: filteredCard.filter((j) => j.status === "รอการตรวจสอบ").length,
         icon: <Clock className="w-8 h-8" />,
         bg: "bg-orange-50",
         iconColor: "text-orange-600",
       },
     ];
-  }, [card, filteredCard, searchTerm, statusFilter]);
+  }
+
+  return [
+    ...baseStats,
+    {
+      title: "จำนวนใบงานทั้งหมด",
+      value: card.length,
+      icon: <ClipboardList className="w-8 h-8" />,
+      bg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+    },
+    {
+      title: "ใบงานที่รอการตรวจสอบ",
+      value: waitingJobs,
+      icon: <Clock className="w-8 h-8" />,
+      bg: "bg-orange-50",
+      iconColor: "text-orange-600",
+    },
+  ];
+}, [card, filteredCard, searchTerm, statusFilter]);
+
 
   // Pagination
   const itemsPerPage = 6;
@@ -223,7 +225,7 @@ const MainDashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4 ">
         {summary.map((item, index) => (
           <div
             key={`summary-${index}`}

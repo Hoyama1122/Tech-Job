@@ -3,10 +3,13 @@
 import {
   FileDiff,
   FileText,
+  Home,
   ImageUp,
   Loader2,
   MapPin,
+  Phone,
   Plus,
+  User,
 } from "lucide-react";
 import React, { useState } from "react";
 import DropdownSupervisor from "./DropdownSupervisor";
@@ -169,7 +172,7 @@ const WorkForm = () => {
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           {/* Left Column */}
-          <div className="bg-white shadow rounded-lg p-6  space-y-4">
+          <div className="bg-white shadow rounded-lg p-4  space-y-4">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="p-[12px]">
@@ -221,18 +224,23 @@ const WorkForm = () => {
 
             <DropdownSupervisor />
             {errors.supervisorId && (
-              <p className="text-xs text-red-500">
+              <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                <span className="w-1 h-1 bg-red-500 rounded-full"></span>
                 {errors.supervisorId.message}
-              </p>
+              </div>
             )}
 
             <DatePickerTH />
             {errors.date && (
-              <p className="text-xs text-red-500">{errors.date.message}</p>
+              <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                {errors.date.message}
+              </div>
             )}
             <div>
-              <label className="block text-lg font-medium mb-1">
-                รูปภาพ <span className="text-red-500"></span>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                รูปภาพประกอบ
               </label>
               <input type="hidden" {...register("image")} />
 
@@ -274,69 +282,79 @@ const WorkForm = () => {
           </div>
 
           {/* Right Column */}
-          <div className="bg-white shadow rounded-lg p-6  space-y-4">
-            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
-                <MapPin className="w-6 h-6 text-white" />
+          <div className="bg-white shadow rounded-lg p-4  space-y-4">
+            <div className="flex items-center gap-3 pb-4 border-b border-gray-100 ">
+              <div className="p-[12px]  flex items-center justify-center mt-2">
+                <MapPin className="w-6 h-6 text-green-500" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-800">ตำแหน่งงาน</h2>
+                <h2 className="text-2xl font-bold text-gray-80 mt-2">
+                  ตำแหน่งงาน
+                </h2>
                 <p className="text-sm text-gray-500">เลือกตำแหน่งในแผนที่</p>
               </div>
             </div>
-            <Map onLocationSelect={(pos) => setLoc(pos)} />
+          <div className="flex items-center justify-center">
+              <Map onLocationSelect={(pos) => setLoc(pos)} />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                ชื่อลูกค้า <span className="text-red-500">*</span>
-              </label>
-              <input
-                {...register("customerName")}
-                className="input-field text-sm"
-                placeholder="กรอกชื่อลูกค้า"
-              />
-              {errors.customerName && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.customerName.message}
-                </p>
-              )}
-            </div>
+           <div className="group">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <User className="w-4 h-4 text-primary" />
+                  ชื่อลูกค้า <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register("customerName")}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
+                  placeholder="กรอกชื่อ-นามสกุลลูกค้า"
+                />
+                {errors.customerName && (
+                  <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                    {errors.customerName.message}
+                  </div>
+                )}
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                เบอร์โทรศัพท์ลูกค้า <span className="text-red-500">*</span>
-              </label>
-              <input
-                {...register("customerPhone")}
-                type="tel"
-                className="input-field text-sm"
-                placeholder="000-000-0000"
-                onInput={handlePhoneInput}
-                maxLength={12}
-              />
-              {errors.customerPhone && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.customerPhone.message}
-                </p>
-              )}
-            </div>
+             <div className="group">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <Phone className="w-4 h-4 text-primary" />
+                  เบอร์โทรศัพท์ลูกค้า <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...register("customerPhone")}
+                  type="tel"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
+                  placeholder="000-000-0000"
+                  onInput={handlePhoneInput}
+                  maxLength={12}
+                />
+                {errors.customerPhone && (
+                  <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                    {errors.customerPhone.message}
+                  </div>
+                )}
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                ที่อยู่ <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                {...register("address")}
-                className="input-field text-sm"
-                rows={3}
-                placeholder="กรอกที่อยู่ลูกค้า"
-              />
-              {errors.address && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.address.message}
-                </p>
-              )}
-            </div>
+            <div className="group">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <Home className="w-4 h-4 text-primary" />
+                  ที่อยู่ <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  {...register("address")}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400 resize-none"
+                  rows={4}
+                  placeholder="กรอกที่อยู่ลูกค้า (บ้านเลขที่, หมู่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์)"
+                />
+                {errors.address && (
+                  <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                    <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                    {errors.address.message}
+                  </div>
+                )}
+              </div>
           </div>
         </div>
 

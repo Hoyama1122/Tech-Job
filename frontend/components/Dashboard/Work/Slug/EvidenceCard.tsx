@@ -12,16 +12,17 @@ export default function EvidenceCard({ job }: any) {
         รูปภาพ
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="flex gap-4">
         {images.map((img: any, i: number) => {
-          const src = typeof img === "object" ? img.src || img.blurDataURL : img;
+          const src =
+            typeof img === "object" ? img.src || img.blurDataURL : img;
 
           return (
             <img
               key={i}
               src={src}
               alt={`หลักฐาน ${i + 1}`}
-              className="w-full object-cover rounded-xl shadow cursor-pointer hover:opacity-90"
+              className="w-36 h-36 object-cover rounded-xl shadow cursor-pointer hover:opacity-90"
               onClick={() => window.open(src, "_blank")}
             />
           );

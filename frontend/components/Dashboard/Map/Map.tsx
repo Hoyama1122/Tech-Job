@@ -5,9 +5,9 @@ import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import { Loader2 } from "lucide-react";
 
 const containerStyle = {
-  width: "100%",
-  height: "400px",
-  borderRadius: "12px",
+  width: "80%",
+  height: "250px",
+  borderRadius: "4px",
 };
 
 const defaultCenter = {
