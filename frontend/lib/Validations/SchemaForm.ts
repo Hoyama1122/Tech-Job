@@ -14,6 +14,7 @@ export const workSchema = z
     startTime: z.string().optional(),
     endTime: z.string().optional(),
     category: z.string().min(1, "กรุณาเลือกประเภทงาน"),
+    technicianId: z.string().min(1, "กรุณาเลือกช่างผู้รับผิดชอบ"),
 
     customerName: z.string().min(1, "กรุณาระบุชื่อลูกค้า"),
     customerPhone: z
@@ -21,7 +22,6 @@ export const workSchema = z
       .min(10, "เบอร์โทรต้องมีอย่างน้อย 10 หลัก")
       .regex(/^[0-9-+\s]+$/, "รูปแบบเบอร์โทรไม่ถูกต้อง เช่น 0812345678"),
     address: z.string().min(1, "กรุณาระบุที่อยู่ลูกค้า"),
-
     image: z.any().optional(),
   })
 
