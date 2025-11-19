@@ -10,7 +10,7 @@ import { Users } from "@/lib/Mock/UserMock";
 export default function DropdownSupervisor() {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [supervisors, setSupervisors] = useState<any[]>([]); // 👈 state สำหรับเก็บหัวหน้างาน
+  const [supervisors, setSupervisors] = useState<any[]>([]);
   const ref = useRef<HTMLDivElement>(null);
   const { setValue, register } = useFormContext();
 

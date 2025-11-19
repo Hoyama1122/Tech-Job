@@ -16,7 +16,6 @@ export type CardWorkTypes = {
   JobId: string;
   title: string;
   description: string;
-
   status:
     | "รอการตรวจสอบ"
     | "กำลังทำงาน"
@@ -24,59 +23,42 @@ export type CardWorkTypes = {
     | "สำเร็จ"
     | "ตีกลับ"
     | "รอการมอบหมายงาน";
-
-
   createdAt: string;
   assignedAt?: string;
   dueDate?: string;
   completedAt?: string;
   approvedAt?: string;
   sla?: string;
-
-
   userId: number | null;
   supervisorId: number;
-
   technicianId: number[];
-  leadTechnicianId?: number; 
-
-
+  leadTechnicianId?: number;
   image: StaticImageData;
   imagesBefore?: string[];
   imagesAfter?: string[];
-
-
   loc: {
     lat: number;
     lng: number;
   };
-
-
   category?: "ไฟฟ้า" | "แอร์" | "ประปา" | "ระบบสื่อสาร" | "ทั่วไป";
   priority?: "low" | "medium" | "high" | "urgent";
-
   customer?: {
     name: string;
     phone: string;
     room: string;
-  };
-
+  }
   technicianReport?: {
     detail: string;
     materialsUsed: string[];
     cost: number;
   } | null;
-
   rejectReason?: string | null;
-
   logs?: {
     by: "admin" | "supervisor" | "technician";
     action: string;
     time: string;
   }[];
 };
-
-
 
 export const CardWork: CardWorkTypes[] = [
   {
@@ -107,7 +89,7 @@ export const CardWork: CardWorkTypes[] = [
     userId: 1,
     supervisorId: 2,
     technicianId: [5, 6],
-    
+
     image: Image,
     loc: randomLocation(),
   },
@@ -412,4 +394,3 @@ export const CardWork: CardWorkTypes[] = [
     loc: randomLocation(),
   },
 ];
-

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileDiff, FileText, ImageUp, Loader2 } from "lucide-react";
+import { FileDiff, FileText, ImageUp, Loader2, Plus } from "lucide-react";
 import React, { useState } from "react";
 import DropdownSupervisor from "./DropdownSupervisor";
 import { FormProvider, useForm } from "react-hook-form";
@@ -13,6 +13,8 @@ import Map from "../Map/Map";
 import DatePickerTH from "@/components/DueDate/Date";
 
 const WorkForm = () => {
+  const [loc, setLoc] = useState({ lat: 13.85, lng: 100.58 });
+
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string[]>([]);
   const methods = useForm<WorkFormValues>({
@@ -67,114 +69,116 @@ const WorkForm = () => {
     e.target.value = value.slice(0, 12);
   };
 
-const onSubmit = async (data: WorkFormValues) => {
-  try {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
+  const onSubmit = async (data: WorkFormValues) => {
+    try {
+      setLoading(true);
+      await new Promise((r) => setTimeout(r, 1000));
 
-    const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
+      const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
 
-    // แปลงรูปภาพเป็น base64
-    const images = data.image?.length
-      ? await Promise.all(Array.from(data.image).map(convertToBase64))
-      : [];
+      // แปลงรูปภาพเป็น base64
+      const images = data.image?.length
+        ? await Promise.all(Array.from(data.image).map(convertToBase64))
+        : [];
 
-    // 🔧 format วันที่นัดหมาย
-    let formattedDate = "";
-    if (data.date) {
-      // ✅ กรณีเป็น yyyy-mm-dd (จาก date picker)
-      if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
-        formattedDate = `${data.date}T${data.startTime || "00:00"}`;
-      } else {
-        // ✅ กรณีเป็นภาษาไทย (เช่น 15 มกราคม 2568)
-        const months: Record<string, number> = {
-          มกราคม: 0,
-          กุมภาพันธ์: 1,
-          มีนาคม: 2,
-          เมษายน: 3,
-          พฤษภาคม: 4,
-          มิถุนายน: 5,
-          กรกฎาคม: 6,
-          สิงหาคม: 7,
-          กันยายน: 8,
-          ตุลาคม: 9,
-          พฤศจิกายน: 10,
-          ธันวาคม: 11,
-        };
-        const match = data.date.match(/(\d{1,2}) (\S+) (\d{4})/);
-        if (match) {
-          const [, d, m, y] = match;
-          const year = parseInt(y) - 543;
-          const month = months[m];
-          const day = parseInt(d);
-          const hours = data.startTime?.split(":")[0] || "00";
-          const minutes = data.startTime?.split(":")[1] || "00";
-          formattedDate = new Date(year, month, day, hours, minutes)
-            .toISOString()
-            .slice(0, 16);
+      let formattedDate = "";
+      if (data.date) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+          formattedDate = `${data.date}T${data.startTime || "00:00"}`;
+        } else {
+          const months: Record<string, number> = {
+            มกราคม: 0,
+            กุมภาพันธ์: 1,
+            มีนาคม: 2,
+            เมษายน: 3,
+            พฤษภาคม: 4,
+            มิถุนายน: 5,
+            กรกฎาคม: 6,
+            สิงหาคม: 7,
+            กันยายน: 8,
+            ตุลาคม: 9,
+            พฤศจิกายน: 10,
+            ธันวาคม: 11,
+          };
+          const match = data.date.match(/(\d{1,2}) (\S+) (\d{4})/);
+          if (match) {
+            const [, d, m, y] = match;
+            const year = parseInt(y) - 543;
+            const month = months[m];
+            const day = parseInt(d);
+            const hours = data.startTime?.split(":")[0] || "00";
+            const minutes = data.startTime?.split(":")[1] || "00";
+            formattedDate = new Date(year, month, day, hours, minutes)
+              .toISOString()
+              .slice(0, 16);
+          }
         }
       }
+
+      const now = new Date();
+
+      const newWork = {
+        id: current.length + 1,
+        JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
+        title: data.title,
+        description: data.description,
+        date: formattedDate,
+        status: "รอการมอบหมายงาน",
+
+        createdAt: now.toISOString(),
+        assignedAt: null,
+        dueDate: null,
+        completedAt: null,
+        approvedAt: null,
+        category: data.category,
+        userId: 1,
+        supervisorId: Number(data.supervisorId) || 0,
+        technicianId: [],
+
+        image: images,
+        loc: loc,
+      };
+
+      localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
+
+      reset();
+      setPreview([]);
+      toast.success("เพิ่มใบงานสำเร็จ!");
+    } catch (error) {
+      console.error(error);
+      toast.error("เพิ่มใบงานไม่สำเร็จ!");
+    } finally {
+      setLoading(false);
     }
-
-    // 🆕 เวลาสร้างใบงาน
-    const now = new Date();
-
-    // 🧩 job object ใหม่
-    const newWork = {
-      id: current.length + 1,
-      JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
-      title: data.title,
-      description: data.description,
-     
-      date: formattedDate,
-      status: "รอการมอบหมายงาน",
-
-      // 🕓 เวลาสำคัญในระบบ
-      createdAt: now.toISOString(),
-      assignedAt: null,     
-      dueDate: null,        
-      completedAt: null,
-      approvedAt: null,
-
-      // 🧑‍💼 ความสัมพันธ์กับผู้ใช้
-      userId: 1, // id ของ admin ที่ login อยู่
-      supervisorId: Number(data.supervisorId) || 0,
-      technicianId: [],
-
-      // 📷 รูปภาพ + location
-      image: images,
-      loc: { lat: 13.85, lng: 100.58 },
-    };
-
-    // 💾 บันทึกลง localStorage
-    localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
-
-    reset();
-    setPreview([]);
-    toast.success("เพิ่มใบงานสำเร็จ!");
-  } catch (error) {
-    console.error(error);
-    toast.error("เพิ่มใบงานไม่สำเร็จ!");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   console.log(errors);
-  
+
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="max-w-[1440px] mx-auto"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           {/* Left Column */}
           <div className="bg-white shadow rounded-lg p-6  space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-primary/90 flex items-center gap-2">
-                ข้อมูลใบงาน <FileText size={22} />
-              </h2>
-              <DropdownCategory />
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-[12px]">
+                  <FileText className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    ข้อมูลใบงาน
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    กรอกรายละเอียดงานที่ต้องการสร้าง
+                  </p>
+                </div>
+              </div>
+              <DropdownCategory register={register} />
             </div>
-            <div className="h-1 w-36 bg-gradient-to-r from-primary to-secondary rounded"></div>
 
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -211,14 +215,19 @@ const onSubmit = async (data: WorkFormValues) => {
               </p>
             )}
 
-            <DatePickerTH/>
-
+            <DatePickerTH />
+            {errors.date && (
+              <p className="text-xs text-red-500">{errors.date.message}</p>
+            )}
             <div>
+              <label className="block text-lg font-medium mb-1">
+                รูปภาพ <span className="text-red-500"></span>
+              </label>
               <input type="hidden" {...register("image")} />
-              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                <ImageUp size={24} className="text-gray-500" />
-                <span className="text-sm font-medium mt-2">กดเพื่ออัปโหลด</span>
-                <span className="text-xs text-gray-400">สูงสุด 6 รูป</span>
+
+              <label className="inline-flex items-center gap-2 bg-primary px-3 py-1.5 rounded-lg cursor-pointer hover:bg-primary/80 transition text-white text-sm">
+                <Plus size={18} />
+                เพิ่มรูป
                 <input
                   type="file"
                   className="hidden"
@@ -229,7 +238,7 @@ const onSubmit = async (data: WorkFormValues) => {
               </label>
 
               {preview.length > 0 && (
-                <div className="mt-3 grid grid-cols-3 gap-2">
+                <div className="mt-3 grid grid-cols-3 gap-3">
                   {preview.map((src, i) => (
                     <div key={i} className="relative group">
                       <Image
@@ -237,12 +246,12 @@ const onSubmit = async (data: WorkFormValues) => {
                         alt={`preview-${i}`}
                         width={120}
                         height={120}
-                        className="w-full h-24 object-cover rounded"
+                        className="w-full rounded-lg object-cover shadow-sm"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100"
+                        className="absolute top-1 right-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition"
                       >
                         ✕
                       </button>
@@ -256,7 +265,7 @@ const onSubmit = async (data: WorkFormValues) => {
           {/* Right Column */}
           <div className="bg-white shadow rounded-lg p-6  space-y-4">
             <h2 className="text-xl font-semibold text-primary/90">แผนที่</h2>
-            <Map />
+            <Map onLocationSelect={(pos) => setLoc(pos)} />
 
             <div>
               <label className="block text-sm font-medium mb-1">

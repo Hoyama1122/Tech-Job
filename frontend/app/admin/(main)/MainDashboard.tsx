@@ -15,6 +15,7 @@ import {
   Filter,
 } from "lucide-react";
 import CardWork from "@/components/Dashboard/CardWork";
+import Activities from "@/components/Dashboard/Activities";
 
 const MainDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -312,14 +313,7 @@ const MainDashboard = () => {
             )}
           </div>
         </div>
-
-        <div className="flex flex-col space-y-4">
-          <div className="bg-white rounded-lg shadow-md p-4 h-full">
-            <h3 className="font-bold mb-2">กิจกรรมล่าสุด</h3>
-            <p className="text-sm text-gray-500">ยังไม่มีกิจกรรม</p>
-          </div>
-          
-        </div>
+           <Activities/>             
       </div>
     </div>
   );
