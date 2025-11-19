@@ -23,14 +23,18 @@ import Map from "../Map/Map";
 import DatePickerTH from "@/components/DueDate/Date";
 import DropdownTechnician from "./DropdownTechnician";
 import Router from "next/router";
+import { useRouter } from "next/navigation";
 
 const WorkForm = () => {
   const [loc, setLoc] = useState({ lat: 13.85, lng: 100.58 });
-
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string[]>([]);
   const methods = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
+    defaultValues: {
+      technicianId: [],
+    },
   });
 
   const {
@@ -145,7 +149,10 @@ const WorkForm = () => {
         category: data.category,
         userId: 1,
         supervisorId: Number(data.supervisorId) || 0,
-        technicianId: [],
+        technicianId: data.technicianId?.map(Number) || [],
+        customerName: data.customerName,
+        customerPhone: data.customerPhone,
+        address: data.address,
 
         image: images,
         loc: loc,
@@ -156,7 +163,7 @@ const WorkForm = () => {
       reset();
       setPreview([]);
       toast.success("เพิ่มใบงานสำเร็จ!");
-      Router.push("/admin");
+      router.push("/admin");
     } catch (error) {
       console.error(error);
       toast.error("เพิ่มใบงานไม่สำเร็จ!");
@@ -164,8 +171,6 @@ const WorkForm = () => {
       setLoading(false);
     }
   };
-
-  console.log(errors);
 
   return (
     <FormProvider {...methods}>
@@ -226,11 +231,6 @@ const WorkForm = () => {
             </div>
 
             <DropdownTechnician />
-            {errors.technicianId && (
-              <p className="text-red-500 text-xs">
-                {errors.technicianId.message}
-              </p>
-            )}
 
             <DatePickerTH />
             {errors.date && (
@@ -361,9 +361,7 @@ const WorkForm = () => {
         </div>
 
         <div className="flex justify-end mt-4">
-          <button type="submit" disabled={loading} className="button-create"
-          
-          >
+          <button type="submit" disabled={loading} className="button-create">
             {loading ? (
               <Loader2 size={18} className="animate-spin" />
             ) : (

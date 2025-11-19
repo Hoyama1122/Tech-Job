@@ -14,7 +14,7 @@ export const workSchema = z
     startTime: z.string().optional(),
     endTime: z.string().optional(),
     category: z.string().min(1, "กรุณาเลือกประเภทงาน"),
-    technicianId: z.string().min(1, "กรุณาเลือกช่างผู้รับผิดชอบ"),
+    technicianId: z.array(z.number()).min(1, "กรุณาเลือกช่างอย่างน้อย 1 คน"),
 
     customerName: z.string().min(1, "กรุณาระบุชื่อลูกค้า"),
     customerPhone: z
