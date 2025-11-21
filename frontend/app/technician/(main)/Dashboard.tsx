@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { CardWork } from "lib/Mock/Jobs";
 
 const Dashboard = () => {
   const [showFilter, setShowFilter] = useState(false);
@@ -39,6 +40,12 @@ const Dashboard = () => {
   const goToProfile = () => {
     router.push("/technician/Profile");
   };
+
+  const technicianId = 5; // เปลี่ยนตามจริง
+
+  const myJobs = CardWork.filter((job) =>
+    job.technicianId.includes(technicianId)
+  );
 
   return (
     <div className="">
@@ -120,209 +127,59 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
-        <div>
-          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
-          <p>รายละเอียดงาน</p>
-          <p>ทีม: 5หัวหน้าสมิง</p>
-          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
-        </div>
-
-        <div className="flex flex-col justify-between text-right">
-          <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
-
+      <div className="mt-4 space-y-4">
+        {myJobs.map((job) => (
           <div
-            className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}
+            key={job.id}
+            className="bg-gray-300 rounded-lg p-3 flex justify-between"
           >
-            <div className="flex justify-end mr-1">
-              <svg
-                className="w-6 h-6 text-red-800 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+            <div>
+              <span className="text-xl">ลูกค้า : {job.customer?.name}</span>
+              <p>{job.description}</p>
+              <p>ทีม: {job.technicianId.join(", ")}</p>
+              <p>
+                {new Date(job.createdAt).toLocaleDateString("th-TH", {
+                  weekday: "long",
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
             </div>
-            <p>map</p>
-          </div>
-        </div>
-      </div>
 
-      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
-        <div>
-          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
-          <p>รายละเอียดงาน</p>
-          <p>ทีม: 5หัวหน้าสมิง</p>
-          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
-        </div>
+            <div className="flex flex-col justify-between text-right">
+              <p className="text-gray-500 text-sm">เลขที่ใบงาน : {job.JobId}</p>
 
-        <div className="flex flex-col justify-between text-right">
-          <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
-
-          <div
-            className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}
-          >
-            <div className="flex justify-end mr-1">
-              <svg
-                className="w-6 h-6 text-red-800 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              <div
+                className="cursor-pointer hover:opacity-75 transition-opacity"
+                onClick={goToOpenwork}
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+                <div className="flex justify-end mr-1">
+                  <svg
+                    className="w-6 h-6 text-red-800"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </div>
+                <p>map</p>
+              </div>
             </div>
-            <p>map</p>
           </div>
-        </div>
-      </div>
-
-      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
-        <div>
-          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
-          <p>รายละเอียดงาน</p>
-          <p>ทีม: 5หัวหน้าสมิง</p>
-          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
-        </div>
-
-        <div className="flex flex-col justify-between text-right">
-          <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
-
-          <div
-            className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}
-          >
-            <div className="flex justify-end mr-1">
-              <svg
-                className="w-6 h-6 text-red-800 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <p>map</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
-        <div>
-          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
-          <p>รายละเอียดงาน</p>
-          <p>ทีม: 5หัวหน้าสมิง</p>
-          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
-        </div>
-
-        <div className="flex flex-col justify-between text-right">
-          <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
-
-          <div
-            className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}
-          >
-            <div className="flex justify-end mr-1">
-              <svg
-                className="w-6 h-6 text-red-800 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <p>map</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
-        <div>
-          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
-          <p>รายละเอียดงาน</p>
-          <p>ทีม: 5หัวหน้าสมิง</p>
-          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
-        </div>
-
-        <div className="flex flex-col justify-between text-right">
-          <p className="text-gray-500 text-sm">เลขที่ใบงาน : 0001</p>
-
-          <div
-            className="cursor-pointer hover:opacity-75 transition-opacity"
-            onClick={goToOpenwork}
-          >
-            <div className="flex justify-end mr-1">
-              <svg
-                className="w-6 h-6 text-red-800 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <p>map</p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
