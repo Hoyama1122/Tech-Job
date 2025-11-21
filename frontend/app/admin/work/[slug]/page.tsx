@@ -1,10 +1,7 @@
 "use client";
-<<<<<<< HEAD
 import { notFound, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-=======
->>>>>>> main
 
 import React, { use } from "react";
 import { useRouter } from "next/navigation";
