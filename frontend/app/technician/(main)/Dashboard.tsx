@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { FilterIcon } from "lucide-react";
 
 const Dashboard = () => {
   const [showFilter, setShowFilter] = useState(false);
@@ -35,6 +34,10 @@ const Dashboard = () => {
 
   const goToOpenwork = () => {
     router.push("/technician/Openwork");
+  };
+
+  const goToProfile = () => {
+    router.push("/technician/Profile");
   };
 
   return (

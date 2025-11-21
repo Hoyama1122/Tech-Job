@@ -10,7 +10,16 @@ import Image from "next/image";
 import NotifacationBell from "../Dashboard/NotifacationBell";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell } from '@fortawesome/free-solid-svg-icons';
+import { useRouter } from 'next/navigation';
+
 const RightNavbar = () => {
+
+  const router = useRouter();
+  
+  const goToProfile = () => {
+    router.push("/technician/Profile");
+  }
+
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);
   return (
     <div className="flex items-center gap-3 px-4 ">
@@ -41,7 +50,8 @@ const RightNavbar = () => {
         <Image
           src={profile}
           alt="profile"
-          className="w-10 h-10 rounded-full bg-cover bg-no-repeat"
+          className="w-10 h-10 rounded-full bg-cover bg-no-repeat" 
+          onClick={goToProfile}
         />
         {/* <div className=" leading-4">
           <h1 className="text-md text-primary-test font-semibold">
