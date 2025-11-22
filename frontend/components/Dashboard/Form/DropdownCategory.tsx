@@ -2,15 +2,22 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Layers, ChevronDown } from "lucide-react";
+import {
+  Layers,
+  ChevronDown,
+  Wifi,
+  Droplets,
+  Snowflake,
+  Zap,
+} from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
 const categories = [
-  { id: "ไฟฟ้า", label: "งานไฟฟ้า" },
-  { id: "แอร์", label: "งานแอร์" },
-  { id: "ประปา", label: "งานประปา" },
-  { id: "ระบบสื่อสาร", label: "งานระบบสื่อสาร" },
-  { id: "ทั่วไป", label: "งานทั่วไป" },
+  { id: "ไฟฟ้า", label: "งานไฟฟ้า", icon: <Zap size={16} /> },
+  { id: "แอร์", label: "งานแอร์", icon: <Snowflake size={16} /> },
+  { id: "ประปา", label: "งานประปา", icon: <Droplets size={16} /> },
+  { id: "ระบบสื่อสาร", label: "งานระบบสื่อสาร", icon: <Wifi size={16} /> },
+  { id: "ทั่วไป", label: "งานทั่วไป", icon: <Layers size={16} /> },
 ];
 
 export default function DropdownCategory() {
@@ -82,8 +89,8 @@ export default function DropdownCategory() {
               onClick={() => handleSelect(cat)}
               className="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-primary/5 transition text-left"
             >
-              <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center text-gray-600 text-xs">
-                {cat.id[0]}
+              <div className="w-6 h-6 bg-gray-200 cursor-pointer rounded flex items-center justify-center text-gray-600 text-xs">
+                {cat.icon}
               </div>
               <span className="text-gray-800">{cat.label}</span>
             </button>

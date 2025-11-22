@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { use } from "react";
@@ -18,6 +19,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   const router = useRouter();
   const { slug } = use(params);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [job, setJob] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -77,7 +79,6 @@ export default function WorkDetailPage({ params }: PageProps) {
           <DescriptionCard job={job} />
           <EvidenceCard job={job} />
         </div>
-
         <Sidebar job={job} />
       </div>
     </div>

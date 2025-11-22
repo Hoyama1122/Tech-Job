@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AlertCircle,
   FileDiff,
   FileText,
   Home,
@@ -209,8 +210,8 @@ const WorkForm = () => {
                 placeholder="ระบุชื่อใบงานให้ชัดเจน"
               />
               {errors.title && (
-                <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
-                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
                   {errors.title.message}
                 </div>
               )}
@@ -233,12 +234,12 @@ const WorkForm = () => {
             <DropdownTechnician />
 
             <DatePickerTH />
-            {errors.date && (
-              <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
-                <span className="w-1 h-1 bg-red-500 rounded-full"></span>
-                {errors.date.message}
-              </div>
-            )}
+          {errors.date && (
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.date.message}
+                </div>
+              )}
             <div>
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                 <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
@@ -311,8 +312,8 @@ const WorkForm = () => {
                 placeholder="กรอกชื่อ-นามสกุลลูกค้า"
               />
               {errors.customerName && (
-                <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
-                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
                   {errors.customerName.message}
                 </div>
               )}
@@ -332,8 +333,8 @@ const WorkForm = () => {
                 maxLength={12}
               />
               {errors.customerPhone && (
-                <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
-                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
                   {errors.customerPhone.message}
                 </div>
               )}
@@ -351,8 +352,8 @@ const WorkForm = () => {
                 placeholder="กรอกที่อยู่ลูกค้า (บ้านเลขที่, หมู่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์)"
               />
               {errors.address && (
-                <div className="mt-2 flex items-center gap-1 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
-                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
                   {errors.address.message}
                 </div>
               )}

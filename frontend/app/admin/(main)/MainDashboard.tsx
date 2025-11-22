@@ -16,64 +16,67 @@ import {
 } from "lucide-react";
 import CardWork from "@/components/Dashboard/CardWork";
 import Activities from "@/components/Dashboard/Activities";
+import Summary from "@/components/Dashboard/Summary/Summary";
+import SummaryModal from "@/components/Dashboard/Summary/SummaryModal";
+import RenderModal from "@/components/Dashboard/Summary/RenderModal";
 
 const MainDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [card, setCard] = useState([]);
+  const [users, setUsers] = useState([]); // 👈 เพิ่ม state ของ users
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [detail, setDetail] = useState(null);
 
-  // โหลดข้อมูลจาก localStorage
+
   useEffect(() => {
-    const loadData = () => {
-      try {
-        setIsLoading(true);
-        const cardData = localStorage.getItem("CardWork");
-        const usersData = localStorage.getItem("Users");
+    try {
+      setIsLoading(true);
 
-        if (!cardData || !usersData) {
-          console.warn("ไม่พบข้อมูลใน localStorage");
-          setCard([]);
-          return;
-        }
+      const cardData = localStorage.getItem("CardWork");
+      const usersData = localStorage.getItem("Users");
 
-        const parsedCards = JSON.parse(cardData);
-        const parsedUsers = JSON.parse(usersData);
-
-        const joined = parsedCards.map((job) => {
-          const supervisor = parsedUsers.find(
-            (u) =>
-              u.role === "supervisor" &&
-              String(u.id) === String(job.supervisorId)
-          );
-
-          const technicians = parsedUsers.filter(
-            (u) =>
-              u.role === "technician" &&
-              Array.isArray(job.technicianId) &&
-              job.technicianId.some((tid) => String(tid) === String(u.id))
-          );
-
-          return {
-            ...job,
-            supervisor: supervisor || null,
-            technicians: technicians || [],
-          };
-        });
-
-        setCard(joined);
-      } catch (error) {
-        console.error("โหลดข้อมูลล้มเหลว:", error);
-      } finally {
-        setIsLoading(false);
+      if (!cardData || !usersData) {
+        console.warn("ไม่พบข้อมูลใน localStorage");
+        setCard([]);
+        setUsers([]);
+        return;
       }
-    };
 
-    loadData();
+      const parsedCards = JSON.parse(cardData);
+      const parsedUsers = JSON.parse(usersData);
+
+      setUsers(parsedUsers); // 👈 เซ็ต users
+
+      const joined = parsedCards.map((job) => {
+        const supervisor = parsedUsers.find(
+          (u) =>
+            u.role === "supervisor" && String(u.id) === String(job.supervisorId)
+        );
+
+        const technicians = parsedUsers.filter(
+          (u) =>
+            u.role === "technician" &&
+            Array.isArray(job.technicianId) &&
+            job.technicianId.some((tid) => String(tid) === String(u.id))
+        );
+
+        return {
+          ...job,
+          supervisor: supervisor || null,
+          technicians: technicians || [],
+        };
+      });
+
+      setCard(joined);
+    } catch (error) {
+      console.error("โหลดข้อมูลล้มเหลว:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // กรองข้อมูลตามสถานะและคำค้นหา
   const filteredCard = useMemo(() => {
     return card.filter((job) => {
       const matchesStatus =
@@ -94,73 +97,73 @@ const MainDashboard = () => {
     });
   }, [card, searchTerm, statusFilter]);
 
- const summary = useMemo(() => {
-  const users = JSON.parse(localStorage.getItem("Users") || "[]");
+  const summary = useMemo(() => {
+    const technicians = users.filter((u) => u.role === "technician").length;
+    const supervisors = users.filter((u) => u.role === "supervisor").length;
 
-  const technicians = users.filter(u => u.role === "technician").length;
-  const supervisors = users.filter(u => u.role === "supervisor").length;
+    const waitingJobs = card.filter((j) => j.status === "รอการตรวจสอบ").length;
 
-  const teams = users.filter(u => u.role === "team").length;
+    const baseStats = [
+      {
+        type: "technicians",
+        title: "จำนวนช่างทั้งหมด",
+        value: technicians,
+        icon: <Users className="w-8 h-8" />,
+        bg: "bg-blue-50",
+        iconColor: "text-blue-600",
+      },
+      {
+        type: "supervisors",
+        title: "จำนวนหัวหน้าทีมทั้งหมด",
+        value: supervisors,
+        icon: <UserCog className="w-8 h-8" />,
+        bg: "bg-amber-50",
+        iconColor: "text-amber-600",
+      },
+    ];
 
-  const waitingJobs = card.filter(j => j.status === "รอการตรวจสอบ").length;
+    if (searchTerm || statusFilter !== "all") {
+      return [
+        ...baseStats,
+        {
+          type: "jobs_all",
+          title: "จำนวนใบงานทั้งหมด",
+          value: card.length,
+          icon: <ClipboardList className="w-8 h-8" />,
+          bg: "bg-emerald-50",
+          iconColor: "text-emerald-600",
+        },
+        {
+          type: "jobs_waiting",
+          title: "ใบงานที่รอการตรวจสอบ",
+          value: waitingJobs,
+          icon: <Clock className="w-8 h-8" />,
+          bg: "bg-orange-50",
+          iconColor: "text-orange-600",
+        },
+      ];
+    }
 
-  const baseStats = [
-    {
-      title: "จำนวนช่างทั้งหมด",
-      value: technicians,
-      icon: <Users className="w-8 h-8" />,
-      bg: "bg-blue-50",
-      iconColor: "text-blue-600",
-    },
-    {
-      title: "จำนวนหัวหน้าทีมทั้งหมด",
-      value: supervisors,
-      icon: <UserCog className="w-8 h-8" />,
-      bg: "bg-amber-50",
-      iconColor: "text-amber-600",
-    },
-   
-  ];
-
-  if (searchTerm || statusFilter !== "all") {
     return [
       ...baseStats,
       {
-        title: "จำนวนใบงาน (กรองแล้ว)",
-        value: filteredCard.length,
+        title: "จำนวนใบงานทั้งหมด",
+        type: "jobs_all",
+        value: card.length,
         icon: <ClipboardList className="w-8 h-8" />,
         bg: "bg-emerald-50",
         iconColor: "text-emerald-600",
       },
       {
-        title: "ใบงานที่รอดำเนินการ",
-        value: filteredCard.filter((j) => j.status === "รอการตรวจสอบ").length,
+        type: "jobs_waiting",
+        title: "ใบงานที่รอการตรวจสอบ",
+        value: waitingJobs,
         icon: <Clock className="w-8 h-8" />,
         bg: "bg-orange-50",
         iconColor: "text-orange-600",
       },
     ];
-  }
-
-  return [
-    ...baseStats,
-    {
-      title: "จำนวนใบงานทั้งหมด",
-      value: card.length,
-      icon: <ClipboardList className="w-8 h-8" />,
-      bg: "bg-emerald-50",
-      iconColor: "text-emerald-600",
-    },
-    {
-      title: "ใบงานที่รอการตรวจสอบ",
-      value: waitingJobs,
-      icon: <Clock className="w-8 h-8" />,
-      bg: "bg-orange-50",
-      iconColor: "text-orange-600",
-    },
-  ];
-}, [card, filteredCard, searchTerm, statusFilter]);
-
+  }, [users, card, filteredCard, searchTerm, statusFilter]);
 
   // Pagination
   const itemsPerPage = 6;
@@ -225,27 +228,14 @@ const MainDashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4 ">
-        {summary.map((item, index) => (
-          <div
-            key={`summary-${index}`}
-            className={`${item.bg} ${item.iconColor} rounded-xl p-5 flex items-center gap-4 shadow-md hover:shadow-lg transition-all duration-300  cursor-pointer border border-transparent hover:border-primary/20`}
-          >
-            <div className="p-3 bg-white/40 rounded-lg backdrop-blur-sm">
-              {item.icon}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-text-secondary">
-                {item.title}
-              </p>
-              <p className="text-2xl font-bold text-primary mt-1">
-                {item.value.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-
+      <Summary summary={summary} onSelect={(item) => setDetail(item)} />
+    
+      <RenderModal
+        detail={detail}
+        users={users}
+        card={card}
+        onClose={() => setDetail(null)}
+      />
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-4">
         {/*  */}
