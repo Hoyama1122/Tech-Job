@@ -100,13 +100,13 @@ const TechnicianListModal = ({ technicians, onClose }) => {
                     ))}
                   </select>
                 </div>
-                <div className="flex items-center gap-1 text-lg text-gray-600 ml-4">
-                  <User size={18} className="text-primary" />
-                  <span className="font-semibold text-gray-800">
-                    {filteredTechnicians.length}
-                  </span>
-                  <span>คน</span>
-                </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 transition rounded-full text-sm">
+                <User size={16} className="text-gray-700" />
+                <span className="font-semibold text-base">
+                  {filteredTechnicians.length}
+                </span>
+                <span className="text-gray-600">คน</span>
+              </div>
               </div>
             </div>
           </div>

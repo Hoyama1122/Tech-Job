@@ -109,16 +109,16 @@ const MainDashboard = () => {
         title: "จำนวนช่างทั้งหมด",
         value: technicians,
         icon: <Users className="w-8 h-8" />,
-        bg: "bg-blue-50",
-        iconColor: "text-blue-600",
+        bg: "bg-blue-200",
+        iconColor: "text-blue-700",
       },
       {
         type: "supervisors",
         title: "จำนวนหัวหน้าทีมทั้งหมด",
         value: supervisors,
         icon: <UserCog className="w-8 h-8" />,
-        bg: "bg-amber-50",
-        iconColor: "text-amber-600",
+        bg: "bg-purple-100",
+        iconColor: "text-purple-600",
       },
     ];
 
