@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Metadata } from "next";
-import AssignJobsClient from "@/components/Supervisor/work/AssignJobsClient";
 
 export const metadata: Metadata = {
   title: "มอบหมายงาน",
@@ -17,7 +16,7 @@ const AssignPage = () => {
       </p>
       
       {/* คอมโพเนนต์นี้จะจัดการ Logic ทั้งหมด */}
-      <AssignJobsClient/>
+     
     </div>
   );
 };
