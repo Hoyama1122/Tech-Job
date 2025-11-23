@@ -140,7 +140,7 @@ const WorkForm = () => {
         title: data.title,
         description: data.description,
         date: formattedDate,
-        status: "รอการมอบหมายงาน",
+        status: "รอการดำเนินงาน",
 
         createdAt: now.toISOString(),
         assignedAt: null,
@@ -151,10 +151,11 @@ const WorkForm = () => {
         userId: 1,
         supervisorId: Number(data.supervisorId) || 0,
         technicianId: data.technicianId?.map(Number) || [],
-        customerName: data.customerName,
-        customerPhone: data.customerPhone,
-        address: data.address,
-
+        customer: {
+          name: data.customerName,
+          phone: data.customerPhone,
+          address: data.address,
+        },
         image: images,
         loc: loc,
       };
@@ -234,12 +235,12 @@ const WorkForm = () => {
             <DropdownTechnician />
 
             <DatePickerTH />
-          {errors.date && (
-                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.date.message}
-                </div>
-              )}
+            {errors.date && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                <AlertCircle className="w-4 h-4" />
+                {errors.date.message}
+              </div>
+            )}
             <div>
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                 <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
@@ -297,7 +298,7 @@ const WorkForm = () => {
                 <p className="text-sm text-gray-500">เลือกตำแหน่งในแผนที่</p>
               </div>
             </div>
-            <div className="flex items-center justify-center">
+            <div className="flex ">
               <Map onLocationSelect={(pos) => setLoc(pos)} />
             </div>
 

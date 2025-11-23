@@ -29,7 +29,7 @@ const Page = () => {
     // แปลงเป็น blob แล้วเปิดแท็บใหม่
     const pdfBlob = pdf.output("blob");
     const pdfURL = URL.createObjectURL(pdfBlob);
-    window.open(pdfURL, "_blank"); 
+    window.open(pdfURL, "_blank");
   };
 
   return (
@@ -61,7 +61,7 @@ const Page = () => {
             width: "800px",
             height: "1200px",
             margin: "0 auto 40px auto",
-            
+
             border: "1px solid #e5e7eb",
           }}
         >
@@ -100,7 +100,7 @@ const Page = () => {
                     color: "#111827",
                   }}
                 >
-                  Tech Job Service 
+                  Tech Job Service
                 </div>
                 <div style={{ fontSize: "12px", color: "#4b5563" }}>
                   123 ถนนสุขุมวิท แขวงบางนา เขตบางนา กรุงเทพมหานคร 10260
@@ -113,8 +113,9 @@ const Page = () => {
 
             {/* ช่อง QR / รหัสเอกสาร */}
             <div style={{ textAlign: "right", fontSize: "12px" }}>
-              
-              <div style={{marginTop:"40px"}}>เลขที่เอกสาร: <b>WO-2025-0001</b></div>
+              <div style={{ marginTop: "40px" }}>
+                เลขที่เอกสาร: <b>WO-2025-0001</b>
+              </div>
               <div>พิมพ์เมื่อ: 13/11/2025</div>
             </div>
           </div>
@@ -162,15 +163,17 @@ const Page = () => {
           {/* รายละเอียดอาการ / การดำเนินการ */}
           <Section title="รายละเอียดอาการ">
             <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
-              ไฟฟ้าบางส่วนของชั้น 5 ดับเป็นช่วง ๆ ส่งผลให้เครื่องปรับอากาศและปลั๊กไฟบางจุดใช้งานไม่ได้
+              ไฟฟ้าบางส่วนของชั้น 5 ดับเป็นช่วง ๆ
+              ส่งผลให้เครื่องปรับอากาศและปลั๊กไฟบางจุดใช้งานไม่ได้
               มีเสียงดังจากตู้เมนไฟฟ้าเป็นระยะ
             </p>
           </Section>
 
           <Section title="ผลการตรวจสอบ">
             <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
-              ตรวจสอบแล้วพบว่ามีจุดต่อสาย (terminal) หลวมภายในตู้เมน ทำให้เกิดความร้อนสะสม
-              และมีการอาร์คของกระแสไฟในบางช่วงเวลา จำเป็นต้องทำการขันจุดต่อใหม่และทำความสะอาดจุดสัมผัส
+              ตรวจสอบแล้วพบว่ามีจุดต่อสาย (terminal) หลวมภายในตู้เมน
+              ทำให้เกิดความร้อนสะสม และมีการอาร์คของกระแสไฟในบางช่วงเวลา
+              จำเป็นต้องทำการขันจุดต่อใหม่และทำความสะอาดจุดสัมผัส
             </p>
           </Section>
 
@@ -184,11 +187,38 @@ const Page = () => {
                 margin: 0,
               }}
             >
-              <li>ตัดระบบไฟในตู้เมนหลัก และติดป้ายห้ามเปิดสวิตช์ (Lockout/Tagout)</li>
+              <li>
+                ตัดระบบไฟในตู้เมนหลัก และติดป้ายห้ามเปิดสวิตช์ (Lockout/Tagout)
+              </li>
               <li>ถอดสายและทำความสะอาดจุดสัมผัสด้วย contact cleaner</li>
               <li>ขันจุดต่อสายทุกจุดให้แน่นตามมาตรฐาน</li>
               <li>ตรวจสอบกระแสและอุณหภูมิหลังเปิดระบบ พร้อมบันทึกค่า</li>
             </ul>
+          </Section>
+          {/*  */}
+          <Section title="อุปกรณ์ที่ใช้ในงาน">
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "12px",
+              }}
+            >
+              <thead>
+                <tr>
+                  <Th>ลำดับ</Th>
+                  <Th>รายการอุปกรณ์</Th>
+                  <Th>จำนวน</Th>
+                </tr>
+              </thead>
+              <tbody>
+                <Tr>
+                  <Td center>1</Td>
+                  <Td>Contact Cleaner</Td>
+                  <Td center>1</Td>
+                </Tr>
+              </tbody>
+            </table>
           </Section>
 
           {/* ตารางทีมช่าง */}
@@ -234,7 +264,8 @@ const Page = () => {
           {/* สรุปผล */}
           <Section title="สรุปผลการดำเนินงาน">
             <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
-              ระบบไฟฟ้ากลับมาทำงานเป็นปกติ ตรวจสอบอุณหภูมิที่จุดต่อสายไม่พบความผิดปกติ
+              ระบบไฟฟ้ากลับมาทำงานเป็นปกติ
+              ตรวจสอบอุณหภูมิที่จุดต่อสายไม่พบความผิดปกติ
               แนะนำให้ตรวจเช็คตู้เมนทุก 6 เดือน และบันทึกค่ากระแสในแต่ละเฟส
             </p>
           </Section>
@@ -281,7 +312,6 @@ const Page = () => {
     </div>
   );
 };
-
 
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div
@@ -332,9 +362,7 @@ const Th = ({ children }: { children: React.ReactNode }) => (
 );
 
 const Tr = ({ children }: { children: React.ReactNode }) => (
-  <tr style={{}}>
-    {children}
-  </tr>
+  <tr style={{}}>{children}</tr>
 );
 
 const Td = ({
@@ -369,7 +397,7 @@ const SignatureBox = ({
       flex: 1,
       borderTop: "1px solid #d1d5db",
       paddingTop: "8px",
-      marginTop:"50px"
+      marginTop: "50px",
     }}
   >
     <div style={{ marginBottom: "32px", fontSize: "12px", color: "#6b7280" }}>

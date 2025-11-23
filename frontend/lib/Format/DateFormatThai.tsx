@@ -1,5 +1,5 @@
 const formatThaiDateTime = (dateString) => {
-  if (!dateString) return "ไม่ทราบวันที่";
+  if (!dateString) return "-";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "ไม่สามารถอ่านวันที่ได้";
 

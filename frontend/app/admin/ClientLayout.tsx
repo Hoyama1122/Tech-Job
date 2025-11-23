@@ -17,13 +17,7 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const { setCardWork, setUsers ,} = AppLoader();
-  const { role } = useAuthStore();
-  // Check role 
-  useEffect(() => {
-    if (role !== "admin" ) {
-      redirect("/");
-    }
-  }, [role]);
+  
   // Loader
   useEffect(() => {
     try {

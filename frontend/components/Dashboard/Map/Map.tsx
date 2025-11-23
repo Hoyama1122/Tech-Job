@@ -5,9 +5,9 @@ import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import { Loader2 } from "lucide-react";
 
 const containerStyle = {
-  width: "80%",
+  width: "100%",
   height: "250px",
-  borderRadius: "4px",
+  borderRadius: "8px",
 };
 
 const defaultCenter = {
@@ -51,7 +51,7 @@ export default function Map({
 
   if (!isLoaded)
     return (
-      <div className="w-full h-[400px] bg-gray-100">
+      <div className="min-w-full h-[400px] bg-gray-100">
         <Loader2 className="animate-spin text-primary" size={40} />
       </div>
     );
@@ -66,6 +66,7 @@ export default function Map({
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
+
       }}
     >
       {/* 🔥 Marker */}

@@ -39,10 +39,7 @@ const RenderModal = ({ detail, users, card, onClose, }) => {
     //     />
     //   );
 
-    default:
-      return (
-        <SummaryModal data={detail} onClose={() => setDetail(null)} />
-      );
+    
   }
 };
 export default RenderModal;

@@ -53,7 +53,7 @@ const SupervisorListModal = ({ supervisors, onClose }) => {
         <div className="flex justify-between items-center  px-6 py-4  border-b border-gray-200 shadow-sm">
           <h2
             id="modal-title"
-            className="text-2xl font-bold text-gray-900 flex items-center gap-3"
+            className="text-xl font-bold text-gray-900 flex items-center gap-3"
           >
             <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
               <User size={20} className="text-purple-600" />
@@ -77,7 +77,7 @@ const SupervisorListModal = ({ supervisors, onClose }) => {
                 <Filter size={16} className="text-gray-500" />
                 <label
                   htmlFor="supervisor-department-filter"
-                  className="text-sm font-medium text-gray-700"
+                  className="text-base font-medium text-gray-700"
                 >
                   แผนก:
                 </label>

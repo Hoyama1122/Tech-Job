@@ -30,7 +30,7 @@ const Activities = () => {
         </div>
 
         {/* Activities List */}
-        <div className="space-y-3 max-h-[575px] overflow-y-auto">
+        <div className="space-y-3 max-h-[533px] overflow-y-auto">
           {ActivityLogs.map((log) => {
             const Icon = LogIconMap[log.type].icon;
             const bg = LogIconMap[log.type].bg;

@@ -207,7 +207,7 @@ const MainDashboard = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="px-4 pt-4 pb-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <div>
@@ -239,8 +239,8 @@ const MainDashboard = () => {
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-4">
         {/*  */}
-        <div>
-          <div className="bg-white/90 rounded-t-lg shadow-md p-4 ">
+        <div className="">
+          <div className="bg-white/90 rounded-t-lg shadow-md px-4 pt-4">
             <h1 className="text-base md:text-lg font-bold text-text  gap-2 flex items-center mb-2">
               ใบงานล่าสุด <File size={20} />
             </h1>
@@ -253,7 +253,7 @@ const MainDashboard = () => {
                   placeholder="ค้นหาด้วย หมายเลขงาน, ชื่องาน, ชื่อช่าง, หรือผู้รับผิดชอบ..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 border text-sm border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
               </div>
 
@@ -276,7 +276,7 @@ const MainDashboard = () => {
             </div>
 
             {/* Active Filters Info */}
-            <div className="mt-2 text-sm text-gray-600">
+            <div className="mt-2 text-sm text-gray-600 pb-4">
               {searchTerm && <span> คำค้น: "{searchTerm}" </span>}
               {statusFilter !== "all" && <span> สถานะ: {statusFilter}</span>}
               {filteredCard.length > 0 && (

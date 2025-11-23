@@ -59,9 +59,9 @@ const TechnicianListModal = ({ technicians, onClose }) => {
         <div className="flex justify-between items-center px-6 py-4  border-b border-gray-200 shadow-sm">
           <h2
             id="modal-title"
-            className="text-xl font-bold text-gray-900 flex items-center gap-2"
+            className="text-xl font-bold text-gray-900 flex items-center gap-3"
           >
-            <div className="w-8 h-8  rounded-full flex items-center justify-center bg-primary/10">
+            <div className="w-10 h-10  rounded-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
               <User size={20} className="text-primary" />
             </div>
             รายชื่อช่างทั้งหมด
@@ -80,10 +80,10 @@ const TechnicianListModal = ({ technicians, onClose }) => {
             <div className="">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <Filter size={18} className="text-primary" />
+                  <Filter size={16} className="text-primary" />
                   <label
                     htmlFor="supervisor-department-filter"
-                    className="text-lg font-medium text-primary"
+                    className="text-base font-medium text-primary"
                   >
                     แผนก :
                   </label>

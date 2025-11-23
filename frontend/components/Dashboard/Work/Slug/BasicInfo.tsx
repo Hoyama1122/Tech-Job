@@ -8,7 +8,7 @@ export default function BasicInfoCard({ job }: any) {
     กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
     ตีกลับ: "bg-red-100 text-red-700 border-red-200",
     รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
-    รอการมอบหมายงาน: "bg-purple-100 text-purple-700 border-purple-200",
+    รอการดำเนินงาน: "bg-purple-100 text-purple-700 border-purple-200",
   };
 
   return (
@@ -35,19 +35,9 @@ export default function BasicInfoCard({ job }: any) {
           {job.location && <InfoRow label="สถานที่" value={job.location} />}
         </div>
         <div className="space-y-4  flex-1 px-4">
-          <InfoRow label="กำหนดเสร็จ" value={`#${job.JobId}`} />
-          <InfoRow label="ชื่องาน" value={job.title} />
-          <InfoRow
-            label="สถานะ"
-            value={job.status}
-            isBadge
-            valueClass={statusStyle[job.status] || ""}
-          />
-          <InfoRow
-            label="วันที่สร้าง"
-            value={formatThaiDateTime(job.createdAt) || "-"}
-          />
-          {job.location && <InfoRow label="สถานที่" value={job.location} />}
+          <InfoRow label="เสร็จสิ้น" value={formatThaiDateTime(job.completedAt) || "-"} />
+       
+          {job.customer?.address && <InfoRow label="สถานที่" value={job.customer?.address} />}
         </div>
       </div>
     </div>

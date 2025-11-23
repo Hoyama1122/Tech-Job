@@ -8,7 +8,7 @@ export const getBadgeStatusClass = (status: JobStatus): string => {
     กำลังทำงาน: "bg-yellow-100 text-yellow-700",
     ตีกลับ: "bg-red-100 text-red-700",
     รอการตรวจสอบ: "bg-blue-100 text-blue-700",
-    รอการมอบหมายงาน: "bg-gray-100 text-gray-700",
+    รอการดำเนินงาน: "bg-purple-100 text-purple-700",
   };
   return statusMap[status] || "bg-gray-50 text-gray-600";
 };
@@ -22,23 +22,21 @@ const CardWork = ({ card }) => {
     <div className="hidden md:block overflow-x-auto">
       <table className="w-full border-collapse rounded-lg overflow-hidden shadow">
         <thead>
-          <tr className="bg-primary rounded-lg">
-            <th className="px-4 py-3 text-left font-semibold text-white w-20">
+          <tr className="bg-primary rounded-lg text-white">
+            <th className="w-[100px] px-4 py-2 text-left font-semibold">
               หมายเลข
             </th>
-            <th className="px-4 py-3 text-left font-semibold text-white">
+            <th className="w-[160px] px-4 py-2 text-left font-semibold">
               ผู้ทำงาน
             </th>
-            <th className="px-4 py-3 text-left font-semibold text-white">
-              งาน
-            </th>
-            <th className="px-4 py-3 text-left font-semibold text-white">
+            <th className="w-[280px] px-4 py-2 text-left font-semibold">งาน</th>
+            <th className="w-[150px] px-4 py-2 text-left font-semibold text-sm">
               ผู้รับผิดชอบ
             </th>
-            <th className="px-4 py-3 text-left font-semibold text-white">
+            <th className="w-[120px] px-4 py-2 text-left font-semibold">
               สถานะ
             </th>
-            <th className="px-4 py-3 text-left font-semibold text-white">
+            <th className="w-[100px] px-4 py-2 text-left font-semibold">
               ดำเนินการ
             </th>
           </tr>
@@ -52,26 +50,27 @@ const CardWork = ({ card }) => {
                   index % 2 === 0 ? "bg-white" : "bg-gray-50"
                 }`}
               >
-                <td className="px-4 py-3 text-sm font-semibold text-gray-800">
+                <td className="px-4 py-2 text-sm font-semibold text-gray-800">
                   {work.JobId}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-700">
-                  {work.technicians?.length > 0
-                    ? work.technicians.map((t) => t.name).join(", ")
-                    : "-"}
+                <td
+                  className="px-4 py-2 text-sm text-gray-700 max-w-[150px] truncate"
+                  title={work.technicians?.map((t) => t.name).join(", ")}
+                >
+                  {work.technicians?.map((t) => t.name).join(", ") || "-"}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-700">
+                <td className="px-4 py-2 text-sm text-gray-700">
                   <div>
                     <p className="font-semibold">{work.title}</p>
                     <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                      {work.description}
+                      {work.description?.slice(0, 40) + "..."}
                     </p>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-700">
+                <td className="px-4 py-2 text-sm text-gray-700">
                   {work.supervisor?.name || "-"}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-700">
+                <td className="px-4 py-2 text-sm text-gray-700">
                   <span
                     className={`px-3 py-1 inline-flex text-sm font-semibold rounded-lg ${getBadgeStatusClass(
                       work.status
@@ -80,10 +79,11 @@ const CardWork = ({ card }) => {
                     {work.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-700 text-center">
+                <td className="px-4 py-2 text-sm text-gray-700 text-center">
                   <Link
                     href={`/admin/work/${work.JobId}`}
-                  className="flex items-center justify-center">
+                    className="flex items-center justify-center"
+                  >
                     <Eye className="w-6 h-6 text-primary cursor-pointer" />
                   </Link>
                 </td>

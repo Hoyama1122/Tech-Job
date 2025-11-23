@@ -73,13 +73,14 @@ export default function WorkDetailPage({ params }: PageProps) {
     <div className="p-4">
       <Header job={job} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-4 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
         <div className="space-y-4">
           <BasicInfoCard job={job} />
           <DescriptionCard job={job} />
           <EvidenceCard job={job} />
         </div>
         <Sidebar job={job} />
+        
       </div>
     </div>
   );
