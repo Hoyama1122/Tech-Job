@@ -1,6 +1,17 @@
 "use client";
 
-import { FileDiff, FileText, ImageUp, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  FileDiff,
+  FileText,
+  Home,
+  ImageUp,
+  Loader2,
+  MapPin,
+  Phone,
+  Plus,
+  User,
+} from "lucide-react";
 import React, { useState } from "react";
 import DropdownSupervisor from "./DropdownSupervisor";
 import { FormProvider, useForm } from "react-hook-form";
@@ -11,12 +22,20 @@ import Image from "next/image";
 import DropdownCategory from "./DropdownCategory";
 import Map from "../Map/Map";
 import DatePickerTH from "@/components/DueDate/Date";
+import DropdownTechnician from "./DropdownTechnician";
+import Router from "next/router";
+import { useRouter } from "next/navigation";
 
 const WorkForm = () => {
+  const [loc, setLoc] = useState({ lat: 13.85, lng: 100.58 });
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string[]>([]);
   const methods = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
+    defaultValues: {
+      technicianId: [],
+    },
   });
 
   const {
@@ -67,158 +86,170 @@ const WorkForm = () => {
     e.target.value = value.slice(0, 12);
   };
 
-const onSubmit = async (data: WorkFormValues) => {
-  try {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
+  const onSubmit = async (data: WorkFormValues) => {
+    try {
+      setLoading(true);
+      await new Promise((r) => setTimeout(r, 1000));
 
-    const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
+      const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
 
-    // แปลงรูปภาพเป็น base64
-    const images = data.image?.length
-      ? await Promise.all(Array.from(data.image).map(convertToBase64))
-      : [];
+      // แปลงรูปภาพเป็น base64
+      const images = data.image?.length
+        ? await Promise.all(Array.from(data.image).map(convertToBase64))
+        : [];
 
-    // 🔧 format วันที่นัดหมาย
-    let formattedDate = "";
-    if (data.date) {
-      // ✅ กรณีเป็น yyyy-mm-dd (จาก date picker)
-      if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
-        formattedDate = `${data.date}T${data.startTime || "00:00"}`;
-      } else {
-        // ✅ กรณีเป็นภาษาไทย (เช่น 15 มกราคม 2568)
-        const months: Record<string, number> = {
-          มกราคม: 0,
-          กุมภาพันธ์: 1,
-          มีนาคม: 2,
-          เมษายน: 3,
-          พฤษภาคม: 4,
-          มิถุนายน: 5,
-          กรกฎาคม: 6,
-          สิงหาคม: 7,
-          กันยายน: 8,
-          ตุลาคม: 9,
-          พฤศจิกายน: 10,
-          ธันวาคม: 11,
-        };
-        const match = data.date.match(/(\d{1,2}) (\S+) (\d{4})/);
-        if (match) {
-          const [, d, m, y] = match;
-          const year = parseInt(y) - 543;
-          const month = months[m];
-          const day = parseInt(d);
-          const hours = data.startTime?.split(":")[0] || "00";
-          const minutes = data.startTime?.split(":")[1] || "00";
-          formattedDate = new Date(year, month, day, hours, minutes)
-            .toISOString()
-            .slice(0, 16);
+      let formattedDate = "";
+      if (data.date) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+          formattedDate = `${data.date}T${data.startTime || "00:00"}`;
+        } else {
+          const months: Record<string, number> = {
+            มกราคม: 0,
+            กุมภาพันธ์: 1,
+            มีนาคม: 2,
+            เมษายน: 3,
+            พฤษภาคม: 4,
+            มิถุนายน: 5,
+            กรกฎาคม: 6,
+            สิงหาคม: 7,
+            กันยายน: 8,
+            ตุลาคม: 9,
+            พฤศจิกายน: 10,
+            ธันวาคม: 11,
+          };
+          const match = data.date.match(/(\d{1,2}) (\S+) (\d{4})/);
+          if (match) {
+            const [, d, m, y] = match;
+            const year = parseInt(y) - 543;
+            const month = months[m];
+            const day = parseInt(d);
+            const hours = data.startTime?.split(":")[0] || "00";
+            const minutes = data.startTime?.split(":")[1] || "00";
+            formattedDate = new Date(year, month, day, hours, minutes)
+              .toISOString()
+              .slice(0, 16);
+          }
         }
       }
+
+      const now = new Date();
+
+      const newWork = {
+        id: current.length + 1,
+        JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
+        title: data.title,
+        description: data.description,
+        date: formattedDate,
+        status: "รอการมอบหมายงาน",
+
+        createdAt: now.toISOString(),
+        assignedAt: null,
+        dueDate: null,
+        completedAt: null,
+        approvedAt: null,
+        category: data.category,
+        userId: 1,
+        supervisorId: Number(data.supervisorId) || 0,
+        technicianId: data.technicianId?.map(Number) || [],
+        customerName: data.customerName,
+        customerPhone: data.customerPhone,
+        address: data.address,
+
+        image: images,
+        loc: loc,
+      };
+
+      localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
+
+      reset();
+      setPreview([]);
+      toast.success("เพิ่มใบงานสำเร็จ!");
+      router.push("/admin");
+    } catch (error) {
+      console.error(error);
+      toast.error("เพิ่มใบงานไม่สำเร็จ!");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // 🆕 เวลาสร้างใบงาน
-    const now = new Date();
-
-    // 🧩 job object ใหม่
-    const newWork = {
-      id: current.length + 1,
-      JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
-      title: data.title,
-      description: data.description,
-     
-      date: formattedDate,
-      status: "รอการมอบหมายงาน",
-
-      // 🕓 เวลาสำคัญในระบบ
-      createdAt: now.toISOString(),
-      assignedAt: null,     
-      dueDate: null,        
-      completedAt: null,
-      approvedAt: null,
-
-      // 🧑‍💼 ความสัมพันธ์กับผู้ใช้
-      userId: 1, // id ของ admin ที่ login อยู่
-      supervisorId: Number(data.supervisorId) || 0,
-      technicianId: [],
-
-      // 📷 รูปภาพ + location
-      image: images,
-      loc: { lat: 13.85, lng: 100.58 },
-    };
-
-    // 💾 บันทึกลง localStorage
-    localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
-
-    reset();
-    setPreview([]);
-    toast.success("เพิ่มใบงานสำเร็จ!");
-  } catch (error) {
-    console.error(error);
-    toast.error("เพิ่มใบงานไม่สำเร็จ!");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  console.log(errors);
-  
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="max-w-[1440px] mx-auto"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           {/* Left Column */}
-          <div className="bg-white shadow rounded-lg p-6  space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-primary/90 flex items-center gap-2">
-                ข้อมูลใบงาน <FileText size={22} />
-              </h2>
-              <DropdownCategory />
+          <div className="bg-white shadow rounded-lg p-4  space-y-4">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-[12px]">
+                  <FileText className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    ข้อมูลใบงาน
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    กรอกรายละเอียดงานที่ต้องการสร้าง
+                  </p>
+                </div>
+              </div>
+              <DropdownCategory register={register} />
             </div>
-            <div className="h-1 w-36 bg-gradient-to-r from-primary to-secondary rounded"></div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
                 ชื่อใบงาน <span className="text-red-500">*</span>
               </label>
               <input
                 {...register("title")}
-                className="input-field text-sm"
-                placeholder="ระบุชื่อใบงาน"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
+                placeholder="ระบุชื่อใบงานให้ชัดเจน"
               />
               {errors.title && (
-                <p className="text-xs text-red-500 mt-1">
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
                   {errors.title.message}
-                </p>
+                </div>
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            {/* Description */}
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
                 คำอธิบายงาน
               </label>
               <textarea
                 {...register("description")}
-                className="input-field text-sm"
-                rows={3}
-                placeholder="รายละเอียด"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400 resize-none"
+                rows={4}
+                placeholder="รายละเอียดงาน, ข้อมูลเพิ่มเติม, หมายเหตุ..."
               />
             </div>
 
-            <DropdownSupervisor />
-            {errors.supervisorId && (
-              <p className="text-xs text-red-500">
-                {errors.supervisorId.message}
-              </p>
-            )}
+            <DropdownTechnician />
 
-            <DatePickerTH/>
-
+            <DatePickerTH />
+          {errors.date && (
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.date.message}
+                </div>
+              )}
             <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                รูปภาพประกอบ
+              </label>
               <input type="hidden" {...register("image")} />
-              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                <ImageUp size={24} className="text-gray-500" />
-                <span className="text-sm font-medium mt-2">กดเพื่ออัปโหลด</span>
-                <span className="text-xs text-gray-400">สูงสุด 6 รูป</span>
+
+              <label className="inline-flex items-center gap-2 bg-primary px-3 py-1.5 rounded-lg cursor-pointer hover:bg-primary/80 transition text-white text-sm">
+                <Plus size={18} />
+                เพิ่มรูป
                 <input
                   type="file"
                   className="hidden"
@@ -229,7 +260,7 @@ const onSubmit = async (data: WorkFormValues) => {
               </label>
 
               {preview.length > 0 && (
-                <div className="mt-3 grid grid-cols-3 gap-2">
+                <div className="mt-3 grid grid-cols-3 gap-3">
                   {preview.map((src, i) => (
                     <div key={i} className="relative group">
                       <Image
@@ -237,12 +268,12 @@ const onSubmit = async (data: WorkFormValues) => {
                         alt={`preview-${i}`}
                         width={120}
                         height={120}
-                        className="w-full h-24 object-cover rounded"
+                        className="w-full rounded-lg object-cover shadow-sm"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100"
+                        className="absolute top-1 right-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition"
                       >
                         ✕
                       </button>
@@ -254,59 +285,77 @@ const onSubmit = async (data: WorkFormValues) => {
           </div>
 
           {/* Right Column */}
-          <div className="bg-white shadow rounded-lg p-6  space-y-4">
-            <h2 className="text-xl font-semibold text-primary/90">แผนที่</h2>
-            <Map />
+          <div className="bg-white shadow rounded-lg p-4  space-y-4">
+            <div className="flex items-center gap-3 pb-4 border-b border-gray-100 ">
+              <div className="p-[12px]  flex items-center justify-center mt-2">
+                <MapPin className="w-6 h-6 text-green-500" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-80 mt-2">
+                  ตำแหน่งงาน
+                </h2>
+                <p className="text-sm text-gray-500">เลือกตำแหน่งในแผนที่</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center">
+              <Map onLocationSelect={(pos) => setLoc(pos)} />
+            </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <User className="w-4 h-4 text-primary" />
                 ชื่อลูกค้า <span className="text-red-500">*</span>
               </label>
               <input
                 {...register("customerName")}
-                className="input-field text-sm"
-                placeholder="กรอกชื่อลูกค้า"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
+                placeholder="กรอกชื่อ-นามสกุลลูกค้า"
               />
               {errors.customerName && (
-                <p className="text-xs text-red-500 mt-1">
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
                   {errors.customerName.message}
-                </p>
+                </div>
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <Phone className="w-4 h-4 text-primary" />
                 เบอร์โทรศัพท์ลูกค้า <span className="text-red-500">*</span>
               </label>
               <input
                 {...register("customerPhone")}
                 type="tel"
-                className="input-field text-sm"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
                 placeholder="000-000-0000"
                 onInput={handlePhoneInput}
                 maxLength={12}
               />
               {errors.customerPhone && (
-                <p className="text-xs text-red-500 mt-1">
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
                   {errors.customerPhone.message}
-                </p>
+                </div>
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                <Home className="w-4 h-4 text-primary" />
                 ที่อยู่ <span className="text-red-500">*</span>
               </label>
               <textarea
                 {...register("address")}
-                className="input-field text-sm"
-                rows={3}
-                placeholder="กรอกที่อยู่ลูกค้า"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400 resize-none"
+                rows={4}
+                placeholder="กรอกที่อยู่ลูกค้า (บ้านเลขที่, หมู่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์)"
               />
               {errors.address && (
-                <p className="text-xs text-red-500 mt-1">
+                <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
                   {errors.address.message}
-                </p>
+                </div>
               )}
             </div>
           </div>

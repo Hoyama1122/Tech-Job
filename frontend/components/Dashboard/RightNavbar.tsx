@@ -49,10 +49,10 @@ const RightNavbar = () => {
           className="w-10 h-10 rounded-full bg-cover bg-no-repeat"
         />
         <div className=" leading-4">
-          <h1 className="text-md text-primary-test font-semibold">
+          <p className="text-sm  text-primary-test font-semibold">{user.state?.name}</p>
+          <h1 className="text-md">
             ธุรการ
           </h1>
-          <p className="text-sm">{user.state?.name}</p>
         </div>
       </div>
     </div>

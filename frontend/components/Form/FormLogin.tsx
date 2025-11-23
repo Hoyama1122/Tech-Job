@@ -1,19 +1,19 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/store/useAuthStore";
 import logo from "@/public/Logo/Logotechjob.png";
 import Image from "next/image";
-
-
+import { Eye, EyeOff } from "lucide-react";
 type LoginFormInputs = {
   email: string;
   password: string;
 };
 
 const FormLogin = () => {
+  const [show, setShow] = useState(false);
   const { login } = useAuthStore();
   const router = useRouter();
   const { register, handleSubmit } = useForm<LoginFormInputs>();
@@ -46,80 +46,94 @@ const FormLogin = () => {
   };
 
   return (
-    <div className="w-full max-w-sm space-y-6">
-      <div className="flex justify-center">
+    <div className="w-full max-w-sm space-y-6 ">
+      <div className="flex justify-center ">
         <Image
-        src={logo} alt="Tech Job" width={160} height={160} className="object-contain"
+          src={logo}
+          alt="Tech Job"
+          width={160}
+          height={160}
+          className="object-contain"
         />
       </div>
 
       <h2 className="text-center text-3xl font-bold text-white">
-        Yooo, welcome back!
+        ยินดีต้อนรับกลับ!
       </h2>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Your Email</label>
+          <label className="block text-base font-medium text-white/80 mb-2">
+            อีเมลของคุณ
+          </label>
           <input
             {...register("email")}
             type="email"
-            className="w-full border-transparent rounded-lg p-3 
-    bg-blue-900 text-white placeholder-gray-500 
-    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-950 focus:ring-blue-500
-    autofill:shadow-[inset_0_0_0px_1000px_rgb(30,58,138)] 
-    autofill:text-white"
-            placeholder="tech@gmail.com"
+            className="w-full border-transparent rounded-lg p-4 
+      bg-blue-900 text-white text-lg placeholder-white/80 
+      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-950 focus:ring-blue-500"
+            placeholder="example@gmail.com"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Password</label>
+        {/* Password */}
+        <div className="relative">
+          <label className="block text-base font-medium text-gray-300 mb-2">
+            รหัสผ่าน
+          </label>
           <input
             {...register("password")}
-            type="password"
-            className="w-full border-transparent rounded-lg p-3 bg-blue-900 text-white placeholder-gray-500"
-            placeholder="รหัสผ่าน"
+            type={show ? "text" : "password"}
+            className="w-full border-transparent rounded-lg p-4 bg-blue-900 text-white text-lg placeholder-white/80"
+            placeholder="กรอกรหัสผ่าน"
           />
+          <button
+            type="button"
+            onClick={() => setShow(!show)}
+            className="absolute right-[6px] top-[43px] text-white cursor-pointer hover:bg-primary/80 p-2 rounded-full"
+          >
+            {show ? <EyeOff size={22} /> : <Eye size={22} />}
+          </button>
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-gray-100 text-blue-950 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors"
+          className="w-full bg-gray-100 text-blue-950 py-3 rounded-full font-semibold text-lg hover:bg-gray-200 transition-colors mt-4 cursor-pointer"
         >
-          SignIn
+          เข้าสู่ระบบ
         </button>
       </form>
 
-      <div className="flex items-center justify-between">
+      {/* OR Divider */}
+      <div className="flex items-center justify-between mt-6">
         <span className="w-full border-t border-gray-700"></span>
-        <span className="px-4 text-gray-500 flex-shrink-0">or</span>
+        <span className="px-4 text-gray-400 text-sm flex-shrink-0">หรือ</span>
         <span className="w-full border-t border-gray-700"></span>
       </div>
 
+      {/* Google */}
       <button
         type="button"
-        
-        className="w-full bg-red-600 text-white py-3 rounded-full font-semibold hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
+        className="w-full bg-red-600 text-white py-3 rounded-full font-semibold text-lg hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
       >
-        <span>Sign in with Google</span>
+        <span>เข้าสู่ระบบด้วย Google</span>
       </button>
 
-      <p className="text-xs text-gray-500 text-center">
-        Yooo, welcome back! bhasa basasbasahbas. <br />
+      {/* Footer */}
+      <p className="text-sm text-gray-400 text-center leading-relaxed">
+        การเข้าสู่ระบบของคุณถือว่ายอมรับ
+        <br />
         <a href="#" className="underline hover:text-gray-300">
-          Terms of Service
+          เงื่อนไขการให้บริการ
         </a>{" "}
-        and our{" "}
+        และ{" "}
         <a href="#" className="underline hover:text-gray-300">
-          Privacy Policy
+          นโยบายความเป็นส่วนตัว
         </a>
-        .
       </p>
     </div>
-
   );
 };
 

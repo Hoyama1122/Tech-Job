@@ -10,8 +10,6 @@ import LoadingSkeleton from "@/components/Dashboard/Work/LoadingSkeleton";
 import EmptyState from "@/components/Dashboard/Work/EmptyState";
 import JobCard from "@/components/Dashboard/Work/JobCard";
 
-
-
 interface Job {
   id: string;
   JobId: string;
@@ -95,7 +93,6 @@ export default function Work() {
     });
   }, [jobs, search, filterStatus]);
 
-  // ✅ สำคัญ: เพิ่ม "รอการมอบหมายงาน" ใน stats
   const stats = useMemo(
     () => ({
       รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")

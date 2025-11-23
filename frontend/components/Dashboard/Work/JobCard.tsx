@@ -36,7 +36,7 @@ const getStatusStyle = (status: string) => {
 
 export default function JobCard({ job }: Props) {
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-200 overflow-hidden group flex flex-col h-full">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg  border border-gray-200 overflow-hidden group flex flex-col h-full">
       {/* Card Header */}
       <div className="bg-gradient-to-r from-primary/5 to-accent/10 p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">

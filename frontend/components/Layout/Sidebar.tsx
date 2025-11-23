@@ -1,32 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import {  X, Wrench, Search,  ArrowBigRight } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { LucideIcon } from "lucide-react";
-import ModalSerach from "./ModalSerach";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  X,
+  Wrench,
+  Search,
+  ArrowBigRight,
+  LogOut,
+  CirclePower,
+} from "lucide-react";
+import { toast } from "react-toastify";
+import ModalSerach from "../Modal/ModalSerach";
+import LogoutModal from "../Modal/LogoutModal";
 
-export type NavItem = {
-  name: string;
-  path: string;
-  icon: LucideIcon;
-};
-
-type SidebarProps = {
-  navLinks: NavItem[];
-  basePath: string;
-  isOpen: boolean;
-  setIsOpen: (v: boolean) => void;
-};
-
-const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
+const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
   const pathname = usePathname();
+  const router = useRouter();
   const [borderStyle, setBorderStyle] = useState({ top: 0, height: 0 });
   const itemsRef = useRef<(HTMLLIElement | null)[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  // คำนวณตำแหน่งของแถบ active
   useEffect(() => {
     const activeIndex = navLinks.findIndex((link) => {
       const fullPath = link.path === "/" ? basePath : `${basePath}${link.path}`;
@@ -42,30 +39,54 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
     }
   }, [pathname, navLinks, basePath]);
 
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    try {
+      localStorage.removeItem("auth-storage");
+      localStorage.removeItem("CardWork");
+      localStorage.removeItem("Users");
+
+      toast.success("ออกจากระบบสำเร็จ", {
+        autoClose: 1500,
+      });
+
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("เกิดข้อผิดพลาดในการออกจากระบบ", {
+        position: "top-center",
+      });
+    }
+  };
+
   return (
     <>
-      {/* */}
+      {/* Hamburger Menu Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden p-3 text-white cursor-pointer bg-primary fixed top-4 z-50 rounded-r-lg hover:scale-105 transition-transform"
+        className="lg:hidden p-3 text-white cursor-pointer bg-primary fixed top-4 left-0 z-50 rounded-r-lg hover:scale-105 transition-transform shadow-lg"
       >
-      <ArrowBigRight size={24} className="text-white "/>
-      
+        <ArrowBigRight size={24} className="text-white" />
       </button>
 
-      {/*  Overlay */}
+      {/* Overlay for Mobile */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/40 z-40"
+          className="lg:hidden fixed inset-0 bg-black/40 z-40 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-     
+      {/* Sidebar */}
       <aside
         className={`bg-primary text-white w-64 fixed top-0 left-0 h-screen
-    flex flex-col overflow-hidden transform transition-transform duration-300 z-[999]
-    ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        flex flex-col overflow-hidden transform transition-transform duration-300 z-[999]
+        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
         {/* Header */}
         <div className="py-6 px-4 flex items-center justify-between bg-black/10 flex-shrink-0">
@@ -80,7 +101,7 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden p-3 rounded-lg hover:scale-105 transition-transform flex-shrink-0"
+            className="lg:hidden p-3 rounded-lg hover:bg-white/20 transition-colors flex-shrink-0"
           >
             <X size={24} />
           </button>
@@ -92,14 +113,13 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
         <div className="px-4 mt-4 flex-shrink-0">
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="bg-accent shadow-2xl cursor-pointer rounded gap-2 px-4 py-2 flex items-center w-full text-left text-lg hover:bg-accent/80 transition"
+            className="bg-accent shadow-xl cursor-pointer rounded gap-2 px-4 py-2 flex items-center w-full text-left text-lg hover:bg-accent/80 transition transform hover:scale-[1.02]"
           >
             <Search size={20} className="text-white" />
             <span className="text-white font-semibold">ค้นหา...</span>
           </button>
         </div>
 
-        {/* ✅ Scroll เฉพาะรายการเมนู */}
         <nav className="py-4 flex-1 overflow-y-auto relative">
           <div
             className="absolute left-0 w-1 bg-white rounded-r-full transition-all duration-200 ease-out"
@@ -125,10 +145,10 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
                 >
                   <Link
                     href={basePath + link.path}
-                    className={`flex items-center gap-3 px-4 py-3 text-lg transition-all duration-300 ${
+                    className={`flex items-center gap-3 px-4 py-3 text-lg transition-all duration-300 rounded-lg mx-2 ${
                       isActive
-                        ? "bg-white/10 font-semibold"
-                        : "hover:bg-white/20 text-white/70"
+                        ? "bg-white/10 font-semibold text-white"
+                        : "text-white/70 hover:bg-white/20 hover:text-white"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
@@ -143,13 +163,29 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: SidebarProps) => {
             })}
           </ul>
         </nav>
-        <div>
-          Logout
+
+        <div className="border-t border-white/20 flex-shrink-0 bg-black/10">
+          <button
+            onClick={handleLogout}
+            className="flex cursor-pointer items-center gap-3 px-4 py-4 text-lg text-white/80 hover:text-white hover:bg-red-500/30 transition-all duration-200 ease-in-out w-full active:scale-95  active:rounded-lg"
+          >
+            <CirclePower size={20} />
+            <span>ออกจากระบบ</span>
+          </button>
         </div>
       </aside>
 
-      {/* Modal Search */}
+  
       {isSearchOpen && <ModalSerach setIsSearchOpen={setIsSearchOpen} />}
+
+   
+      {showLogoutModal && (
+        <LogoutModal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={confirmLogout}
+        />
+      )}
     </>
   );
 };
