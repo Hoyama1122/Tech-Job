@@ -24,13 +24,12 @@ export type CardWorkTypes = {
     | "ตีกลับ"
     | "รอการดำเนินงาน";
 
-  createdAt: string; 
-  completedAt?: string; 
+  createdAt: string;
+  completedAt?: string;
 
- 
   dateRange: {
-    startAt: string | null; 
-    endAt: string | null;  
+    startAt: string | null;
+    endAt: string | null;
   };
 
   sla?: string;
@@ -52,6 +51,7 @@ export type CardWorkTypes = {
     name: string;
     phone: string;
     address: string;
+    sign: string;
   };
 
   technicianReport?: {
@@ -160,9 +160,15 @@ export const CardWork: CardWorkTypes[] = [
     },
 
     technicianReport: {
-      detail: "เปลี่ยนหลอดไฟครบทุกจุดแล้ว ทดสอบใช้งานปกติ",
-      materialsUsed: ["หลอดไฟ 12 ดวง"],
+      detail: "หลอดไฟโถงกลางชั้น 2 ดับยกแถว ต้องเปลี่ยนใหม่ทั้งหมด",
+      inspectionResults:
+        "ตรวจสอบพบว่าหลอดไฟชุดเดิมหมดอายุการใช้งานและมีบางจุดขั้วหลวม ส่งผลให้ไฟตกและดับเป็นช่วง",
+      repairOperations:
+        "ถอดหลอดไฟชุดเดิม ตรวจสอบขั้วและสายไฟ ทำความสะอาดจุดสัมผัส และติดตั้งหลอดไฟใหม่ทุกจุด พร้อมทดสอบระบบ",
+      materialsUsed: ["หลอดไฟ LED 12 ดวง"],
       cost: 0,
+      summaryOfOperatingResults:
+        "ไฟติดครบทุกจุด ความสว่างปกติ ไม่มีไฟกระพริบ แนะนำตรวจเช็คหลอดไฟทุก 6 เดือน",
     },
 
     rejectReason: null,
@@ -197,11 +203,16 @@ export const CardWork: CardWorkTypes[] = [
     },
 
     technicianReport: {
-      detail: "ตรวจพบจุดรั่ว แต่ภาพหลังซ่อมไม่ชัด",
-      materialsUsed: ["ซีลกันรั่ว"],
+      detail: "ตรวจสอบปัญหาน้ำหยดจากเพดานบริเวณชั้น 5",
+      inspectionResults:
+        "พบว่าท่อน้ำดีมีรอยปริแตก ทำให้น้ำซึมลงฝ้าและหยดลงพื้นเป็นระยะ",
+      repairOperations:
+        "ตัดต่อท่อน้ำใหม่ ใช้ซีลกันรั่วอุดรอยปริ พร้อมทดสอบแรงดันน้ำอีกครั้ง",
+      materialsUsed: ["ซีลกันรั่ว", "ท่อน้ำดีสำรอง"],
       cost: 0,
+      summaryOfOperatingResults:
+        "ท่อไม่รั่วแล้ว แต่ภาพถ่ายหลังซ่อมไม่ชัดเจน จึงถูกตีกลับให้ถ่ายใหม่",
     },
-
     rejectReason: "รูปหลังทำงานไม่ชัด ขอถ่ายใหม่",
     userId: 4,
     supervisorId: 4,
@@ -331,11 +342,16 @@ export const CardWork: CardWorkTypes[] = [
     },
 
     technicianReport: {
-      detail: "ล้างคอยล์เย็นเรียบร้อย เปลี่ยนไส้กรองใหม่",
-      materialsUsed: ["ไส้กรองอากาศ"],
+      detail: "ล้างคอยล์เย็นและเปลี่ยนไส้กรองอากาศ",
+      inspectionResults:
+        "ตรวจสอบคอยล์เย็นพบฝุ่นสะสมหนา ทำให้ลมออกอ่อนและแอร์ทำงานหนักเกินปกติ",
+      repairOperations:
+        "ล้างคอยล์ด้วยน้ำแรงดันต่ำ ทำความสะอาดใบพัด เปลี่ยนไส้กรองใหม่ และตรวจเช็คแรงดันน้ำยา",
+      materialsUsed: ["ไส้กรองอากาศ 1 ชุด"],
       cost: 150,
+      summaryOfOperatingResults:
+        "ความเย็นกลับมาปกติ ลมแรงขึ้น เสียงการทำงานลดลง แนะนำล้างทุก 3 เดือน",
     },
-
     rejectReason: null,
     userId: 8,
     supervisorId: 3,
@@ -400,11 +416,15 @@ export const CardWork: CardWorkTypes[] = [
     },
 
     technicianReport: {
-      detail: "ซ่อมบานพับแล้ว แต่ภาพหลังซ่อมไม่ครบทุกมุม",
-      materialsUsed: ["สกรูใหม่"],
+      detail: "บานประตูหลวม กลอนไม่ล็อก และมีเสียงดังเวลาเปิด/ปิด",
+      inspectionResults:
+        "ตรวจสอบพบว่าบานพับคลายตัวและสกรูบางจุดสึก ทำให้ประตูเอียง",
+      repairOperations: "ขันบานพับใหม่ เปลี่ยนสกรู และปรับระดับประตูให้ปิดสนิท",
+      materialsUsed: ["สกรูใหม่ 4 ตัว"],
       cost: 25,
+      summaryOfOperatingResults:
+        "ประตูเปิดปิดได้สมูทขึ้น แต่ภาพหลังซ่อมไม่ครบทุกมุม จึงถูกตีกลับ",
     },
-
     rejectReason: "รูปหลังซ่อมไม่ครบ ขอถ่ายเพิ่ม",
     userId: 10,
     supervisorId: 4,
@@ -631,7 +651,17 @@ export const CardWork: CardWorkTypes[] = [
       address: "ห้องควบคุมชั้น 1",
     },
 
-    technicianReport: null,
+    technicianReport: {
+      detail: "ทำความสะอาดคอยล์ร้อน/เย็น และตรวจเช็คสภาพการทำงานของแอร์ 2 ตัว",
+      inspectionResults:
+        "พบว่าคอยล์ร้อนมีเศษฝุ่นสะสมมาก ส่งผลให้คอมเพรสเซอร์ทำงานหนักและมีเสียงดัง",
+      repairOperations:
+        "ล้างคอยล์ร้อนด้วยปั๊มฉีดน้ำ ล้างคอยล์เย็น ตรวจแรงดันน้ำยา และขันจุดต่อสายไฟให้แน่น",
+      materialsUsed: ["น้ำยาล้างคอยล์", "ผ้าเช็ดทำความสะอาด"],
+      cost: 200,
+      summaryOfOperatingResults:
+        "แอร์ทำงานเงียบลง ความเย็นดีขึ้น แนะนำให้ล้างอย่างน้อย 3 เดือนครั้ง",
+    },
     rejectReason: null,
 
     userId: 1,
@@ -671,8 +701,7 @@ export const CardWork: CardWorkTypes[] = [
     },
 
     technicianReport: {
-      detail:
-        "ล้างแอร์ 2 ตัว ตรวจเช็คการทำงานแล้ว เย็นปกติ เสียงเงียบลง",
+      detail: "ล้างแอร์ 2 ตัว ตรวจเช็คการทำงานแล้ว เย็นปกติ เสียงเงียบลง",
       materialsUsed: ["น้ำยาล้างคอยล์", "ผ้าทำความสะอาด"],
       cost: 200,
     },
@@ -765,8 +794,16 @@ export const CardWork: CardWorkTypes[] = [
     loc: randomLocation(),
     logs: [
       { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T09:50" },
-      { by: "supervisor", action: "มอบหมายช่างระบบสื่อสาร", time: "2025-01-15T10:10" },
-      { by: "technician", action: "เริ่มตรวจสอบหน้างาน", time: "2025-01-15T10:40" },
+      {
+        by: "supervisor",
+        action: "มอบหมายช่างระบบสื่อสาร",
+        time: "2025-01-15T10:10",
+      },
+      {
+        by: "technician",
+        action: "เริ่มตรวจสอบหน้างาน",
+        time: "2025-01-15T10:40",
+      },
     ],
   },
 
@@ -796,11 +833,16 @@ export const CardWork: CardWorkTypes[] = [
     },
 
     technicianReport: {
-      detail: "เปลี่ยนล้อใหม่ 2 จุด ตรวจสอบแล้วใช้งานได้ปกติ",
+      detail: "ล้อเก้าอี้หลุดออกจากขาและใช้งานไม่ได้",
+      inspectionResults:
+        "ตรวจพบว่าขาล้อสึกและบูชยึดล้อเดิมหัก ทำให้ล้อไม่สามารถล็อกได้",
+      repairOperations:
+        "ถอดล้อเดิมออก ทำความสะอาดจุดยึด และติดตั้งล้อใหม่ พร้อมทดสอบการทรงตัว",
       materialsUsed: ["ล้อเก้าอี้สำรอง 2 ชิ้น"],
       cost: 80,
+      summaryOfOperatingResults:
+        "เก้าอี้กลับมาใช้งานได้ตามปกติ ไม่มีเสียงดังหรือโยก แนะนำตรวจเช็คทุก 6 เดือน",
     },
-
     rejectReason: null,
     userId: 2,
     supervisorId: 4,
@@ -809,11 +851,15 @@ export const CardWork: CardWorkTypes[] = [
     loc: randomLocation(),
     logs: [
       { by: "admin", action: "สร้างใบงาน", time: "2025-01-12T09:20" },
-      { by: "supervisor", action: "มอบหมายงานช่างทั่วไป", time: "2025-01-12T09:45" },
+      {
+        by: "supervisor",
+        action: "มอบหมายงานช่างทั่วไป",
+        time: "2025-01-12T09:45",
+      },
       { by: "technician", action: "ปิดงาน", time: "2025-01-12T14:10" },
     ],
   },
-{
+  {
     id: 21,
     JobId: "JOB_021",
     title: "เบรกเกอร์ย่อยตัดบ่อย ห้องปฏิบัติการคอมพิวเตอร์",
@@ -918,12 +964,16 @@ export const CardWork: CardWorkTypes[] = [
     },
 
     technicianReport: {
-      detail:
-        "ขันก๊อกน้ำใหม่และใช้เทปพันเกลียว แต่รูปถ่ายก่อนปิดงานถ่ายไม่ครบทุกมุม",
+      detail: "ก๊อกน้ำหมุนได้รอบฐาน และมีน้ำซึมบริเวณขอบอ่าง",
+      inspectionResults:
+        "พบว่าชุดเกลียวด้านล่างคลายตัวและเทปพันเกลียวเสื่อมสภาพ",
+      repairOperations:
+        "ถอดก๊อกออก ทำความสะอาดเกลียว ใส่เทปพันใหม่ และขันยึดให้แน่น",
       materialsUsed: ["เทปพันเกลียว"],
       cost: 15,
+      summaryOfOperatingResults:
+        "น้ำไม่ซึมแล้ว แต่ภาพก่อน-หลังซ่อมไม่ครบ จึงถูกตีกลับให้ถ่ายเพิ่ม",
     },
-
     rejectReason: "ขอรูปเพิ่มเติมมุมด้านข้างและด้านล่างอ่าง",
 
     userId: 3,
@@ -936,7 +986,11 @@ export const CardWork: CardWorkTypes[] = [
       { by: "admin", action: "สร้างใบงาน", time: "2025-01-14T10:40" },
       { by: "supervisor", action: "มอบหมายทีมประปา", time: "2025-01-14T11:00" },
       { by: "technician", action: "ปิดงานรอตรวจสอบ", time: "2025-01-15T09:30" },
-      { by: "supervisor", action: "ตีกลับขอรูปเพิ่ม", time: "2025-01-15T10:10" },
+      {
+        by: "supervisor",
+        action: "ตีกลับขอรูปเพิ่ม",
+        time: "2025-01-15T10:10",
+      },
     ],
   },
 
@@ -966,12 +1020,16 @@ export const CardWork: CardWorkTypes[] = [
     },
 
     technicianReport: {
-      detail:
-        "สร้าง VLAN แยกแขกและพนักงาน ทดสอบการเชื่อมต่อแล้วใช้งานได้ปกติ",
+      detail: "แยกเครือข่าย Guest และ Staff บนสวิตช์หลักและ Access Point",
+      inspectionResults:
+        "ตรวจพบว่าระบบเดิมใช้ VLAN เดียว ทำให้โหลดกระจุกและความเร็วไม่คงที่",
+      repairOperations:
+        "สร้าง VLAN ใหม่บนสวิตช์ ตั้งค่า trunk/Access port และกำหนด SSID แยกสำหรับ Guest/Staff พร้อมทดสอบความเร็ว",
       materialsUsed: [],
       cost: 0,
+      summaryOfOperatingResults:
+        "เครือข่ายทั้งสองส่วนทำงานแยกอิสระ ความเร็วดีขึ้น และมีความปลอดภัยเพิ่มขึ้น",
     },
-
     rejectReason: null,
 
     userId: 4,
@@ -983,7 +1041,11 @@ export const CardWork: CardWorkTypes[] = [
     logs: [
       { by: "admin", action: "สร้างใบงาน", time: "2025-01-10T09:00" },
       { by: "supervisor", action: "มอบหมายงาน", time: "2025-01-10T09:30" },
-      { by: "technician", action: "ตั้งค่าและทดสอบระบบ", time: "2025-01-11T14:00" },
+      {
+        by: "technician",
+        action: "ตั้งค่าและทดสอบระบบ",
+        time: "2025-01-11T14:00",
+      },
       { by: "technician", action: "ปิดงาน", time: "2025-01-11T15:20" },
     ],
   },
@@ -1064,7 +1126,11 @@ export const CardWork: CardWorkTypes[] = [
     logs: [
       { by: "admin", action: "สร้างใบงาน", time: "2025-01-17T09:00" },
       { by: "supervisor", action: "มอบหมายทีมไฟฟ้า", time: "2025-01-17T09:20" },
-      { by: "technician", action: "กำลังดำเนินการเปลี่ยนหลอด", time: "2025-01-17T10:10" },
+      {
+        by: "technician",
+        action: "กำลังดำเนินการเปลี่ยนหลอด",
+        time: "2025-01-17T10:10",
+      },
     ],
   },
 
@@ -1225,9 +1291,11 @@ export const CardWork: CardWorkTypes[] = [
     logs: [
       { by: "admin", action: "สร้างใบงาน", time: "2025-01-17T13:10" },
       { by: "supervisor", action: "มอบหมายงาน", time: "2025-01-17T13:30" },
-      { by: "technician", action: "กำลังปรับระดับประตู", time: "2025-01-17T14:00" },
+      {
+        by: "technician",
+        action: "กำลังปรับระดับประตู",
+        time: "2025-01-17T14:00",
+      },
     ],
   },
-
 ];
-
