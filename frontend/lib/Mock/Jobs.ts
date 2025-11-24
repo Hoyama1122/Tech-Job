@@ -24,7 +24,6 @@ export type CardWorkTypes = {
     | "ตีกลับ"
     | "รอการดำเนินงาน";
 
-<<<<<<< HEAD
   createdAt: string; 
   completedAt?: string; 
 
@@ -32,14 +31,6 @@ export type CardWorkTypes = {
   dateRange: {
     startAt: string | null; 
     endAt: string | null;  
-=======
-  createdAt: string;
-  completedAt?: string;
-
-  dateRange: {
-    startAt: string | null;
-    endAt: string | null;
->>>>>>> ec9c1f2fe2d40177c5587fb4e5c06842a4eb3ec9
   };
 
   sla?: string;
@@ -664,21 +655,7 @@ export const CardWork: CardWorkTypes[] = [
       address: "ห้องควบคุมชั้น 1",
     },
 
-<<<<<<< HEAD
     technicianReport: null,
-=======
-    technicianReport: {
-      detail: "ทำความสะอาดคอยล์ร้อน/เย็น และตรวจเช็คสภาพการทำงานของแอร์ 2 ตัว",
-      inspectionResults:
-        "พบว่าคอยล์ร้อนมีเศษฝุ่นสะสมมาก ส่งผลให้คอมเพรสเซอร์ทำงานหนักและมีเสียงดัง",
-      repairOperations:
-        "ล้างคอยล์ร้อนด้วยปั๊มฉีดน้ำ ล้างคอยล์เย็น ตรวจแรงดันน้ำยา และขันจุดต่อสายไฟให้แน่น",
-      materialsUsed: ["น้ำยาล้างคอยล์", "ผ้าเช็ดทำความสะอาด"],
-      cost: 200,
-      summaryOfOperatingResults:
-        "แอร์ทำงานเงียบลง ความเย็นดีขึ้น แนะนำให้ล้างอย่างน้อย 3 เดือนครั้ง",
-    },
->>>>>>> ec9c1f2fe2d40177c5587fb4e5c06842a4eb3ec9
     rejectReason: null,
 
     userId: 1,
@@ -877,11 +854,7 @@ export const CardWork: CardWorkTypes[] = [
       { by: "technician", action: "ปิดงาน", time: "2025-01-12T14:10" },
     ],
   },
-<<<<<<< HEAD
 {
-=======
-  {
->>>>>>> ec9c1f2fe2d40177c5587fb4e5c06842a4eb3ec9
     id: 21,
     JobId: "JOB_021",
     title: "เบรกเกอร์ย่อยตัดบ่อย ห้องปฏิบัติการคอมพิวเตอร์",
