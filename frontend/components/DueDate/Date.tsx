@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, DateRange } from "react-day-picker";
 import "react-day-picker/style.css";
 import { th } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
@@ -14,10 +14,17 @@ export default function DatePickerTH() {
 
   const formDate = watch("date");
 
-  const [selected, setSelected] = useState<Date | undefined>(
-    formDate ? new Date(formDate) : undefined
+  // state เก็บช่วงวันที่
+  const [range, setRange] = useState<DateRange | undefined>(
+    formDate
+      ? {
+          from: formDate.start ? new Date(formDate.start) : undefined,
+          to: formDate.end ? new Date(formDate.end) : undefined,
+        }
+      : undefined
   );
 
+  // ปิด popup เมื่อคลิกนอก
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -28,35 +35,50 @@ export default function DatePickerTH() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (day?: Date) => {
-    setSelected(day);
-    if (day) {
-      const formattedDate = day.toLocaleDateString("th-TH", {
+  // เมื่อเลือกช่วงวัน
+  const handleSelect = (selectedRange?: DateRange) => {
+    setRange(selectedRange);
+
+    if (selectedRange?.from && selectedRange?.to) {
+      const start = selectedRange.from.toLocaleDateString("th-TH", {
         day: "numeric",
         month: "long",
         year: "numeric",
       });
-      setValue("date", formattedDate);
-      setOpen(false);
+
+      const end = selectedRange.to.toLocaleDateString("th-TH", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+
+      setValue("date", {
+        start,
+        end,
+      });
     }
   };
 
-  const formatTH = (date?: Date) =>
-    date?.toLocaleDateString("th-TH", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-
-  const displayValue = selected ? formatTH(selected) : "เลือกวันที่ทำงาน";
+  // ข้อความโชว์ด้านบน
+  const displayValue =
+    range?.from && range?.to
+      ? `${range.from.toLocaleDateString("th-TH", {
+          day: "numeric",
+        })} - ${range.to.toLocaleDateString("th-TH", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })}`
+      : "เลือกช่วงวันที่ทำงาน";
 
   return (
     <div ref={ref} className="relative w-full max-w-md mt-4">
       <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
         <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-        วันที่และเวลา <span className="text-red-500">*</span>
+        ช่วงวันที่ <span className="text-red-500">*</span>
       </label>
 
+      {/* hidden form field */}
       <input type="hidden" {...register("date")} />
 
       <button
@@ -67,7 +89,7 @@ export default function DatePickerTH() {
       >
         <span
           className={`text-sm md:text-base font-medium ${
-            selected ? "text-gray-900" : "text-gray-500"
+            range?.from && range?.to ? "text-gray-900" : "text-gray-500"
           }`}
         >
           {displayValue}
@@ -76,18 +98,22 @@ export default function DatePickerTH() {
       </button>
 
       {open && (
-        <div className="absolute top-[-30px] z-20 mt-2 bg-white p-2 border border-gray-200 rounded-xl shadow-lg">
+        <div className="absolute top-[-30px] left-0 z-20 mt-2 bg-white p-3 border border-gray-200 rounded-xl shadow-lg">
           <DayPicker
-            mode="single"
-            selected={selected}
+            mode="range"
+            selected={range}
             onSelect={handleSelect}
             locale={th}
             classNames={{
               day_selected: "bg-primary text-white hover:bg-primary rounded-lg",
+              day_range_start: "bg-primary text-white rounded-l-lg",
+              day_range_end: "bg-primary text-white rounded-r-lg",
+              day_range_middle: "bg-primary/20",
               day_today: "border border-primary text-primary font-semibold",
               day: "w-8 h-8",
             }}
           />
+
           <div className="flex justify-end pt-2">
             <button
               type="button"
