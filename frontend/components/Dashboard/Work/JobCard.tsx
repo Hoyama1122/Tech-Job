@@ -71,35 +71,43 @@ export default function JobCard({ job }: Props) {
 
           {/* Metadata */}
         </div>
-          <div className="space-y-3 mb-2">
+        <div className="space-y-3 mb-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <User className="w-4 h-4" />
+              <span>หัวหน้างาน:</span>
+            </div>
+            <span className="font-medium text-gray-900">
+             
+              {typeof job.supervisorName === "object"
+                ? job.supervisorName.name
+                : job.supervisorName || "ไม่ระบุ"}
+                ({job.supervisorName.department})
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Clock className="w-4 h-4" />
+              <span>วันที่สร้าง:</span>
+            </div>
+            <span className="font-medium text-gray-900">
+              {formatThaiDateTime(job.createdAt)}
+            </span>
+          </div>
+
+          {job.technician && job.technician.length > 0 && (
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-gray-600">
                 <User className="w-4 h-4" />
                 <span>ช่างที่รับผิดชอบ:</span>
               </div>
               <span className="font-medium text-gray-900">
-                {job.technician?.length} คน
+                {job.technician.length} คน
               </span>
             </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Clock className="w-4 h-4" />
-                <span>วันที่สร้าง:</span>
-              </div>
-              <span className="font-medium text-gray-900">{job.date}</span>
-            </div>
-
-            {job.technician && job.technician.length > 0 && (
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <User className="w-4 h-4" />
-                  <span>ช่างที่รับผิดชอบ:</span>
-                </div>
-                <span className="font-medium text-gray-900">{job.technician.length} คน</span>
-              </div>
-            )}
-          </div>
+          )}
+        </div>
 
         {/* Action Button - อยู่ล่างสุดเสมอ */}
         <Link
