@@ -4,7 +4,7 @@ import { Clock, FileText, User } from "lucide-react";
 interface Props {
   stats: {
     "รอการตรวจสอบ": number;
-    "รอการมอบหมายงาน": number;
+    "รอการดำเนินงาน": number;
     "กำลังทำงาน": number;
     "สำเร็จ": number;
     "ตีกลับ": number;
@@ -22,7 +22,7 @@ const colorClasses = {
 
 const items = [
   { key: "รอการตรวจสอบ", label: "รอการตรวจสอบ", Icon: Clock, color: "blue" as const },
-  { key: "รอการมอบหมายงาน", label: "รอการมอบหมายงาน", Icon: Clock, color: "purple" as const }, // ใช้สีม่วงเพื่อแยกความต่าง
+  { key: "รอการดำเนินงาน", label: "รอการดำเนินงาน", Icon: Clock, color: "purple" as const }, 
   { key: "กำลังทำงาน", label: "กำลังทำงาน", Icon: Clock, color: "yellow" as const },
   { key: "สำเร็จ", label: "สำเร็จ", Icon: FileText, color: "emerald" as const },
   { key: "ตีกลับ", label: "ตีกลับ", Icon: User, color: "red" as const },
@@ -38,7 +38,7 @@ export default function StatsSummary({ stats }: Props) {
             <div className="flex items-center justify-between">
               <div>
                 <p className={`text-sm ${cls.text} font-medium`}>{label}</p>
-                <p className={`text-2xl font-bold ${cls.textDark}`}>{stats[key as keyof typeof stats]}</p>
+                <p className={`text-2xl font-bold ${cls.textDark}`}>{stats[key as keyof typeof stats] || 0}</p>
               </div>
               <div className={`p-2 ${cls.iconBg} rounded-lg`}>
                 <Icon className={`w-5 h-5 ${cls.icon}`} />

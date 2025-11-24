@@ -30,7 +30,7 @@ export default function SearchBar({ search, setSearch, filterStatus, setFilterSt
             className="px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
           >
             <option value="ทั้งหมด">สถานะ: ทั้งหมด</option>
-            <option value="รอการมอบหมายงาน">รอการมอบหมายงาน</option>
+            <option value="รอการดำเนินงาน">รอการดำเนินงาน</option>
             <option value="รอการตรวจสอบ">รอการตรวจสอบ</option>
             <option value="กำลังทำงาน">กำลังทำงาน</option>
             <option value="สำเร็จ">สำเร็จ</option>

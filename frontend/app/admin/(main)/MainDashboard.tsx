@@ -15,64 +15,68 @@ import {
   Filter,
 } from "lucide-react";
 import CardWork from "@/components/Dashboard/CardWork";
+import Activities from "@/components/Dashboard/Activities";
+import Summary from "@/components/Dashboard/Summary/Summary";
+import SummaryModal from "@/components/Dashboard/Summary/SummaryModal";
+import RenderModal from "@/components/Dashboard/Summary/RenderModal";
 
 const MainDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [card, setCard] = useState([]);
+  const [users, setUsers] = useState([]); // 👈 เพิ่ม state ของ users
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [detail, setDetail] = useState(null);
 
-  // โหลดข้อมูลจาก localStorage
+
   useEffect(() => {
-    const loadData = () => {
-      try {
-        setIsLoading(true);
-        const cardData = localStorage.getItem("CardWork");
-        const usersData = localStorage.getItem("Users");
+    try {
+      setIsLoading(true);
 
-        if (!cardData || !usersData) {
-          console.warn("ไม่พบข้อมูลใน localStorage");
-          setCard([]);
-          return;
-        }
+      const cardData = localStorage.getItem("CardWork");
+      const usersData = localStorage.getItem("Users");
 
-        const parsedCards = JSON.parse(cardData);
-        const parsedUsers = JSON.parse(usersData);
-
-        const joined = parsedCards.map((job) => {
-          const supervisor = parsedUsers.find(
-            (u) =>
-              u.role === "supervisor" &&
-              String(u.id) === String(job.supervisorId)
-          );
-
-          const technicians = parsedUsers.filter(
-            (u) =>
-              u.role === "technician" &&
-              Array.isArray(job.technicianId) &&
-              job.technicianId.some((tid) => String(tid) === String(u.id))
-          );
-
-          return {
-            ...job,
-            supervisor: supervisor || null,
-            technicians: technicians || [],
-          };
-        });
-
-        setCard(joined);
-      } catch (error) {
-        console.error("โหลดข้อมูลล้มเหลว:", error);
-      } finally {
-        setIsLoading(false);
+      if (!cardData || !usersData) {
+        console.warn("ไม่พบข้อมูลใน localStorage");
+        setCard([]);
+        setUsers([]);
+        return;
       }
-    };
 
-    loadData();
+      const parsedCards = JSON.parse(cardData);
+      const parsedUsers = JSON.parse(usersData);
+
+      setUsers(parsedUsers); // 👈 เซ็ต users
+
+      const joined = parsedCards.map((job) => {
+        const supervisor = parsedUsers.find(
+          (u) =>
+            u.role === "supervisor" && String(u.id) === String(job.supervisorId)
+        );
+
+        const technicians = parsedUsers.filter(
+          (u) =>
+            u.role === "technician" &&
+            Array.isArray(job.technicianId) &&
+            job.technicianId.some((tid) => String(tid) === String(u.id))
+        );
+
+        return {
+          ...job,
+          supervisor: supervisor || null,
+          technicians: technicians || [],
+        };
+      });
+
+      setCard(joined);
+    } catch (error) {
+      console.error("โหลดข้อมูลล้มเหลว:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // กรองข้อมูลตามสถานะและคำค้นหา
   const filteredCard = useMemo(() => {
     return card.filter((job) => {
       const matchesStatus =
@@ -93,46 +97,46 @@ const MainDashboard = () => {
     });
   }, [card, searchTerm, statusFilter]);
 
-  // คำนวณสถิติ (เปลี่ยนเป็นข้อมูลที่กรองแล้วเมื่อมีการกรอง)
   const summary = useMemo(() => {
+    const technicians = users.filter((u) => u.role === "technician").length;
+    const supervisors = users.filter((u) => u.role === "supervisor").length;
+
+    const waitingJobs = card.filter((j) => j.status === "รอการตรวจสอบ").length;
+
     const baseStats = [
       {
+        type: "technicians",
         title: "จำนวนช่างทั้งหมด",
-        value: 132,
+        value: technicians,
         icon: <Users className="w-8 h-8" />,
-        bg: "bg-blue-50",
-        iconColor: "text-blue-600",
+        bg: "bg-blue-200",
+        iconColor: "text-blue-700",
       },
       {
+        type: "supervisors",
         title: "จำนวนหัวหน้าทีมทั้งหมด",
-        value: 28,
+        value: supervisors,
         icon: <UserCog className="w-8 h-8" />,
-        bg: "bg-amber-50",
-        iconColor: "text-amber-600",
-      },
-      {
-        title: "จำนวนทีมทั้งหมด",
-        value: 48,
-        icon: <Users2 className="w-8 h-8" />,
-        bg: "bg-gray-50",
-        iconColor: "text-gray-700",
+        bg: "bg-purple-100",
+        iconColor: "text-purple-600",
       },
     ];
 
-    // ถ้ามีการกรอง ให้แสดงจำนวนที่กรอง
     if (searchTerm || statusFilter !== "all") {
       return [
         ...baseStats,
         {
-          title: "จำนวนใบงาน (กรองแล้ว)",
-          value: filteredCard.length,
+          type: "jobs_all",
+          title: "จำนวนใบงานทั้งหมด",
+          value: card.length,
           icon: <ClipboardList className="w-8 h-8" />,
           bg: "bg-emerald-50",
           iconColor: "text-emerald-600",
         },
         {
-          title: "ใบงานที่รอดำเนินการ",
-          value: filteredCard.filter((j) => j.status === "รอการตรวจสอบ").length,
+          type: "jobs_waiting",
+          title: "ใบงานที่รอการตรวจสอบ",
+          value: waitingJobs,
           icon: <Clock className="w-8 h-8" />,
           bg: "bg-orange-50",
           iconColor: "text-orange-600",
@@ -140,25 +144,26 @@ const MainDashboard = () => {
       ];
     }
 
-    // ถ้าไม่มีการกรอง แสดงทั้งหมด
     return [
       ...baseStats,
       {
         title: "จำนวนใบงานทั้งหมด",
+        type: "jobs_all",
         value: card.length,
         icon: <ClipboardList className="w-8 h-8" />,
         bg: "bg-emerald-50",
         iconColor: "text-emerald-600",
       },
       {
-        title: "ใบงานที่รอดำเนินการ",
-        value: card.filter((j) => j.status === "รอการตรวจสอบ").length,
+        type: "jobs_waiting",
+        title: "ใบงานที่รอการตรวจสอบ",
+        value: waitingJobs,
         icon: <Clock className="w-8 h-8" />,
         bg: "bg-orange-50",
         iconColor: "text-orange-600",
       },
     ];
-  }, [card, filteredCard, searchTerm, statusFilter]);
+  }, [users, card, filteredCard, searchTerm, statusFilter]);
 
   // Pagination
   const itemsPerPage = 6;
@@ -202,7 +207,7 @@ const MainDashboard = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="px-4 pt-4 pb-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <div>
@@ -219,42 +224,23 @@ const MainDashboard = () => {
             <CirclePlus className="w-5 h-5" />
             สร้างงานใหม่
           </Link>
-
-          <button className="flex items-center gap-2 bg-primary/90 hover:bg-primary-hover transition-all duration-200 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg hover:-translate-y-0.5">
-            <Share strokeWidth={2.5} className="w-5 h-5" />
-            Export PDF
-          </button>
         </div>
       </div>
 
-
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
-        {summary.map((item, index) => (
-          <div
-            key={`summary-${index}`}
-            className={`${item.bg} ${item.iconColor} rounded-xl p-5 flex items-center gap-4 shadow-md hover:shadow-lg transition-all duration-300  cursor-pointer border border-transparent hover:border-primary/20`}
-          >
-            <div className="p-3 bg-white/40 rounded-lg backdrop-blur-sm">
-              {item.icon}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-text-secondary">
-                {item.title}
-              </p>
-              <p className="text-2xl font-bold text-primary mt-1">
-                {item.value.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-
+      <Summary summary={summary} onSelect={(item) => setDetail(item)} />
+    
+      <RenderModal
+        detail={detail}
+        users={users}
+        card={card}
+        onClose={() => setDetail(null)}
+      />
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-4">
         {/*  */}
-        <div>
-          <div className="bg-white/90 rounded-t-lg shadow-md p-4 ">
+        <div className="">
+          <div className="bg-white/90 rounded-t-lg shadow-md px-4 pt-4">
             <h1 className="text-base md:text-lg font-bold text-text  gap-2 flex items-center mb-2">
               ใบงานล่าสุด <File size={20} />
             </h1>
@@ -267,7 +253,7 @@ const MainDashboard = () => {
                   placeholder="ค้นหาด้วย หมายเลขงาน, ชื่องาน, ชื่อช่าง, หรือผู้รับผิดชอบ..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 border text-sm border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
               </div>
 
@@ -290,7 +276,7 @@ const MainDashboard = () => {
             </div>
 
             {/* Active Filters Info */}
-            <div className="mt-2 text-sm text-gray-600">
+            <div className="mt-2 text-sm text-gray-600 pb-4">
               {searchTerm && <span> คำค้น: "{searchTerm}" </span>}
               {statusFilter !== "all" && <span> สถานะ: {statusFilter}</span>}
               {filteredCard.length > 0 && (
@@ -312,14 +298,7 @@ const MainDashboard = () => {
             )}
           </div>
         </div>
-
-        <div className="flex flex-col space-y-4">
-          <div className="bg-white rounded-lg shadow-md p-4 h-full">
-            <h3 className="font-bold mb-2">กิจกรรมล่าสุด</h3>
-            <p className="text-sm text-gray-500">ยังไม่มีกิจกรรม</p>
-          </div>
-          
-        </div>
+        <Activities />
       </div>
     </div>
   );

@@ -12,14 +12,12 @@ export default function DatePickerTH() {
   const ref = useRef<HTMLDivElement>(null);
   const { setValue, register, watch } = useFormContext();
 
-  // อ่านค่าจากฟอร์ม (ถ้ามีค่าเก่า)
   const formDate = watch("date");
 
   const [selected, setSelected] = useState<Date | undefined>(
     formDate ? new Date(formDate) : undefined
   );
 
-  // ปิด popup เมื่อคลิกข้างนอก
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -30,19 +28,18 @@ export default function DatePickerTH() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // เมื่อเลือกวัน
   const handleSelect = (day?: Date) => {
-  setSelected(day);
-  if (day) {
-    const formattedDate = day.toLocaleDateString("th-TH", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-    setValue("date", formattedDate);
-    setOpen(false);
-  }
-};
+    setSelected(day);
+    if (day) {
+      const formattedDate = day.toLocaleDateString("th-TH", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      setValue("date", formattedDate);
+      setOpen(false);
+    }
+  };
 
   const formatTH = (date?: Date) =>
     date?.toLocaleDateString("th-TH", {
@@ -55,14 +52,13 @@ export default function DatePickerTH() {
 
   return (
     <div ref={ref} className="relative w-full max-w-md mt-4">
-      <label className="block text-lg font-medium text-gray-700 mb-1">
-        วันที่ทำงาน <span className="text-red-500">*</span>
+      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+        <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+        วันที่และเวลา <span className="text-red-500">*</span>
       </label>
 
-  
       <input type="hidden" {...register("date")} />
 
-    
       <button
         type="button"
         onClick={() => setOpen(!open)}

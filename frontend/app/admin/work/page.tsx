@@ -1,4 +1,5 @@
-import React from 'react'
+"use client"
+import React, { useEffect } from 'react'
 import Work from './AllJobs';
 export const metadata = {
   title: "ใบงานทั้งหมด",
@@ -11,7 +12,6 @@ const page = () => {
   )
 }
 
-<<<<<<< HEAD
 export default function Work() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [search, setSearch] = useState("");
@@ -151,6 +151,3 @@ console.log(jobs);
     </div>
   );
 }
-=======
-export default page
->>>>>>> main

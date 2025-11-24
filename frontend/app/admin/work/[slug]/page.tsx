@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { notFound, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -12,8 +13,6 @@ import DescriptionCard from "@/components/Dashboard/Work/Slug/DescriptionCard";
 import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
-
-
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -74,6 +73,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   );
 };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [job, setJob] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -127,14 +127,14 @@ export default function WorkDetailPage({ params }: PageProps) {
     <div className="p-4">
       <Header job={job} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
+        <div className="space-y-4">
           <BasicInfoCard job={job} />
           <DescriptionCard job={job} />
           <EvidenceCard job={job} />
         </div>
-
         <Sidebar job={job} />
+        
       </div>
     </div>
   );

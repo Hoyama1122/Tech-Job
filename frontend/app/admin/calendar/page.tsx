@@ -58,7 +58,7 @@ const Calendar = () => {
           events={filteredEvents}
           height="auto"
           eventDisplay="block"
-          eventColor="#2563eb" // ปรับสี event ได้
+          eventColor="#2563eb" 
         />
       </div>
     </div>

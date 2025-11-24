@@ -27,8 +27,8 @@ const getStatusStyle = (status: string) => {
       return "bg-red-100 text-red-700 border-red-200";
     case "รอการตรวจสอบ":
       return "bg-blue-100 text-blue-700 border-blue-200";
-    case "รอการมอบหมายงาน":
-      return "bg-primary/80 text-white border-primary";
+    case "รอการดำเนินงาน":
+      return "bg-purple-100 text-purple-700 border-purple-200";
     default:
       return "bg-gray-100 text-gray-700 border-gray-200";
   }
@@ -36,7 +36,7 @@ const getStatusStyle = (status: string) => {
 
 export default function JobCard({ job }: Props) {
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-gray-200 overflow-hidden group flex flex-col h-full">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg  border border-gray-200 overflow-hidden group flex flex-col h-full">
       {/* Card Header */}
       <div className="bg-gradient-to-r from-primary/5 to-accent/10 p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const {  setCardWork } = AppLoader();
-  const { role, supervisorId } = useAuthStore();
+
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {

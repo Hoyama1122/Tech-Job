@@ -10,7 +10,7 @@ import { Users } from "@/lib/Mock/UserMock";
 export default function DropdownSupervisor() {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [supervisors, setSupervisors] = useState<any[]>([]); // 👈 state สำหรับเก็บหัวหน้างาน
+  const [supervisors, setSupervisors] = useState<any[]>([]);
   const ref = useRef<HTMLDivElement>(null);
   const { setValue, register } = useFormContext();
 
@@ -37,14 +37,14 @@ export default function DropdownSupervisor() {
 
   return (
     <div ref={ref} className="relative w-full max-w-md mt-4">
-      <label className="block text-lg font-medium text-text mb-1">
-        หัวหน้างานที่รับผิดชอบ <span className="text-red-500">*</span>
+      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+        <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+        หัวหน้างาน <span className="text-red-500">*</span>
       </label>
 
       {/* Hidden input for react-hook-form */}
       <input type="hidden" {...register("supervisorId")} />
 
-      {/* ปุ่มหลัก */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         type="button"
@@ -69,7 +69,9 @@ export default function DropdownSupervisor() {
             )}
             <div className="flex flex-col text-left">
               <span className="font-medium text-gray-800">{selected.name}</span>
-              <span className="text-xs text-gray-500">{selected.department}</span>
+              <span className="text-xs text-gray-500">
+                {selected.department}
+              </span>
             </div>
           </div>
         ) : (

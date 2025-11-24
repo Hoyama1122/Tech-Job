@@ -10,8 +10,6 @@ import LoadingSkeleton from "@/components/Dashboard/Work/LoadingSkeleton";
 import EmptyState from "@/components/Dashboard/Work/EmptyState";
 import JobCard from "@/components/Dashboard/Work/JobCard";
 
-
-
 interface Job {
   id: string;
   JobId: string;
@@ -28,6 +26,11 @@ export default function Work() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const jobsPerPage = 12;
+
+  const startIndex = (currentPage - 1) * jobsPerPage;
+  const endIndex = startIndex + jobsPerPage;
 
   useEffect(() => {
     setIsLoading(true);
@@ -71,7 +74,6 @@ export default function Work() {
       setTimeout(() => setIsLoading(false), 400);
     }
   }, [setJobs]);
-  console.log(jobs);
 
   const filteredJobs = useMemo(() => {
     if (!jobs.length) return [];
@@ -94,15 +96,15 @@ export default function Work() {
       return matchSearch && matchStatus;
     });
   }, [jobs, search, filterStatus]);
+  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+  const paginatedJobs = filteredJobs.slice(startIndex, endIndex);
 
-  // ✅ สำคัญ: เพิ่ม "รอการมอบหมายงาน" ใน stats
   const stats = useMemo(
     () => ({
       รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
         .length,
-      รอการมอบหมายงาน: jobs.filter(
-        (j) => j.status?.trim() === "รอการมอบหมายงาน"
-      ).length,
+      รอการดำเนินงาน: jobs.filter((j) => j.status?.trim() === "รอการดำเนินงาน")
+        .length,
       กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
       สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
       ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
@@ -147,19 +149,34 @@ export default function Work() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
         {isLoading ? (
           <LoadingSkeleton count={6} />
-        ) : filteredJobs.length === 0 ? (
+        ) : paginatedJobs.length === 0 ? (
           <EmptyState />
         ) : (
-          filteredJobs.map((job) => <JobCard key={job.JobId} job={job} />)
+          paginatedJobs.map((job) => <JobCard key={job.JobId} job={job} />)
         )}
       </div>
-
-      {/* Results Count */}
-      {!isLoading && filteredJobs.length > 0 && (
-        <div className="mt-6 text-center text-sm text-gray-500">
-          กำลังแสดง {filteredJobs.length} จาก {jobs.length} ใบงาน
-        </div>
-      )}
+      {/*  */}
+      <div className="flex justify-center items-center gap-2 mt-4">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-primary cursor-pointer hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors text-white"
+        >
+          ก่อนหน้า
+        </button>
+        <span className="text-sm text-gray-600">
+          หน้า {currentPage} / {totalPages || 1}
+        </span>
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          disabled={currentPage === totalPages || totalPages === 0}
+          className="px-4 py-2 bg-primary cursor-pointer hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors text-white"
+        >
+          ถัดไป
+        </button>
+      </div>
+     
+      
     </div>
   );
 }
