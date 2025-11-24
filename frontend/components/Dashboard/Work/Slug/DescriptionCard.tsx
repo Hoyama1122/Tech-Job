@@ -1,32 +1,52 @@
+import { FileText } from "lucide-react";
+
 export default function DescriptionCard({ job }: any) {
   if (!job.description) return null;
 
+  const reportSections = [
+    { title: "รายละเอียดอาการ", key: "detail", bg: "bg-blue-50", border: "border-blue-100" },
+    { title: "ผลการตรวจสอบ", key: "inspectionResults", bg: "bg-green-50", border: "border-green-100" },
+    { title: "การดำเนินการซ่อม", key: "repairOperations", bg: "bg-yellow-50", border: "border-yellow-100" },
+    { title: "สรุปผลการดำเนินงาน", key: "summaryOfOperatingResults", bg: "bg-purple-50", border: "border-purple-100" },
+  ];
+
   return (
     <div className="bg-white rounded-xl shadow-md p-6">
-      <div className="flex flex-col">
-        <div>
-          <h2 className="text-xl font-bold mb-4">รายละเอียดงาน</h2>
-          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed px-2">
+      {/* Job Description */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <FileText className="w-5 h-5 text-blue-600" />
+          รายละเอียดงาน
+        </h2>
+        <div className="">
+          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
             {job.description}
           </p>
         </div>
-        {/* From Technician */}
-        {job.technicianReport ? (
-          <div className="mt-6">
-            <h2 className="text-xl font-bold mb-4">รายละเอียดจากช่างเทคนิค</h2>
-            <div className="  leading-relaxed text-gray-700 whitespace-pre-wrap px-2">
-              {job.technicianReport?.detail}
-            </div>
-          </div>
-        ) : (
-          <div className="mt-6">
-            <h2 className="text-xl font-bold mb-2">รายละเอียดจากช่างเทคนิค</h2>
-            <p className="text-gray-500 italic">
-              ยังไม่มีรายละเอียดจากช่างเทคนิค
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* Technician Report */}
+      {job.technicianReport ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+          {reportSections.map((section) => (
+            <div 
+              key={section.key}
+              className={`${section.bg} ${section.border} rounded-lg p-5 border hover:shadow-md transition-shadow`}
+            >
+              <h3 className="font-semibold text-gray-900 mb-3 text-base uppercase tracking-wide">
+                {section.title}
+              </h3>
+              <p className="text-gray-700 text-sm whitespace-pre-wrap leading-relaxed min-h-[60px]">
+                {job.technicianReport?.[section.key] || "-"}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+          <p className="text-gray-500 italic">ยังไม่มีรายละเอียดจากช่างเทคนิค</p>
+        </div>
+      )}
     </div>
   );
 }
