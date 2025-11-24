@@ -11,6 +11,7 @@ import {
   ArrowBigRight,
   LogOut,
   CirclePower,
+  Menu,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import ModalSerach from "../Modal/ModalSerach";
@@ -68,7 +69,7 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
         onClick={() => setIsOpen(true)}
         className="lg:hidden p-3 text-white cursor-pointer bg-primary fixed top-4 left-0 z-50 rounded-r-lg hover:scale-105 transition-transform shadow-lg"
       >
-        <ArrowBigRight size={24} className="text-white" />
+        <Menu size={24} className="text-white" />
       </button>
 
       {/* Overlay for Mobile */}

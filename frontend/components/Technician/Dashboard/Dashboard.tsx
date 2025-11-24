@@ -1,9 +1,12 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
+import { Briefcase, CheckCircle2, ClipboardClock, Clock4 } from "lucide-react";
+import DateTime from "./DateTime";
+import FilterJobs from "./Filter";
 import { useRouter } from "next/navigation";
-import { CardWork } from "lib/Mock/Jobs";
-import Link from "next/link";
+import formatThaiDateTime from "@/lib/Format/DateFormatThai";
+import Jobs from "./Jobs";
 
 const Dashboard = () => {
   const [technicianId, setTechnicianId] = useState<number | null>(null);
@@ -12,16 +15,13 @@ const Dashboard = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [time, setTime] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"today" | "week">("today");
-
-
+  const router = useRouter();
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("auth-storage");
       if (!saved) return;
-
       const parsed = JSON.parse(saved);
-
       if (parsed?.state) {
         setTechnicianId(parsed.state);
       }
@@ -48,13 +48,6 @@ const Dashboard = () => {
 
     setMyJobs(my);
   }, [technicianId, jobs]);
- 
-  
-  const handleTabClick = (tab: "today" | "week") => {
-    setActiveTab(tab);
-  };
-
-  const router = useRouter();
 
   useEffect(() => {
     const updateTime = () => {
@@ -72,166 +65,104 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const goToOpenwork = () => {
-    router.push("/technician/Openwork");
-  };
-
-  const goToProfile = () => {
-    router.push("/technician/Profile");
-  };
   console.log(technicianId);
-  
+
+  const todayJobs = myJobs.filter((job: any) => {
+    const jobDate = new Date(job.createdAt).toDateString();
+    const today = new Date().toDateString();
+    return jobDate === today;
+  });
+  const displayJobs = activeTab === "today" ? todayJobs : myJobs;
   return (
-    <div className="">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-        <div className="p-6 bg-gray-300 rounded-lg">
-          <p className="text-3xl">{technicianId?.name}</p>
-          <p className="text-m">หรัสพนักงาน: {technicianId?.employeeCode}</p>
-        </div>
-
-        <div className="p-6 bg-gray-300 rounded-lg flex justify-between">
-          <div>
-            <p className="text-m">
-              {new Date().toLocaleDateString("th-TH", { weekday: "long" })}
-            </p>
-            <p className="text-3xl">
-              {new Date().toLocaleDateString("th-TH", {
-                day: "2-digit",
-                month: "long",
-              })}
-            </p>
-          </div>
-          <div className="flex flex-col items-center">
-            <p className="text-m">เวลา</p>
-            <p className="text-3xl">{time}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 justify-between flex items-center">
-        <div className="inline-flex rounded-md shadow-xs" role="group">
-          <button
-            type="button"
-            onClick={() => setActiveTab("today")}
-            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-s-lg
-      ${
-        activeTab === "today"
-          ? "bg-blue-600 text-white"
-          : "bg-white text-gray-900 opacity-50"
-      }
-    `}
-          >
-            งานวันนี้
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("week")}
-            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-e-lg
-      ${
-        activeTab === "week"
-          ? "bg-blue-600 text-white"
-          : "bg-white text-gray-900 opacity-50"
-      }
-    `}
-          >
-            งานทั้งหมด
-          </button>
-        </div>
-        <div className="relative">
-          <button
-            onClick={() => setShowFilter(!showFilter)}
-            className="px-3 py-2 bg-gray-200 rounded-lg"
-          >
-            Filter
-          </button>
-
-          {showFilter && (
-            <div className="absolute mt-2 right-0 bg-white border rounded-lg shadow p-3 w-40">
-              <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">
-                งานวันนี้
-              </p>
-              <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">
-                งานทั้งหมด
-              </p>
-              <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">
-                งานรออนุมัติ
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-4 space-y-4">
-        {myJobs.map((job) => (
-          <div
-            key={job.id}
-            className="bg-gray-300 rounded-lg p-3 flex justify-between"
-          >
+    <div className="max-w-6xl mx-auto p-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 ">
+        {/* Header */}
+        {/* <div className="bg-white rounded-2xl p-6 shadow-lg">
+          <div className="flex items-start justify-between">
             <div>
-              <span className="text-xl">ลูกค้า : {job.customer?.name}</span>
-              <p>{job.description}</p>
-              <p>ทีม: {job.technicianId.join(", ")}</p>
-              <p>
-                {new Date(job.createdAt).toLocaleDateString("th-TH", {
-                  weekday: "long",
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
+              <h2 className="text-xl font-bold">คุณ{technicianId?.name}</h2>
+              <p className=" text-sm">รหัสพนักงาน: {technicianId?.employeeCode}</p>
             </div>
-
-            <div className="flex flex-col justify-between text-right">
-              <p className="text-gray-500 text-sm">เลขที่ใบงาน : {job.JobId}</p>
-
-              <Link
-                href={`/technician/${job.JobId}`}
-                className="cursor-pointer hover:opacity-75 transition-opacity"
-              >
-                <div className="flex justify-end mr-1"></div>
-                {job.status === "กำลังทำงาน" && (
-                  <div className="cursor-pointer text-black bg-yellow-400 rounded-2xl p-1">
-                    กำลังทำงาน
-                  </div>
-                )}
-
-                {job.status === "สำเร็จ" && (
-                  <div className="text-white bg-green-600 rounded-2xl p-1">
-                    เสร็จสิ้นงาน
-                  </div>
-                )}
-
-                {job.status === "รอการดำเนินงาน" && (
-                  <div className="cursor-pointer hover:opacity-75 transition-opacity">
-                    <div className="flex justify-end mr-1">
-                      <svg
-                        className="w-6 h-6 text-red-800"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                    </div>
-                    <p>map</p>
-                  </div>
-                )}
-              </Link>
+            <div className="bg-white/20 rounded-full p-3">
+              <User className="w-6 h-6" />
             </div>
           </div>
-        ))}
+        </div> */}
+        {/* Date */}
+        <DateTime time={time} />
+
+        {/* Summary */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+          {/* Today */}
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="bg-yellow-100 rounded-lg p-2">
+                <Clock4 className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {todayJobs.length}
+                </p>
+                <p className="text-xs text-gray-500">งานวันนี้</p>
+              </div>
+            </div>
+          </div>
+          {/* All Jobs */}
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 rounded-lg p-2">
+                <Briefcase className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {myJobs.length}
+                </p>
+                <p className="text-xs text-gray-500">งานทั้งหมด</p>
+              </div>
+            </div>
+          </div>
+          {/*  Success */}
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-100 rounded-lg p-2">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {myJobs.filter((j: any) => j.status === "สำเร็จ").length}
+                </p>
+                <p className="text-xs text-gray-500">เสร็จสิ้น</p>
+              </div>
+            </div>
+          </div>
+          {/* Pending */}
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-100 rounded-lg p-2">
+                <ClipboardClock className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {
+                    myJobs.filter((j: any) => j.status === "รอการตรวจสอบ")
+                      .length
+                  }
+                </p>
+                <p className="text-xs text-gray-500">รอการตรวจสอบ</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Tabs and Filter */}
+        <FilterJobs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          showFilter={showFilter}
+          setShowFilter={setShowFilter}
+        />
       </div>
+      {/* Jobs List */}
+      <Jobs displayJobs={displayJobs} activeTab={activeTab} />
     </div>
   );
 };

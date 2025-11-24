@@ -12,7 +12,8 @@ import {
   Layers,
 } from "lucide-react";
 import Link from "next/link";
-import MapLocation from "./MapLocation";
+import MapLocation from "../../../Technician/slug/MapLocation";
+import MapForAdmin from "./MapForAdmin";
 const departmentIcons: Record<string, React.ReactNode> = {
   ไฟฟ้า: <Zap size={14} />,
   แอร์: <Snowflake size={14} />,
@@ -120,7 +121,7 @@ export default function Sidebar({ job }: any) {
       <div className="bg-white rounded-xl shadow-md p-4">
           {/* Map */}
            <div className="w-full h-64 bg-gray-200 flex items-center justify-center text-gray-500">
-             <MapLocation lat={job.loc.lat} lng={job.loc.lng} />
+            <MapForAdmin lat={job.loc.lat} lng={job.loc.lng} />
           </div>
         </div>
     </div>

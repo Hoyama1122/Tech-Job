@@ -38,7 +38,6 @@ export default function BasicInfoCard({ job }: any) {
           <InfoRow label="วันที่เริ่มงาน" value={DateFormat(job.dateRange.startAt) || "-"} />
           <InfoRow label="วันที่สิ้นสุด" value={DateFormat(job.dateRange.endAt) || "-"} />
           <InfoRow label="เสร็จสิ้น" value={formatThaiDateTime(job.completedAt) || "-"} />
-       
           {job.customer?.address && <InfoRow label="สถานที่" value={job.customer?.address} />}
         </div>
       </div>
