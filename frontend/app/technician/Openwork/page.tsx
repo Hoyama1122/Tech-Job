@@ -19,7 +19,7 @@ export const Openwork = () => {
   const [time, setTime] = useState("");
 
   // ฟังก์ชันดึงพิกัดปัจจุบัน
-  const getCurrentLocation = () => {
+  const getCurrentLocation = () => { 
     if (!navigator.geolocation) {
       alert("เบราว์เซอร์ของคุณไม่รองรับการดึงตำแหน่ง");
       return;

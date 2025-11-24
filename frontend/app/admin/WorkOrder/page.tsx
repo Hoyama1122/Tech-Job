@@ -11,9 +11,8 @@ const Page = () => {
     const input = pdfRef.current;
     if (!input) return;
 
-    // แปลง DOM เป็นภาพ
     const canvas = await html2canvas(input, {
-      scale: 2,
+      scale: 1.2,
       backgroundColor: "#ffffff",
       useCORS: true,
     });

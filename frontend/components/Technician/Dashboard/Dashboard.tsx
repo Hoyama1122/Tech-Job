@@ -1,22 +1,57 @@
 "use client";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { CardWork } from "lib/Mock/Jobs";
+import Link from "next/link";
 
 const Dashboard = () => {
-
+  const [technicianId, setTechnicianId] = useState<number | null>(null);
+  const [myJobs, setMyJobs] = useState([]);
+  const [jobs, setjobs] = useState([]);
   const [jobStatus, setJobStatus] = useState("none");
+  const [showFilter, setShowFilter] = useState(false);
+  const [time, setTime] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"today" | "week">("today");
+
   useEffect(() => {
     const saved = localStorage.getItem("jobStatus");
     if (saved) setJobStatus(saved);
   }, []);
 
-  const [showFilter, setShowFilter] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("auth-storage");
+      if (!saved) return;
 
-  const [time, setTime] = useState<string>("");
+      const parsed = JSON.parse(saved);
 
-  const [activeTab, setActiveTab] = useState<"today" | "week">("today");
+      if (parsed?.state?.userId) {
+        setTechnicianId(Number(parsed.state.userId));
+      }
+    } catch (err) {
+      console.error("โหลด user จาก auth-storage fail", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const cardData = localStorage.getItem("CardWork");
+    if (!cardData) return;
+
+    const parsed = JSON.parse(cardData);
+    setjobs(parsed);
+  }, []);
+
+  // ดึงงานตาม technicianId
+  useEffect(() => {
+    if (technicianId == null) return;
+
+    const my = jobs.filter((job: any) =>
+      job.technicianId?.includes(technicianId)
+    );
+
+    setMyJobs(my);
+  }, [technicianId, jobs]);
 
   const handleTabClick = (tab: "today" | "week") => {
     setActiveTab(tab);
@@ -47,12 +82,6 @@ const Dashboard = () => {
   const goToProfile = () => {
     router.push("/technician/Profile");
   };
-
-  const technicianId = 5; // เปลี่ยนตามจริง
-
-  const myJobs = CardWork.filter((job) =>
-    job.technicianId.includes(technicianId)
-  );
 
   return (
     <div className="">
@@ -157,31 +186,25 @@ const Dashboard = () => {
             <div className="flex flex-col justify-between text-right">
               <p className="text-gray-500 text-sm">เลขที่ใบงาน : {job.JobId}</p>
 
-              <div
+              <Link
+                href={`/technician/${job.JobId}`}
                 className="cursor-pointer hover:opacity-75 transition-opacity"
-                onClick={goToOpenwork}
               >
                 <div className="flex justify-end mr-1"></div>
-                {jobStatus === "working" && (
-                  <div
-                    className="cursor-pointer text-black bg-yellow-400 rounded-2xl p-1"
-                    onClick={goToOpenwork}
-                  >
-                    กำลังดำเนินการ
+                {job.status === "กำลังทำงาน" && (
+                  <div className="cursor-pointer text-black bg-yellow-400 rounded-2xl p-1">
+                    กำลังทำงาน
                   </div>
                 )}
 
-                {jobStatus === "done" && (
+                {job.status === "สำเร็จ" && (
                   <div className="text-white bg-green-600 rounded-2xl p-1">
                     เสร็จสิ้นงาน
                   </div>
                 )}
 
-                {jobStatus === "none" && (
-                  <div
-                    className="cursor-pointer hover:opacity-75 transition-opacity"
-                    onClick={goToOpenwork}
-                  >
+                {job.status === "รอการดำเนินงาน" && (
+                  <div className="cursor-pointer hover:opacity-75 transition-opacity">
                     <div className="flex justify-end mr-1">
                       <svg
                         className="w-6 h-6 text-red-800"
@@ -205,10 +228,8 @@ const Dashboard = () => {
                     </div>
                     <p>map</p>
                   </div>
-                  
                 )}
-                
-              </div>
+              </Link>
             </div>
           </div>
         ))}
