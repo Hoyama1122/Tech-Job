@@ -42,7 +42,7 @@ export const navLinkTechnician: NavItem[] = [
 export const navLinkSupervisor: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
   { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck }, 
-  { name: "มอบหมายงาน", path: "/assign", icon: UserCog }, 
+  // { name: "มอบหมายงาน", path: "/assign", icon: UserCog }, 
   { name: "ตรวจงาน", path: "/review", icon: Wrench }, 
   { name: "ทีมของฉัน", path: "/team", icon: Users2 },
   // { name: "สถิติทีม", path: "/report", icon: BarChart3 }, 

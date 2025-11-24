@@ -46,9 +46,6 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
   const confirmLogout = () => {
     try {
       localStorage.removeItem("auth-storage");
-      localStorage.removeItem("CardWork");
-      localStorage.removeItem("Users");
-
       toast.success("ออกจากระบบสำเร็จ", {
         autoClose: 1500,
       });
