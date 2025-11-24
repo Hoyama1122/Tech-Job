@@ -6,7 +6,7 @@ export default function DescriptionCard({ job }: any) {
       <div className="flex flex-col">
         <div>
           <h2 className="text-xl font-bold mb-4">รายละเอียดงาน</h2>
-          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed px-2">
             {job.description}
           </p>
         </div>
@@ -14,9 +14,8 @@ export default function DescriptionCard({ job }: any) {
         {job.technicianReport ? (
           <div className="mt-6">
             <h2 className="text-xl font-bold mb-4">รายละเอียดจากช่างเทคนิค</h2>
-
-            <div className="bg-gray-50 p-4 rounded-lg border leading-relaxed text-gray-700 whitespace-pre-wrap">
-              {job.technicianReport}
+            <div className="  leading-relaxed text-gray-700 whitespace-pre-wrap px-2">
+              {job.technicianReport?.detail}
             </div>
           </div>
         ) : (

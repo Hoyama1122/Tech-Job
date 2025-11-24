@@ -5,7 +5,6 @@ import {
   FileDiff,
   FileText,
   Home,
-  ImageUp,
   Loader2,
   MapPin,
   Phone,
@@ -13,7 +12,6 @@ import {
   User,
 } from "lucide-react";
 import React, { useState } from "react";
-import DropdownSupervisor from "./DropdownSupervisor";
 import { FormProvider, useForm } from "react-hook-form";
 import { WorkFormValues, workSchema } from "@/lib/Validations/SchemaForm";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +21,6 @@ import DropdownCategory from "./DropdownCategory";
 import Map from "../Map/Map";
 import DatePickerTH from "@/components/DueDate/Date";
 import DropdownTechnician from "./DropdownTechnician";
-import Router from "next/router";
 import { useRouter } from "next/navigation";
 
 const WorkForm = () => {
