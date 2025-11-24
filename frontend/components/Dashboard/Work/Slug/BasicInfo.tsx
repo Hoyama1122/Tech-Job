@@ -2,8 +2,6 @@ import { FileText } from "lucide-react";
 import InfoRow from "./InfoRow";
 import DateFormat from "@/lib/Format/DateForm";
 import formatThaiDateTime from "@/lib/Format/DateFormatThai";
-import DateFormat from "@/lib/Format/DateForWork";
-
 export default function BasicInfoCard({ job }: any) {
   const statusStyle = {
     สำเร็จ: "bg-emerald-100 text-emerald-700 border-emerald-200",
