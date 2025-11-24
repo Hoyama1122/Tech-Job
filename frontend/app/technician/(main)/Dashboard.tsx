@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { CardWork } from "lib/Mock/Jobs";
 
 const Dashboard = () => {
+
+  const [jobStatus, setJobStatus] = useState("none");
+  useEffect(() => {
+    const saved = localStorage.getItem("jobStatus");
+    if (saved) setJobStatus(saved);
+  }, []);
+
   const [showFilter, setShowFilter] = useState(false);
 
   const [time, setTime] = useState<string>("");
@@ -154,28 +161,53 @@ const Dashboard = () => {
                 className="cursor-pointer hover:opacity-75 transition-opacity"
                 onClick={goToOpenwork}
               >
-                <div className="flex justify-end mr-1">
-                  <svg
-                    className="w-6 h-6 text-red-800"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                <div className="flex justify-end mr-1"></div>
+                {jobStatus === "working" && (
+                  <div
+                    className="cursor-pointer text-black bg-yellow-400 rounded-2xl p-1"
+                    onClick={goToOpenwork}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </div>
-                <p>map</p>
+                    กำลังดำเนินการ
+                  </div>
+                )}
+
+                {jobStatus === "done" && (
+                  <div className="text-white bg-green-600 rounded-2xl p-1">
+                    เสร็จสิ้นงาน
+                  </div>
+                )}
+
+                {jobStatus === "none" && (
+                  <div
+                    className="cursor-pointer hover:opacity-75 transition-opacity"
+                    onClick={goToOpenwork}
+                  >
+                    <div className="flex justify-end mr-1">
+                      <svg
+                        className="w-6 h-6 text-red-800"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </div>
+                    <p>map</p>
+                  </div>
+                  
+                )}
+                
               </div>
             </div>
           </div>

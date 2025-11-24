@@ -1,11 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export const Openwork = () => {
-  const [open, setOpen] = useState(false); // ปุ่มกดเริ่มงาน
+  const router = useRouter();
 
-  const [name, setName] = useState(""); // ชื่อพนักงานรอดึงจากโปรไฟล์อีกที
-  const [code, setCode] = useState("");
+  const [jobStatus, setJobStatus] = useState("none");
+  useEffect(() => {
+    const saved = localStorage.getItem("jobStatus");
+    if (saved) setJobStatus(saved);
+  }, []);
+
+  const [open, setOpen] = useState(false);
 
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
@@ -33,30 +39,25 @@ export const Openwork = () => {
 
   // ฟังก์ชันเริ่มงาน
   const handleStartWork = () => {
-    if (!name || !code) {
-      alert("กรุณากรอกชื่อและรหัสพนักงานให้ครบ");
-      return;
-    }
-
     const now = new Date();
     const currentTime = now.toLocaleString("th-TH", {
       dateStyle: "full",
       timeStyle: "medium",
     });
     setTime(currentTime);
-
     getCurrentLocation();
 
     const data = {
-      name,
-      code,
       time: currentTime,
       location: { latitude, longitude },
     };
-
     console.log("ข้อมูลเริ่มงาน:", data);
-    alert("เริ่มงานสำเร็จ!");
-    setOpen(false);
+
+    localStorage.setItem("jobStatus", "working");
+
+    alert("บันทึกเริ่มงานสำเร็จ");
+
+    router.push("/technician");
   };
 
   // อัปเดตเวลาแบบเรียลไทม์
@@ -89,30 +90,8 @@ export const Openwork = () => {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-80">
             <h2 className="text-xl font-bold mb-3 text-center">
-              กรุณากรอกข้อมูลพนักงาน
+              บันทึกเวลาเข้างาน
             </h2>
-
-            <div className="mb-4">
-              <label className="text-sm">ชื่อพนักงาน</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                placeholder="กรอกชื่อ"
-              />
-            </div>
-
-            <div className="mb-5">
-              <label className="text-sm">รหัสพนักงาน</label>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                placeholder="กรอกรหัส"
-              />
-            </div>
 
             <div className="mb-5">
               <label className="">เวลาเข้างาน</label>
@@ -199,13 +178,25 @@ export const Openwork = () => {
         </div>
       </div>
 
-      <button
-        onClick={() => setOpen(true)}
-        className="rounded-md bg-gradient-to-tr from-slate-800 to-slate-700 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none position-fixed bottom-4 w-full md:w-1/2 md:mx-auto block mt-6"
-        type="button"
-      >
-        เริ่มงาน
-      </button>
+      {jobStatus === "working" ? (
+  <button
+    onClick={() => {
+      localStorage.setItem("jobStatus", "done");
+      alert("งานเสร็จสมบูรณ์!");
+      router.push("/technician");
+    }}
+    className="rounded-md bg-red-700 text-white py-2 px-4 w-full mt-6"
+  >
+    จบงาน
+  </button>
+) : (
+  <button
+    onClick={() => setOpen(true)}
+    className="rounded-md bg-gradient-to-tr from-slate-800 to-slate-700 py-2 px-4 w-full mt-6 text-white"
+  >
+    เริ่มงาน
+  </button>
+)}
     </div>
   );
 };
