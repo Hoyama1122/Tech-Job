@@ -623,5 +623,3 @@ export const Users: UserType[] = [
     address: "ตำบลบางวัว อำเภอบางปะกง ฉะเชิงเทรา",
   },
 ];
-
-
