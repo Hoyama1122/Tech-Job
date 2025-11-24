@@ -10,6 +10,7 @@ interface AuthState {
   name?: string;
   email?: string;
   userId?: number;
+  employeeCode?: string;
   supervisorId?: string;
   login: (email: string, password: string) => Role;
   logout: () => void;
@@ -23,7 +24,7 @@ export const useAuthStore = create<AuthState>()(
       name: undefined,
       email: undefined,
       userId: undefined,
-
+      employeeCode: undefined,
 
       login: (email, password) => {
         const emailLower = email.toLowerCase();
@@ -41,6 +42,7 @@ export const useAuthStore = create<AuthState>()(
             name: foundUser.name,
             email: foundUser.email,
             userId: foundUser.id,
+            employeeCode: foundUser.employeeCode,
             supervisorId:
               foundUser.role === "supervisor"
                 ? String(foundUser.id)
@@ -68,6 +70,7 @@ export const useAuthStore = create<AuthState>()(
           name: undefined,
           email: undefined,
           userId: undefined,
+          employeeCode: undefined,
           supervisorId: undefined,
         }),
     }),

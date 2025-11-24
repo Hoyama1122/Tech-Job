@@ -9,15 +9,11 @@ const Dashboard = () => {
   const [technicianId, setTechnicianId] = useState<number | null>(null);
   const [myJobs, setMyJobs] = useState([]);
   const [jobs, setjobs] = useState([]);
-  const [jobStatus, setJobStatus] = useState("none");
   const [showFilter, setShowFilter] = useState(false);
   const [time, setTime] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"today" | "week">("today");
 
-  useEffect(() => {
-    const saved = localStorage.getItem("jobStatus");
-    if (saved) setJobStatus(saved);
-  }, []);
+
 
   useEffect(() => {
     try {
@@ -26,8 +22,8 @@ const Dashboard = () => {
 
       const parsed = JSON.parse(saved);
 
-      if (parsed?.state?.userId) {
-        setTechnicianId(Number(parsed.state.userId));
+      if (parsed?.state) {
+        setTechnicianId(parsed.state);
       }
     } catch (err) {
       console.error("โหลด user จาก auth-storage fail", err);
@@ -47,12 +43,13 @@ const Dashboard = () => {
     if (technicianId == null) return;
 
     const my = jobs.filter((job: any) =>
-      job.technicianId?.includes(technicianId)
+      job.technicianId?.includes(technicianId?.userId)
     );
 
     setMyJobs(my);
   }, [technicianId, jobs]);
-
+ 
+  
   const handleTabClick = (tab: "today" | "week") => {
     setActiveTab(tab);
   };
@@ -82,13 +79,14 @@ const Dashboard = () => {
   const goToProfile = () => {
     router.push("/technician/Profile");
   };
-
+  console.log(technicianId);
+  
   return (
     <div className="">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
         <div className="p-6 bg-gray-300 rounded-lg">
-          <p className="text-3xl">Mr. Jason John</p>
-          <p className="text-m">รหัสพนักงาน 67696969</p>
+          <p className="text-3xl">{technicianId?.name}</p>
+          <p className="text-m">หรัสพนักงาน: {technicianId?.employeeCode}</p>
         </div>
 
         <div className="p-6 bg-gray-300 rounded-lg flex justify-between">

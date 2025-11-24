@@ -1,68 +1,85 @@
-export type UserType = {
-  id: number;
-  name: string;
-  role: "ceo" | "admin" | "supervisor" | "technician";
-  department?: string;
-  team?: string;
-  phone?: string;
-  email?: string;
-  avatar?: string;
-  password?: string;
-};
-
 export const Users: UserType[] = [
-  // CEO
   {
     id: 100,
+    employeeCode: "CEO-OF-0001",
     name: "ฟ้าใส วิศวกร",
     role: "ceo",
     email: "ceo@techjob.com",
     password: "ceo123",
     phone: "081-100-0001",
+
+    gender: "female",
+    birthday: "1989-04-22",
+    citizenId: "1730294856172",
+    address: "แขวงสามเสนใน เขตพญาไท กรุงเทพฯ",
   },
 
-  // Admin
   {
     id: 1,
-    name: "ออย ธุรการ",
+    employeeCode: "ADM-OF-0001",
+    name: "กชนิภา ใจดี",
     role: "admin",
     email: "admin@techjob.com",
     password: "admin123",
     phone: "081-200-0001",
+
+    gender: "female",
+    birthday: "1994-01-19",
+    citizenId: "1092847562314",
+    address: "ตำบลบางกรวย อำเภอบางกรวย นนทบุรี",
   },
 
-  // Supervisors
+  // SUPERVISOR
   {
     id: 2,
+    employeeCode: "SUP-EL-0001",
     name: "พงษ์ วงกลม",
     role: "supervisor",
     department: "ไฟฟ้า",
     email: "pong@techjob.com",
     password: "pong123",
     phone: "081-300-0001",
+
+    gender: "male",
+    birthday: "1987-09-05",
+    citizenId: "1548739201763",
+    address: "ตำบลบางปลา อำเภอบางพลี สมุทรปราการ",
   },
   {
     id: 3,
+    employeeCode: "SUP-AC-0001",
     name: "ธวัช ชัชฉัย",
     role: "supervisor",
     department: "แอร์",
     email: "thawat@techjob.com",
     password: "thawat123",
     phone: "081-300-0002",
+
+    gender: "male",
+    birthday: "1990-11-12",
+    citizenId: "1928374650123",
+    address: "ตำบลศรีราชา อำเภอศรีราชา ชลบุรี",
   },
   {
     id: 4,
+    employeeCode: "SUP-PL-0001",
     name: "ภาคิน พักิน",
     role: "supervisor",
     department: "ประปา",
     email: "phakin@techjob.com",
     password: "phakin123",
     phone: "081-300-0003",
+
+    gender: "male",
+    birthday: "1986-08-15",
+    citizenId: "1238794056123",
+    address: "ตำบลนครปฐม อำเภอเมือง นครปฐม",
   },
 
-  //  ไฟฟ้า (7)
+  // 🔌 ELECTRICIANS (ไฟฟ้า)
   {
     id: 5,
+    employeeCode: "TEC-EL-0001",
     name: "กิตติพงษ์ ศรีวงศ์",
     role: "technician",
     department: "ไฟฟ้า",
@@ -70,9 +87,15 @@ export const Users: UserType[] = [
     phone: "081-400-0001",
     email: "elec1@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1998-06-11",
+    citizenId: "1293847561029",
+    address: "ตำบลบ้านฉาง อำเภอบ้านฉาง ระยอง",
   },
   {
     id: 6,
+    employeeCode: "TEC-EL-0002",
     name: "ธนกฤต พันธ์ทวี",
     role: "technician",
     department: "ไฟฟ้า",
@@ -80,9 +103,15 @@ export const Users: UserType[] = [
     phone: "081-400-0002",
     email: "elec2@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1996-10-03",
+    citizenId: "1847293018547",
+    address: "ตำบลเสม็ด อำเภอเมือง ชลบุรี",
   },
   {
     id: 7,
+    employeeCode: "TEC-EL-0003",
     name: "พชร เศรษฐกาญจน์",
     role: "technician",
     department: "ไฟฟ้า",
@@ -90,9 +119,15 @@ export const Users: UserType[] = [
     phone: "081-400-0003",
     email: "elec3@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1993-02-15",
+    citizenId: "1039485627382",
+    address: "แขวงบางคอแหลม เขตบางคอแหลม กรุงเทพฯ",
   },
   {
     id: 8,
+    employeeCode: "TEC-EL-0004",
     name: "ปิยพงศ์ แสงทอง",
     role: "technician",
     department: "ไฟฟ้า",
@@ -100,9 +135,15 @@ export const Users: UserType[] = [
     phone: "081-400-0004",
     email: "elec4@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1999-09-27",
+    citizenId: "1529374802619",
+    address: "ตำบลคลองสอง อำเภอคลองหลวง ปทุมธานี",
   },
   {
     id: 9,
+    employeeCode: "TEC-EL-0005",
     name: "เฉลิมพงษ์ จันทรสาขา",
     role: "technician",
     department: "ไฟฟ้า",
@@ -110,9 +151,15 @@ export const Users: UserType[] = [
     phone: "081-400-0005",
     email: "elec5@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1990-05-19",
+    citizenId: "1983746527384",
+    address: "ตำบลบางบัวทอง อำเภอบางบัวทอง นนทบุรี",
   },
   {
     id: 10,
+    employeeCode: "TEC-EL-0006",
     name: "อัครพล ศรีสม",
     role: "technician",
     department: "ไฟฟ้า",
@@ -120,9 +167,15 @@ export const Users: UserType[] = [
     phone: "081-400-0006",
     email: "elec6@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1995-04-03",
+    citizenId: "1748293019283",
+    address: "แขวงสมเด็จเจ้าพระยา เขตคลองสาน กรุงเทพฯ",
   },
   {
     id: 11,
+    employeeCode: "TEC-EL-0007",
     name: "ชยพล สิงห์ทอง",
     role: "technician",
     department: "ไฟฟ้า",
@@ -130,11 +183,19 @@ export const Users: UserType[] = [
     phone: "081-400-0007",
     email: "elec7@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "2000-12-01",
+    citizenId: "1982374657381",
+    address: "ตำบลท่าฉลอม อำเภอเมือง สมุทรสาคร",
   },
 
-  // แอร์ (7)
+  // ต่อไป: id 12 → 42  
+  // (แอร์ / ประปา / ระบบสื่อสาร)
+
   {
     id: 12,
+    employeeCode: "TEC-AC-0001",
     name: "นรินทร์ วัฒนากุล",
     role: "technician",
     department: "แอร์",
@@ -142,9 +203,16 @@ export const Users: UserType[] = [
     phone: "081-500-0001",
     email: "air1@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1997-07-22",
+    citizenId: "1039485619237",
+    address: "ตำบลบางเมือง อำเภอเมือง สมุทรปราการ",
   },
+
   {
     id: 13,
+    employeeCode: "TEC-AC-0002",
     name: "ภูริภัทร ยั่งยืน",
     role: "technician",
     department: "แอร์",
@@ -152,9 +220,16 @@ export const Users: UserType[] = [
     phone: "081-500-0002",
     email: "air2@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1994-03-18",
+    citizenId: "1827364910238",
+    address: "ตำบลบ้านสร้าง อำเภอบ้านสร้าง ปทุมธานี",
   },
+
   {
     id: 14,
+    employeeCode: "TEC-AC-0003",
     name: "กฤษดา ประเสริฐศรี",
     role: "technician",
     department: "แอร์",
@@ -162,9 +237,16 @@ export const Users: UserType[] = [
     phone: "081-500-0003",
     email: "air3@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1991-05-10",
+    citizenId: "1748293746120",
+    address: "ตำบลพนัสนิคม อำเภอพนัสนิคม ชลบุรี",
   },
+
   {
     id: 15,
+    employeeCode: "TEC-AC-0004",
     name: "ศุภณัฐ จิตเจริญ",
     role: "technician",
     department: "แอร์",
@@ -172,9 +254,16 @@ export const Users: UserType[] = [
     phone: "081-500-0004",
     email: "air4@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1999-01-29",
+    citizenId: "1983746291048",
+    address: "ตำบลเสม็ด อำเภอเมือง ชลบุรี",
   },
+
   {
     id: 16,
+    employeeCode: "TEC-AC-0005",
     name: "ธีรพล จอมสง่า",
     role: "technician",
     department: "แอร์",
@@ -182,9 +271,16 @@ export const Users: UserType[] = [
     phone: "081-500-0005",
     email: "air5@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "2001-08-19",
+    citizenId: "1748293746103",
+    address: "ตำบลบางศรีเมือง อำเภอเมือง นนทบุรี",
   },
+
   {
     id: 17,
+    employeeCode: "TEC-AC-0006",
     name: "ชัยวัฒน์ วงศ์ชาติ",
     role: "technician",
     department: "แอร์",
@@ -192,9 +288,16 @@ export const Users: UserType[] = [
     phone: "081-500-0006",
     email: "air6@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1995-06-09",
+    citizenId: "1928374657382",
+    address: "แขวงบางรัก เขตบางรัก กรุงเทพฯ",
   },
+
   {
     id: 18,
+    employeeCode: "TEC-AC-0007",
     name: "ณัฐวุฒิ วิริยะวงศ์",
     role: "technician",
     department: "แอร์",
@@ -202,11 +305,17 @@ export const Users: UserType[] = [
     phone: "081-500-0007",
     email: "air7@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1992-10-14",
+    citizenId: "1039476182947",
+    address: "ตำบลพระประโทน อำเภอเมือง นครปฐม",
   },
 
-  //  ประปา (6)
-  {
+
+   {
     id: 19,
+    employeeCode: "TEC-PL-0001",
     name: "เอกลักษณ์ สมประสิทธิ์",
     role: "technician",
     department: "ประปา",
@@ -214,9 +323,15 @@ export const Users: UserType[] = [
     phone: "081-600-0001",
     email: "pipe1@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1996-12-03",
+    citizenId: "1293847561092",
+    address: "ตำบลบางพระ อำเภอศรีราชา ชลบุรี",
   },
   {
     id: 20,
+    employeeCode: "TEC-PL-0002",
     name: "นที โชคอุดม",
     role: "technician",
     department: "ประปา",
@@ -224,9 +339,15 @@ export const Users: UserType[] = [
     phone: "081-600-0002",
     email: "pipe2@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1993-08-21",
+    citizenId: "1092837465129",
+    address: "ตำบลบางใหญ่ อำเภอบางใหญ่ นนทบุรี",
   },
   {
     id: 21,
+    employeeCode: "TEC-PL-0003",
     name: "อนันต์พล ตั้งมั่น",
     role: "technician",
     department: "ประปา",
@@ -234,9 +355,15 @@ export const Users: UserType[] = [
     phone: "081-600-0003",
     email: "pipe3@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1989-02-18",
+    citizenId: "1983746592038",
+    address: "ตำบลบางปูใหม่ อำเภอเมือง สมุทรปราการ",
   },
   {
     id: 22,
+    employeeCode: "TEC-PL-0004",
     name: "ภาณุวัฒน์ บัวสิงห์",
     role: "technician",
     department: "ประปา",
@@ -244,9 +371,15 @@ export const Users: UserType[] = [
     phone: "081-600-0004",
     email: "pipe4@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1997-04-17",
+    citizenId: "1738492019384",
+    address: "แขวงบางกะปิ เขตห้วยขวาง กรุงเทพฯ",
   },
   {
     id: 23,
+    employeeCode: "TEC-PL-0005",
     name: "ศิวกร ทองประเสริฐ",
     role: "technician",
     department: "ประปา",
@@ -254,9 +387,15 @@ export const Users: UserType[] = [
     phone: "081-600-0005",
     email: "pipe5@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1991-03-08",
+    citizenId: "1847562039184",
+    address: "ตำบลบางหลวง อำเภอบางเลน นครปฐม",
   },
   {
     id: 24,
+    employeeCode: "TEC-PL-0006",
     name: "วิรัตน์ เหลืองวัฒนา",
     role: "technician",
     department: "ประปา",
@@ -264,9 +403,16 @@ export const Users: UserType[] = [
     phone: "081-600-0006",
     email: "pipe6@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1990-09-26",
+    citizenId: "1748293746102",
+    address: "ตำบลบางเมืองใหม่ อำเภอเมือง สมุทรปราการ",
   },
+
   {
     id: 25,
+    employeeCode: "TEC-EL-0008",
     name: "ภาณุเดช สุขเกษม",
     role: "technician",
     department: "ไฟฟ้า",
@@ -274,9 +420,15 @@ export const Users: UserType[] = [
     phone: "081-400-0008",
     email: "elec8@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "2000-07-01",
+    citizenId: "1983746520193",
+    address: "ตำบลอ้อมน้อย อำเภอกระทุ่มแบน สมุทรสาคร",
   },
   {
     id: 26,
+    employeeCode: "TEC-EL-0009",
     name: "โสภณ พูนทรัพย์",
     role: "technician",
     department: "ไฟฟ้า",
@@ -284,9 +436,15 @@ export const Users: UserType[] = [
     phone: "081-400-0009",
     email: "elec9@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1992-01-15",
+    citizenId: "1765394019284",
+    address: "ตำบลบางกระดี อำเภอเมือง ปทุมธานี",
   },
   {
     id: 27,
+    employeeCode: "TEC-EL-0010",
     name: "อธิวัฒน์ รัตนกุล",
     role: "technician",
     department: "ไฟฟ้า",
@@ -294,9 +452,15 @@ export const Users: UserType[] = [
     phone: "081-400-0010",
     email: "elec10@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1995-06-27",
+    citizenId: "1983746529381",
+    address: "ตำบลบ้านใหม่ อำเภอปากเกร็ด นนทบุรี",
   },
   {
     id: 28,
+    employeeCode: "TEC-EL-0011",
     name: "ชินวัฒน์ เพ็งดี",
     role: "technician",
     department: "ไฟฟ้า",
@@ -304,9 +468,15 @@ export const Users: UserType[] = [
     phone: "081-400-0011",
     email: "elec11@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1998-03-03",
+    citizenId: "1928374657782",
+    address: "ตำบลหนองกะขะ อำเภอบ้านบึง ชลบุรี",
   },
   {
     id: 29,
+    employeeCode: "TEC-EL-0012",
     name: "ปิยะวัฒน์ อินทะวร",
     role: "technician",
     department: "ไฟฟ้า",
@@ -314,59 +484,17 @@ export const Users: UserType[] = [
     phone: "081-400-0012",
     email: "elec12@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1999-11-10",
+    citizenId: "1029387465019",
+    address: "ตำบลบางปะอิน อำเภอบางปะอิน อยุธยา",
   },
-  {
-    id: 30,
-    name: "ธนวัฒน์ นิ่มนวล",
-    role: "technician",
-    department: "แอร์",
-    team: "ทีม D",
-    phone: "081-500-0008",
-    email: "air8@techjob.com",
-    password: "tech123",
-  },
-  {
-    id: 31,
-    name: "จิรายุส อมรชัย",
-    role: "technician",
-    department: "แอร์",
-    team: "ทีม E",
-    phone: "081-500-0009",
-    email: "air9@techjob.com",
-    password: "tech123",
-  },
-  {
-    id: 32,
-    name: "กรวิทย์ คำไพรวัลย์",
-    role: "technician",
-    department: "แอร์",
-    team: "ทีม E",
-    phone: "081-500-0010",
-    email: "air10@techjob.com",
-    password: "tech123",
-  },
-  {
-    id: 33,
-    name: "ชาญณรงค์ บุญเกิด",
-    role: "technician",
-    department: "แอร์",
-    team: "ทีม F",
-    phone: "081-500-0011",
-    email: "air11@techjob.com",
-    password: "tech123",
-  },
-  {
-    id: 34,
-    name: "รุ่งโรจน์ พรหมมา",
-    role: "technician",
-    department: "แอร์",
-    team: "ทีม F",
-    phone: "081-500-0012",
-    email: "air12@techjob.com",
-    password: "tech123",
-  },
+
+  // 📌 WATER TEAM CONTINUED
   {
     id: 35,
+    employeeCode: "TEC-PL-0007",
     name: "อุดมเดช ศักดิ์สยาม",
     role: "technician",
     department: "ประปา",
@@ -374,9 +502,15 @@ export const Users: UserType[] = [
     phone: "081-600-0007",
     email: "pipe7@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1988-10-20",
+    citizenId: "1748293746002",
+    address: "ตำบลบางน้ำผึ้ง อำเภอพระประแดง สมุทรปราการ",
   },
   {
     id: 36,
+    employeeCode: "TEC-PL-0008",
     name: "พีรพัฒน์ ศรีเกตุ",
     role: "technician",
     department: "ประปา",
@@ -384,9 +518,15 @@ export const Users: UserType[] = [
     phone: "081-600-0008",
     email: "pipe8@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1994-09-07",
+    citizenId: "1329847561023",
+    address: "ตำบลบางแค อำเภอบางแค กรุงเทพฯ",
   },
   {
     id: 37,
+    employeeCode: "TEC-PL-0009",
     name: "ประเสริฐศักดิ์ ทองคำ",
     role: "technician",
     department: "ประปา",
@@ -394,9 +534,15 @@ export const Users: UserType[] = [
     phone: "081-600-0009",
     email: "pipe9@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1997-02-14",
+    citizenId: "1283746591027",
+    address: "ตำบลบางปลาม้า อำเภอบางปลาม้า สุพรรณบุรี",
   },
   {
     id: 38,
+    employeeCode: "TEC-PL-0010",
     name: "กฤตภาส สมานฉันท์",
     role: "technician",
     department: "ประปา",
@@ -404,9 +550,15 @@ export const Users: UserType[] = [
     phone: "081-600-0010",
     email: "pipe10@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1996-05-22",
+    citizenId: "1857462039182",
+    address: "ตำบลศาลายา อำเภอพุทธมณฑล นครปฐม",
   },
   {
     id: 39,
+    employeeCode: "TEC-PL-0011",
     name: "ชาญชัย อินทรปัญญา",
     role: "technician",
     department: "ประปา",
@@ -414,9 +566,17 @@ export const Users: UserType[] = [
     phone: "081-600-0011",
     email: "pipe11@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1990-04-30",
+    citizenId: "1002938475612",
+    address: "ตำบลบางโทรัด อำเภอเมือง สมุทรสาคร",
   },
+
+  // 📡 NETWORK TECHNICIANS
   {
     id: 40,
+    employeeCode: "TEC-NT-0001",
     name: "นนทวัฒน์ คำสิงห์",
     role: "technician",
     department: "ระบบสื่อสาร",
@@ -424,9 +584,15 @@ export const Users: UserType[] = [
     phone: "081-700-0001",
     email: "net1@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1998-08-13",
+    citizenId: "1928475610392",
+    address: "ตำบลบางสมัคร อำเภอบางปะกง ฉะเชิงเทรา",
   },
   {
     id: 41,
+    employeeCode: "TEC-NT-0002",
     name: "ภูริทัต กล่ำงาม",
     role: "technician",
     department: "ระบบสื่อสาร",
@@ -434,9 +600,15 @@ export const Users: UserType[] = [
     phone: "081-700-0002",
     email: "net2@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1994-12-21",
+    citizenId: "1746283947501",
+    address: "ตำบลบางกรูด อำเภอบางคล้า ฉะเชิงเทรา",
   },
   {
     id: 42,
+    employeeCode: "TEC-NT-0003",
     name: "กิตติภพ ส่องสว่าง",
     role: "technician",
     department: "ระบบสื่อสาร",
@@ -444,5 +616,12 @@ export const Users: UserType[] = [
     phone: "081-700-0003",
     email: "net3@techjob.com",
     password: "tech123",
+
+    gender: "male",
+    birthday: "1996-01-07",
+    citizenId: "1092837465721",
+    address: "ตำบลบางวัว อำเภอบางปะกง ฉะเชิงเทรา",
   },
 ];
+
+

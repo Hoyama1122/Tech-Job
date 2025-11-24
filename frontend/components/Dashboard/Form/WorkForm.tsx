@@ -83,93 +83,112 @@ const WorkForm = () => {
     e.target.value = value.slice(0, 12);
   };
 
-  const onSubmit = async (data: WorkFormValues) => {
-    try {
-      setLoading(true);
-      await new Promise((r) => setTimeout(r, 1000));
+ const onSubmit = async (data: WorkFormValues) => {
+  try {
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 1000));
 
-      const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
+    const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
 
-      // แปลงรูปภาพเป็น base64
-      const images = data.image?.length
-        ? await Promise.all(Array.from(data.image).map(convertToBase64))
-        : [];
+   
+    const images = data.image?.length
+      ? await Promise.all(Array.from(data.image).map(convertToBase64))
+      : [];
 
-      let formattedDate = "";
-      if (data.date) {
-        if (/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
-          formattedDate = `${data.date}T${data.startTime || "00:00"}`;
-        } else {
-          const months: Record<string, number> = {
-            มกราคม: 0,
-            กุมภาพันธ์: 1,
-            มีนาคม: 2,
-            เมษายน: 3,
-            พฤษภาคม: 4,
-            มิถุนายน: 5,
-            กรกฎาคม: 6,
-            สิงหาคม: 7,
-            กันยายน: 8,
-            ตุลาคม: 9,
-            พฤศจิกายน: 10,
-            ธันวาคม: 11,
-          };
-          const match = data.date.match(/(\d{1,2}) (\S+) (\d{4})/);
-          if (match) {
-            const [, d, m, y] = match;
-            const year = parseInt(y) - 543;
-            const month = months[m];
-            const day = parseInt(d);
-            const hours = data.startTime?.split(":")[0] || "00";
-            const minutes = data.startTime?.split(":")[1] || "00";
-            formattedDate = new Date(year, month, day, hours, minutes)
-              .toISOString()
-              .slice(0, 16);
-          }
-        }
-      }
-
-      const now = new Date();
-
-      const newWork = {
-        id: current.length + 1,
-        JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
-        title: data.title,
-        description: data.description,
-        date: formattedDate,
-        status: "รอการดำเนินงาน",
-
-        createdAt: now.toISOString(),
-        assignedAt: null,
-        dueDate: null,
-        completedAt: null,
-        approvedAt: null,
-        category: data.category,
-        userId: 1,
-        supervisorId: Number(data.supervisorId) || 0,
-        technicianId: data.technicianId?.map(Number) || [],
-        customer: {
-          name: data.customerName,
-          phone: data.customerPhone,
-          address: data.address,
-        },
-        image: images,
-        loc: loc,
+  
+    const parseThaiDate = (str: string) => {
+      const months: Record<string, number> = {
+        มกราคม: 0,
+        กุมภาพันธ์: 1,
+        มีนาคม: 2,
+        เมษายน: 3,
+        พฤษภาคม: 4,
+        มิถุนายน: 5,
+        กรกฎาคม: 6,
+        สิงหาคม: 7,
+        กันยายน: 8,
+        ตุลาคม: 9,
+        พฤศจิกายน: 10,
+        ธันวาคม: 11,
       };
 
-      localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
+      const match = str.match(/(\d{1,2}) (\S+) (\d{4})/);
+      if (!match) return null;
 
-      reset();
-      setPreview([]);
-      toast.success("เพิ่มใบงานสำเร็จ!");
-      router.push("/admin");
-    } catch (error) {
-      console.error(error);
-      toast.error("เพิ่มใบงานไม่สำเร็จ!");
-    } finally {
-      setLoading(false);
-    }
-  };
+      const [, d, m, y] = match;
+
+      const year = parseInt(y) - 543;
+      const month = months[m];
+      const day = parseInt(d);
+
+      return new Date(year, month, day);
+    };
+
+    const startDateObj = parseThaiDate(data.date.start);
+    const endDateObj = parseThaiDate(data.date.end);
+
+    const startISO = startDateObj
+      ? `${startDateObj.toISOString().split("T")[0]}T${
+          data.startTime || "00:00"
+        }:00`
+      : null;
+
+    const endISO = endDateObj
+      ? `${endDateObj.toISOString().split("T")[0]}T${
+          data.endTime || "00:00"
+        }:00`
+      : null;
+
+    const now = new Date();
+
+    const newWork = {
+      id: current.length + 1,
+      JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
+      title: data.title,
+      description: data.description,
+
+    
+      dateRange: {
+        startAt: startISO,
+        endAt: endISO,
+      },
+
+      status: "รอการดำเนินงาน",
+      createdAt: now.toISOString(),
+      assignedAt: null,
+      dueDate: null,
+      completedAt: null,
+      approvedAt: null,
+
+      category: data.category,
+      userId: 1,
+      supervisorId: Number(data.supervisorId) || 0,
+      technicianId: data.technicianId?.map(Number) || [],
+
+      customer: {
+        name: data.customerName,
+        phone: data.customerPhone,
+        address: data.address,
+      },
+
+      image: images,
+      loc: loc,
+    };
+
+ 
+    localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
+
+    reset();
+    setPreview([]);
+    toast.success("เพิ่มใบงานสำเร็จ!");
+    router.push("/admin");
+  } catch (error) {
+    console.error(error);
+    toast.error("เพิ่มใบงานไม่สำเร็จ!");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <FormProvider {...methods}>

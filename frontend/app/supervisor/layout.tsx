@@ -8,7 +8,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const {  setCardWork } = AppLoader();
+  const { setCardWork } = AppLoader();
 
   const [isReady, setIsReady] = useState(false);
 
@@ -16,9 +16,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setIsReady(true);
   }, []);
 
-
-
- 
 
   if (!isReady) return null;
 
