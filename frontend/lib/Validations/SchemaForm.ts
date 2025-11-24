@@ -10,7 +10,11 @@ export const workSchema = z
 
     supervisorId: z.string().min(1, "กรุณาเลือกหัวหน้างาน"),
 
-    date: z.string().min(1, "กรุณาเลือกวันที่นัดหมาย"),
+    date: z.object({
+      start: z.string().min(1, "กรุณาเลือกวันเริ่ม"),
+      end: z.string().min(1, "กรุณาเลือกวันสิ้นสุด"),
+    }),
+
     startTime: z.string().optional(),
     endTime: z.string().optional(),
     category: z.string().min(1, "กรุณาเลือกประเภทงาน"),
