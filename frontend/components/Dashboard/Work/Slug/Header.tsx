@@ -1,14 +1,13 @@
-import { FileText, Download, ArrowLeft } from "lucide-react";
+import { FileText, Download, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateWorkPDF } from "@/lib/pdf/generateWorkPDF";
 
-export default function Header({ job, pdfRef }: any) {
+export default function Header({ job, pdfRef, onApprove, onReject }: any) {
   const router = useRouter();
 
   const handleDownload = async () => {
     if (!pdfRef?.current) return;
-    await generateWorkPDF(pdfRef.current, "ใบงานช่าง_" + job.JobId );
-
+    await generateWorkPDF(pdfRef.current, "ใบงานช่าง_" + job.JobId);
   };
 
   return (
@@ -34,15 +33,39 @@ export default function Header({ job, pdfRef }: any) {
         </div>
       </div>
 
-      {/* Download Button */}
-      <button
-        onClick={handleDownload}
-        className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 
-        text-primary py-2 px-4 rounded-lg text-sm font-medium transition"
-      >
-        <Download className="w-4 h-4" />
-        ดาวน์โหลด PDF
-      </button>
+      {/* Buttons */}
+      <div className="flex items-center gap-3">
+
+        {/* Reject Button */}
+        <button
+          onClick={onReject}
+          className="flex items-center gap-2 bg-red-600 hover:bg-red-700
+            text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
+        >
+          <XCircle className="w-4 h-4" />
+          ตีกลับงาน
+        </button>
+
+        
+        <button
+          onClick={onApprove}
+          className="flex items-center gap-2 bg-primary hover:bg-primary-hover
+            text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
+        >
+          <CheckCircle className="w-4 h-4" />
+          อนุมัติงานสำเร็จ
+        </button>
+
+      
+        <button
+          onClick={handleDownload}
+          className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 
+          text-primary py-2 px-4 rounded-lg text-sm font-medium transition"
+        >
+          <Download className="w-4 h-4" />
+          ดาวน์โหลด PDF
+        </button>
+      </div>
     </div>
   );
 }
