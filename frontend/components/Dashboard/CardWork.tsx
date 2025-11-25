@@ -18,6 +18,9 @@ export const getStatusClass = (status: JobStatus): string => {
 };
 
 const CardWork = ({ card }) => {
+  const auth = localStorage.getItem("auth-storage");
+  const parsedAuth = auth ? JSON.parse(auth) : [];
+
   const DesktopView = () => (
     <div className="hidden md:block overflow-x-auto">
       <table className="w-full border-collapse rounded-lg overflow-hidden shadow">
@@ -82,7 +85,7 @@ const CardWork = ({ card }) => {
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-700 text-center">
                   <Link
-                    href={`/admin/work/${work.JobId}`}
+                    href={`/${parsedAuth.state.role}/work/${work.JobId}`}
                   className="flex items-center justify-center">
                     <Eye className="w-6 h-6 text-primary cursor-pointer" />
                   </Link>
