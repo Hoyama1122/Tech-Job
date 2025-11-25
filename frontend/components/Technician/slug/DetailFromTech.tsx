@@ -59,9 +59,9 @@ export default function DetailFromTech({ job }: DetailFromTechProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 md:p-8 space-y-6 mt-2">
+    <div className="bg-white rounded-xl shadow-md p-6 md:p-8 space-y-2 mt-2">
       {/* Header */}
-      <div className="border-b border-gray-200 pb-4">
+      <div className="border-b border-gray-200">
         <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
           <FileText className="w-6 h-6 text-gray-700" />
           รายงานจากช่างเทคนิค
@@ -70,7 +70,7 @@ export default function DetailFromTech({ job }: DetailFromTechProps) {
       </div>
 
       {/* Report Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {sections.map((section) => (
           <div 
             key={section.title}
