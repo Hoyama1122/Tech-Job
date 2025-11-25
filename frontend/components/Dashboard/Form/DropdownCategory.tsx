@@ -43,7 +43,7 @@ export default function DropdownCategory() {
   };
 
   return (
-    <div ref={ref} className="relative mt-2">
+    <div ref={ref} className="relative mt-2 w-1/2">
       <label className="block text-sm font-medium text-gray-700 mb-1">
         ประเภทงาน <span className="text-red-500">*</span>
       </label>

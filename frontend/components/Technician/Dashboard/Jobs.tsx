@@ -8,9 +8,8 @@ const Jobs = ({ displayJobs, activeTab }) => {
     const styles = {
       กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
       สำเร็จ: "bg-green-100 text-green-700 border-green-200",
-      รอการดำเนินงาน: "bg-primary text-white",
+      รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
       รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
-      รอการมอบหมายงาน: "bg-purple-100 text-purple-700 border-purple-200",
     };
 
     const defaultStyle = "bg-gray-100 text-gray-700 border-gray-200";
@@ -65,9 +64,7 @@ const Jobs = ({ displayJobs, activeTab }) => {
                     {job.customer?.address || "ไม่ระบุสถานที่"}
                   </span>
                 </div>
-                <div className="">
-                  {formatThaiDateTime(job.createdAt)}
-                </div>
+                <div className="">{formatThaiDateTime(job.createdAt)}</div>
 
                 <div className="mt-2 text-xs text-gray-500">
                   หมายเลขงาน: #{job.JobId}

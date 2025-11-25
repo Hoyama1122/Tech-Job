@@ -8,7 +8,7 @@ export const getBadgeStatusClass = (status: JobStatus): string => {
     กำลังทำงาน: "bg-yellow-100 text-yellow-700",
     ตีกลับ: "bg-red-100 text-red-700",
     รอการตรวจสอบ: "bg-blue-100 text-blue-700",
-    รอการดำเนินงาน: "bg-purple-100 text-purple-700",
+    รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
   };
   return statusMap[status] || "bg-gray-50 text-gray-600";
 };

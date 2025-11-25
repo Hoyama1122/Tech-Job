@@ -12,54 +12,53 @@ export default function DatePickerTH() {
   const ref = useRef<HTMLDivElement>(null);
   const { setValue, register, watch } = useFormContext();
 
-  const formDate = watch("date");
+  // watch dateRange
+  const formDate = watch("dateRange");
 
   // state เก็บช่วงวันที่
   const [range, setRange] = useState<DateRange | undefined>(
     formDate
       ? {
-          from: formDate.start ? new Date(formDate.start) : undefined,
-          to: formDate.end ? new Date(formDate.end) : undefined,
+          from: formDate.startAt ? new Date(formDate.startAt) : undefined,
+          to: formDate.endAt ? new Date(formDate.endAt) : undefined,
         }
       : undefined
   );
 
   // ปิด popup เมื่อคลิกนอก
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   // เมื่อเลือกช่วงวัน
-  const handleSelect = (selectedRange?: DateRange) => {
-    setRange(selectedRange);
+  const handleSelect = (selected?: DateRange) => {
+    setRange(selected);
 
-    if (selectedRange?.from && selectedRange?.to) {
-      const start = selectedRange.from.toLocaleDateString("th-TH", {
+    if (selected?.from && selected?.to) {
+      const start = selected.from.toLocaleDateString("th-TH", {
         day: "numeric",
         month: "long",
         year: "numeric",
       });
 
-      const end = selectedRange.to.toLocaleDateString("th-TH", {
+      const end = selected.to.toLocaleDateString("th-TH", {
         day: "numeric",
         month: "long",
         year: "numeric",
       });
 
-      setValue("date", {
-        start,
-        end,
-      });
+      // set values ให้ตรง schema
+      setValue("dateRange.startAt", start, { shouldValidate: true });
+      setValue("dateRange.endAt", end, { shouldValidate: true });
     }
   };
 
-  // ข้อความโชว์ด้านบน
   const displayValue =
     range?.from && range?.to
       ? `${range.from.toLocaleDateString("th-TH", {
@@ -79,7 +78,8 @@ export default function DatePickerTH() {
       </label>
 
       {/* hidden form field */}
-      <input type="hidden" {...register("date")} />
+      <input type="hidden" {...register("dateRange.startAt")} />
+      <input type="hidden" {...register("dateRange.endAt")} />
 
       <button
         type="button"
@@ -104,14 +104,6 @@ export default function DatePickerTH() {
             selected={range}
             onSelect={handleSelect}
             locale={th}
-            classNames={{
-              day_selected: "bg-primary text-white hover:bg-primary rounded-lg",
-              day_range_start: "bg-primary text-white rounded-l-lg",
-              day_range_end: "bg-primary text-white rounded-r-lg",
-              day_range_middle: "bg-primary/20",
-              day_today: "border border-primary text-primary font-semibold",
-              day: "w-8 h-8",
-            }}
           />
 
           <div className="flex justify-end pt-2">

@@ -14,7 +14,7 @@ interface Props {
 const colorClasses = {
   blue: { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-700", textDark: "text-blue-800", iconBg: "bg-blue-200", icon: "text-blue-600" },
   yellow: { bg: "bg-yellow-50", border: "border-yellow-200", text: "text-yellow-700", textDark: "text-yellow-800", iconBg: "bg-yellow-200", icon: "text-yellow-600" },
-  purple: { bg: "bg-purple-50", border: "border-purple-200", text: "text-purple-700", textDark: "text-purple-800", iconBg: "bg-purple-200", icon: "text-purple-600" },
+  orange: { bg: "bg-orange-50", border: "border-orange-200", text: "text-orange-700", textDark: "text-orange-800", iconBg: "bg-orange-200", icon: "text-orange-600" },
   emerald: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", textDark: "text-emerald-800", iconBg: "bg-emerald-200", icon: "text-emerald-600" },
   red: { bg: "bg-red-50", border: "border-red-200", text: "text-red-700", textDark: "text-red-800", iconBg: "bg-red-200", icon: "text-red-600" },
 };
@@ -22,7 +22,7 @@ const colorClasses = {
 
 const items = [
   { key: "รอการตรวจสอบ", label: "รอการตรวจสอบ", Icon: Clock, color: "blue" as const },
-  { key: "รอการดำเนินงาน", label: "รอการดำเนินงาน", Icon: Clock, color: "purple" as const }, 
+  { key: "รอการดำเนินงาน", label: "รอการดำเนินงาน", Icon: Clock, color: "orange" as const }, 
   { key: "กำลังทำงาน", label: "กำลังทำงาน", Icon: Clock, color: "yellow" as const },
   { key: "สำเร็จ", label: "สำเร็จ", Icon: FileText, color: "emerald" as const },
   { key: "ตีกลับ", label: "ตีกลับ", Icon: User, color: "red" as const },

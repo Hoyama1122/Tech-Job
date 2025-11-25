@@ -1,3 +1,20 @@
+export type UserType = {
+  id: number;
+  name: string;
+  role: "ceo" | "admin" | "supervisor" | "technician";
+  department?: string;
+  team?: string;
+  phone?: string;
+  email?: string;
+  avatar?: string;
+  password?: string;
+  notifications: any[];
+  employeeCode: string;
+  gender?: string;
+  birthday?: string;
+  citizenId?: string;
+  address?: string;
+};
 export const Users: UserType[] = [
   {
     id: 100,
@@ -7,7 +24,7 @@ export const Users: UserType[] = [
     email: "ceo@techjob.com",
     password: "ceo123",
     phone: "081-100-0001",
-
+    notifications: [],
     gender: "female",
     birthday: "1989-04-22",
     citizenId: "1730294856172",
@@ -27,6 +44,7 @@ export const Users: UserType[] = [
     birthday: "1994-01-19",
     citizenId: "1092847562314",
     address: "ตำบลบางกรวย อำเภอบางกรวย นนทบุรี",
+    notifications: [],
   },
 
   // SUPERVISOR
@@ -44,6 +62,7 @@ export const Users: UserType[] = [
     birthday: "1987-09-05",
     citizenId: "1548739201763",
     address: "ตำบลบางปลา อำเภอบางพลี สมุทรปราการ",
+    notifications: [],
   },
   {
     id: 3,
@@ -59,6 +78,7 @@ export const Users: UserType[] = [
     birthday: "1990-11-12",
     citizenId: "1928374650123",
     address: "ตำบลศรีราชา อำเภอศรีราชา ชลบุรี",
+    notifications: [],
   },
   {
     id: 4,
@@ -74,6 +94,7 @@ export const Users: UserType[] = [
     birthday: "1986-08-15",
     citizenId: "1238794056123",
     address: "ตำบลนครปฐม อำเภอเมือง นครปฐม",
+    notifications: [],
   },
 
   // 🔌 ELECTRICIANS (ไฟฟ้า)
@@ -92,6 +113,7 @@ export const Users: UserType[] = [
     birthday: "1998-06-11",
     citizenId: "1293847561029",
     address: "ตำบลบ้านฉาง อำเภอบ้านฉาง ระยอง",
+    notifications: [],
   },
   {
     id: 6,
@@ -108,6 +130,7 @@ export const Users: UserType[] = [
     birthday: "1996-10-03",
     citizenId: "1847293018547",
     address: "ตำบลเสม็ด อำเภอเมือง ชลบุรี",
+    notifications: [],
   },
   {
     id: 7,
@@ -124,6 +147,7 @@ export const Users: UserType[] = [
     birthday: "1993-02-15",
     citizenId: "1039485627382",
     address: "แขวงบางคอแหลม เขตบางคอแหลม กรุงเทพฯ",
+    notifications: [],
   },
   {
     id: 8,
@@ -140,6 +164,7 @@ export const Users: UserType[] = [
     birthday: "1999-09-27",
     citizenId: "1529374802619",
     address: "ตำบลคลองสอง อำเภอคลองหลวง ปทุมธานี",
+    notifications: [],
   },
   {
     id: 9,
@@ -156,6 +181,7 @@ export const Users: UserType[] = [
     birthday: "1990-05-19",
     citizenId: "1983746527384",
     address: "ตำบลบางบัวทอง อำเภอบางบัวทอง นนทบุรี",
+    notifications: [],
   },
   {
     id: 10,
@@ -172,6 +198,7 @@ export const Users: UserType[] = [
     birthday: "1995-04-03",
     citizenId: "1748293019283",
     address: "แขวงสมเด็จเจ้าพระยา เขตคลองสาน กรุงเทพฯ",
+    notifications: [],
   },
   {
     id: 11,
@@ -188,10 +215,10 @@ export const Users: UserType[] = [
     birthday: "2000-12-01",
     citizenId: "1982374657381",
     address: "ตำบลท่าฉลอม อำเภอเมือง สมุทรสาคร",
+    notifications: [],
   },
 
-  // ต่อไป: id 12 → 42  
-  // (แอร์ / ประปา / ระบบสื่อสาร)
+
 
   {
     id: 12,
@@ -208,6 +235,7 @@ export const Users: UserType[] = [
     birthday: "1997-07-22",
     citizenId: "1039485619237",
     address: "ตำบลบางเมือง อำเภอเมือง สมุทรปราการ",
+    notifications: [],
   },
 
   {
@@ -225,6 +253,7 @@ export const Users: UserType[] = [
     birthday: "1994-03-18",
     citizenId: "1827364910238",
     address: "ตำบลบ้านสร้าง อำเภอบ้านสร้าง ปทุมธานี",
+    notifications: [],
   },
 
   {
@@ -242,6 +271,7 @@ export const Users: UserType[] = [
     birthday: "1991-05-10",
     citizenId: "1748293746120",
     address: "ตำบลพนัสนิคม อำเภอพนัสนิคม ชลบุรี",
+    notifications: [],
   },
 
   {
@@ -259,6 +289,7 @@ export const Users: UserType[] = [
     birthday: "1999-01-29",
     citizenId: "1983746291048",
     address: "ตำบลเสม็ด อำเภอเมือง ชลบุรี",
+    notifications: [],
   },
 
   {
@@ -276,6 +307,7 @@ export const Users: UserType[] = [
     birthday: "2001-08-19",
     citizenId: "1748293746103",
     address: "ตำบลบางศรีเมือง อำเภอเมือง นนทบุรี",
+    notifications: [],
   },
 
   {
@@ -293,6 +325,7 @@ export const Users: UserType[] = [
     birthday: "1995-06-09",
     citizenId: "1928374657382",
     address: "แขวงบางรัก เขตบางรัก กรุงเทพฯ",
+    notifications: [],
   },
 
   {
@@ -310,10 +343,10 @@ export const Users: UserType[] = [
     birthday: "1992-10-14",
     citizenId: "1039476182947",
     address: "ตำบลพระประโทน อำเภอเมือง นครปฐม",
+    notifications: [],
   },
 
-
-   {
+  {
     id: 19,
     employeeCode: "TEC-PL-0001",
     name: "เอกลักษณ์ สมประสิทธิ์",
@@ -328,6 +361,7 @@ export const Users: UserType[] = [
     birthday: "1996-12-03",
     citizenId: "1293847561092",
     address: "ตำบลบางพระ อำเภอศรีราชา ชลบุรี",
+    notifications: [],
   },
   {
     id: 20,
@@ -344,6 +378,7 @@ export const Users: UserType[] = [
     birthday: "1993-08-21",
     citizenId: "1092837465129",
     address: "ตำบลบางใหญ่ อำเภอบางใหญ่ นนทบุรี",
+    notifications: [],
   },
   {
     id: 21,
@@ -360,6 +395,7 @@ export const Users: UserType[] = [
     birthday: "1989-02-18",
     citizenId: "1983746592038",
     address: "ตำบลบางปูใหม่ อำเภอเมือง สมุทรปราการ",
+    notifications: [],
   },
   {
     id: 22,
@@ -376,6 +412,7 @@ export const Users: UserType[] = [
     birthday: "1997-04-17",
     citizenId: "1738492019384",
     address: "แขวงบางกะปิ เขตห้วยขวาง กรุงเทพฯ",
+    notifications: [],
   },
   {
     id: 23,
@@ -392,6 +429,7 @@ export const Users: UserType[] = [
     birthday: "1991-03-08",
     citizenId: "1847562039184",
     address: "ตำบลบางหลวง อำเภอบางเลน นครปฐม",
+    notifications: [],
   },
   {
     id: 24,
@@ -408,6 +446,7 @@ export const Users: UserType[] = [
     birthday: "1990-09-26",
     citizenId: "1748293746102",
     address: "ตำบลบางเมืองใหม่ อำเภอเมือง สมุทรปราการ",
+    notifications: [],
   },
 
   {
@@ -425,6 +464,7 @@ export const Users: UserType[] = [
     birthday: "2000-07-01",
     citizenId: "1983746520193",
     address: "ตำบลอ้อมน้อย อำเภอกระทุ่มแบน สมุทรสาคร",
+    notifications: [],
   },
   {
     id: 26,
@@ -441,6 +481,7 @@ export const Users: UserType[] = [
     birthday: "1992-01-15",
     citizenId: "1765394019284",
     address: "ตำบลบางกระดี อำเภอเมือง ปทุมธานี",
+    notifications: [],
   },
   {
     id: 27,
@@ -457,6 +498,7 @@ export const Users: UserType[] = [
     birthday: "1995-06-27",
     citizenId: "1983746529381",
     address: "ตำบลบ้านใหม่ อำเภอปากเกร็ด นนทบุรี",
+    notifications: [],
   },
   {
     id: 28,
@@ -473,6 +515,7 @@ export const Users: UserType[] = [
     birthday: "1998-03-03",
     citizenId: "1928374657782",
     address: "ตำบลหนองกะขะ อำเภอบ้านบึง ชลบุรี",
+    notifications: [],
   },
   {
     id: 29,
@@ -489,9 +532,9 @@ export const Users: UserType[] = [
     birthday: "1999-11-10",
     citizenId: "1029387465019",
     address: "ตำบลบางปะอิน อำเภอบางปะอิน อยุธยา",
+    notifications: [],
   },
 
-  // 📌 WATER TEAM CONTINUED
   {
     id: 35,
     employeeCode: "TEC-PL-0007",
@@ -507,6 +550,7 @@ export const Users: UserType[] = [
     birthday: "1988-10-20",
     citizenId: "1748293746002",
     address: "ตำบลบางน้ำผึ้ง อำเภอพระประแดง สมุทรปราการ",
+    notifications: [],
   },
   {
     id: 36,
@@ -523,6 +567,7 @@ export const Users: UserType[] = [
     birthday: "1994-09-07",
     citizenId: "1329847561023",
     address: "ตำบลบางแค อำเภอบางแค กรุงเทพฯ",
+    notifications: [],
   },
   {
     id: 37,
@@ -539,6 +584,7 @@ export const Users: UserType[] = [
     birthday: "1997-02-14",
     citizenId: "1283746591027",
     address: "ตำบลบางปลาม้า อำเภอบางปลาม้า สุพรรณบุรี",
+    notifications: [],
   },
   {
     id: 38,
@@ -555,6 +601,7 @@ export const Users: UserType[] = [
     birthday: "1996-05-22",
     citizenId: "1857462039182",
     address: "ตำบลศาลายา อำเภอพุทธมณฑล นครปฐม",
+    notifications: [],
   },
   {
     id: 39,
@@ -571,6 +618,7 @@ export const Users: UserType[] = [
     birthday: "1990-04-30",
     citizenId: "1002938475612",
     address: "ตำบลบางโทรัด อำเภอเมือง สมุทรสาคร",
+    notifications: [],
   },
 
   // 📡 NETWORK TECHNICIANS
@@ -589,6 +637,7 @@ export const Users: UserType[] = [
     birthday: "1998-08-13",
     citizenId: "1928475610392",
     address: "ตำบลบางสมัคร อำเภอบางปะกง ฉะเชิงเทรา",
+    notifications: [],
   },
   {
     id: 41,
@@ -605,6 +654,7 @@ export const Users: UserType[] = [
     birthday: "1994-12-21",
     citizenId: "1746283947501",
     address: "ตำบลบางกรูด อำเภอบางคล้า ฉะเชิงเทรา",
+    notifications: [],
   },
   {
     id: 42,
@@ -621,7 +671,6 @@ export const Users: UserType[] = [
     birthday: "1996-01-07",
     citizenId: "1092837465721",
     address: "ตำบลบางวัว อำเภอบางปะกง ฉะเชิงเทรา",
+    notifications: [],
   },
 ];
-
-

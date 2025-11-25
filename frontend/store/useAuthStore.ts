@@ -25,13 +25,11 @@ export const useAuthStore = create<AuthState>()(
       email: undefined,
       userId: undefined,
       employeeCode: undefined,
-
       login: (email, password) => {
         const emailLower = email.toLowerCase();
         const foundUser = Users.find(
           (u) => u.email?.toLowerCase() === emailLower && u.password === password
         );
-
         if (foundUser) {
           set({
             role:
@@ -56,13 +54,10 @@ export const useAuthStore = create<AuthState>()(
                   )
                 : undefined,
           });
-
           return foundUser.role as Role;
         }
-
         return null;
       },
-
       logout: () =>
         set({
           role: null,

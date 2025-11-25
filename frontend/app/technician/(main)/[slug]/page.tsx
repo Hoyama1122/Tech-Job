@@ -7,6 +7,7 @@ import JobsDetail from "@/components/Technician/slug/JobsDetail";
 
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+
 import {
   technicianReportSchema,
   TechnicianReportForm,
@@ -16,11 +17,14 @@ interface PageProps {
   params: { slug: string };
 }
 
-const page = ({ params }: PageProps) => {
+export default function page({ params }: PageProps) {
   const { slug } = params;
+
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
   const [showFormModal, setShowFormModal] = useState(false);
+
   const [formData, setFormData] = useState<TechnicianReportForm>({
     detail: "",
     inspectionResults: "",
@@ -29,24 +33,31 @@ const page = ({ params }: PageProps) => {
     technicianSignature: "",
     customerSignature: "",
   });
-const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [images, setImages] = useState<string[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [imagesBefore, setImagesBefore] = useState<string[]>([]);
+  const [imagesAfter, setImagesAfter] = useState<string[]>([]);
+
   const [currentStatus, setCurrentStatus] = useState("");
-  const [time, setTime] = useState("");
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
 
-  // Load job data
+  // โหลดข้อมูลจาก localStorage
   useEffect(() => {
     setIsLoading(true);
+
     const cardData = localStorage.getItem("CardWork");
     if (cardData) {
       const jobs = JSON.parse(cardData);
       const found = jobs.find((j: any) => j.JobId === slug);
-      setJob(found || null);
-      setCurrentStatus(found?.status || "");
+
+      if (found) {
+        setJob(found);
+        setCurrentStatus(found.status);
+      } else {
+        setJob(null);
+      }
     }
+
     setTimeout(() => setIsLoading(false), 300);
   }, [slug]);
 
@@ -61,6 +72,8 @@ const [errors, setErrors] = useState<Record<string, string>>({});
         return {
           ...j,
           status: newStatus,
+
+          // ใส่เวลาปิดงานเมื่อกดส่งรายงาน
           completedAt:
             newStatus === "รอการตรวจสอบ"
               ? new Date().toISOString()
@@ -74,6 +87,7 @@ const [errors, setErrors] = useState<Record<string, string>>({});
 
     localStorage.setItem("CardWork", JSON.stringify(updated));
 
+    // update หน้า
     setJob((prev: any) => ({
       ...prev,
       status: newStatus,
@@ -87,53 +101,6 @@ const [errors, setErrors] = useState<Record<string, string>>({});
     setCurrentStatus(newStatus);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImages((prev) => [...prev, event.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleSubmit = () => {
-  const result = technicianReportSchema.safeParse(formData);
-
-  if (!result.success) {
-   
-    const formErrors: Record<string, string> = {};
-    result.error.issues.forEach(issue => {
-      const field = issue.path[0] as string; 
-      formErrors[field] = issue.message;
-    });
-
-    setErrors(formErrors);
-
-    toast.warning("กรุณาตรวจสอบข้อมูลอีกครั้ง");
-    return;
-  }
-
-  // ถ้าถูกต้อง → ล้าง error
-  setErrors({});
-
-  const validData = result.data;
-
-  const reportData = {
-    ...validData,
-    images,
-    submittedAt: new Date().toISOString(),
-  };
-
-  updateJobStatus("รอการตรวจสอบ", reportData);
-  setShowFormModal(false);
-  toast.success("บันทึกข้อมูลสำเร็จ!");
-};
-
-
   const handleStartJob = () => {
     updateJobStatus("กำลังทำงาน");
     toast.success("เริ่มงานสำเร็จ!");
@@ -142,13 +109,47 @@ const [errors, setErrors] = useState<Record<string, string>>({});
   const handleCompleteJob = () => {
     setShowFormModal(true);
   };
+
+  const handleSubmitReport = () => {
+    const result = technicianReportSchema.safeParse({
+      ...formData,
+      imagesBefore,
+      imagesAfter,
+    });
+
+    if (!result.success) {
+      const formErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        formErrors[issue.path[0]] = issue.message;
+      });
+      setErrors(formErrors);
+      toast.warning("กรุณาตรวจสอบข้อมูลอีกครั้ง");
+      return;
+    }
+
+    setErrors({});
+
+    const validData = result.data;
+
+    const reportData = {
+      ...validData,
+      imagesBefore,
+      imagesAfter,
+      submittedAt: new Date().toISOString(),
+    };
+
+    updateJobStatus("รอการตรวจสอบ", reportData);
+
+    setShowFormModal(false);
+    toast.success("บันทึกรายงานปิดงานสำเร็จ!");
+  };
+
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
       กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
       สำเร็จ: "bg-green-100 text-green-700 border-green-200",
-      รอการดำเนินงาน: "bg-primary text-white ",
+      รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
       รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
-      รอการมอบหมายงาน: "bg-purple-100 text-purple-700 border-purple-200",
     };
 
     return (
@@ -161,6 +162,7 @@ const [errors, setErrors] = useState<Record<string, string>>({});
       </span>
     );
   };
+
   if (isLoading)
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -176,11 +178,17 @@ const [errors, setErrors] = useState<Record<string, string>>({});
       </div>
     );
 
+  if (!job)
+    return (
+      <div className="p-6 text-center text-gray-600">
+        ไม่พบข้อมูลงานหมายเลข {slug}
+      </div>
+    );
+
   return (
-    <div className="max-w-4xl mx-auto p-2 ">
+    <div className="max-w-4xl mx-auto p-2">
       <div className="relative space-y-2">
         <HeaderSlugTechni job={job} getStatusBadge={getStatusBadge} />
-
         <JobsDetail job={job} />
       </div>
 
@@ -204,20 +212,20 @@ const [errors, setErrors] = useState<Record<string, string>>({});
         </button>
       )}
 
+      {/* MODAL FORM */}
       {showFormModal && (
         <FormModal
           formData={formData}
           setFormData={setFormData}
-          images={images}
-          setImages={setImages}
-          handleImageUpload={handleImageUpload}
-          handleSubmit={handleSubmit}
+          imagesBefore={imagesBefore}
+          setImagesBefore={setImagesBefore}
+          imagesAfter={imagesAfter}
+          setImagesAfter={setImagesAfter}
+          handleSubmit={handleSubmitReport}
           setShowFormModal={setShowFormModal}
           errors={errors}
         />
       )}
     </div>
   );
-};
-
-export default page;
+}

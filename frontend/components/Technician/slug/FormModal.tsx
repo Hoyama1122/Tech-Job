@@ -8,23 +8,55 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import SignatureField from "./SignatureField";
 
 const FormModal = ({
   formData,
   setFormData,
-  images,
-  setImages,
-  handleImageUpload,
+  imagesBefore,
+  setImagesBefore,
+  imagesAfter,
+  setImagesAfter,
   handleSubmit,
   setShowFormModal,
   errors,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const uploadBeforeRef = useRef<HTMLInputElement>(null);
+  const uploadAfterRef = useRef<HTMLInputElement>(null);
 
-  const removeImage = (index: number) => {
-    setImages((prev: string[]) => prev.filter((_, i) => i !== index));
+  const handleUploadBefore = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagesBefore((prev) => [...prev, event.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleUploadAfter = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagesAfter((prev) => [...prev, event.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeBefore = (i: number) => {
+    setImagesBefore((p) => p.filter((_, idx) => idx !== i));
+  };
+  const removeAfter = (i: number) => {
+    setImagesAfter((p) => p.filter((_, idx) => idx !== i));
   };
 
   const handleFormSubmit = async () => {
@@ -57,49 +89,87 @@ const FormModal = ({
 
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Images Section */}
+          {/* BEFORE WORK SECTION */}
           <div className="space-y-3">
             <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <ImageIcon className="w-4 h-4 text-primary" />
-              รูปภาพประกอบ{" "}
-              <span className="text-gray-400 font-normal">
-                ({images.length}/5)
-              </span>
+              รูปก่อนทำงาน{" "}
+              <span className="text-gray-400">({imagesBefore.length}/5)</span>
             </label>
 
-            <div>
-              <button
-                className="px-4 py-2 rounded-lg bg-primary text-white text-sm hover:bg-primary/90 transition"
-                onClick={() => document.getElementById("uploadInput")?.click()}
-              >
-                อัปโหลดรูปภาพ
-              </button>
+            <button
+              className="px-4 py-2 rounded-lg bg-primary text-white text-sm hover:bg-primary/90"
+              onClick={() => uploadBeforeRef.current?.click()}
+            >
+              อัปโหลดรูปก่อนทำงาน
+            </button>
 
-              <input
-                id="uploadInput"
-                type="file"
-                multiple
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-            </div>
+            <input
+              ref={uploadBeforeRef}
+              id="uploadBefore"
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={handleUploadBefore}
+            />
 
-            {/* Preview รูป */}
-            {images.length > 0 && (
+            {/* Preview */}
+            {imagesBefore.length > 0 && (
               <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mt-2">
-                {images.map((img, i) => (
-                  <div key={i} className="relative ">
+                {imagesBefore.map((img, i) => (
+                  <div key={i} className="relative">
                     <img
                       src={img}
-                      alt={`Preview ${i + 1}`}
                       className="w-full h-20 object-cover rounded-lg border"
                     />
-
-                    {/* ปุ่มลบ */}
                     <button
-                      onClick={() => removeImage(i)}
-                      className="absolute -top-2 -right-2  text-white rounded-full w-6 h-6 flex items-center justify-center text-xs  transition-opacity bg-red-600"
+                      className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                      onClick={() => removeBefore(i)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* AFTER WORK SECTION */}
+          <div className="space-y-3 mt-6">
+            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-primary" />
+              รูปหลังทำงาน{" "}
+              <span className="text-gray-400">({imagesAfter.length}/5)</span>
+            </label>
+
+            <button
+              className="px-4 py-2 rounded-lg bg-primary text-white text-sm hover:bg-primary/90"
+              onClick={() => uploadAfterRef.current?.click()}
+            >
+              อัปโหลดรูปหลังทำงาน
+            </button>
+
+            <input
+              ref={uploadAfterRef}
+              id="uploadAfter"
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={handleUploadAfter}
+            />
+
+            {imagesAfter.length > 0 && (
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mt-2">
+                {imagesAfter.map((img, i) => (
+                  <div key={i} className="relative">
+                    <img
+                      src={img}
+                      className="w-full h-20 object-cover rounded-lg border"
+                    />
+                    <button
+                      className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                      onClick={() => removeAfter(i)}
                     >
                       ×
                     </button>

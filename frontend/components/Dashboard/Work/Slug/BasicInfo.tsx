@@ -8,7 +8,7 @@ export default function BasicInfoCard({ job }: any) {
     กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
     ตีกลับ: "bg-red-100 text-red-700 border-red-200",
     รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
-    รอการดำเนินงาน: "bg-purple-100 text-purple-700 border-purple-200",
+    รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
   };
 
   return (

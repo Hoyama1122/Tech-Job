@@ -17,6 +17,7 @@ const defaultCenter = {
 
 export default function Map({
   onLocationSelect,
+  
 }: {
   onLocationSelect: (pos: { lat: number; lng: number }) => void;
 }) {
@@ -25,7 +26,6 @@ export default function Map({
   });
 
   const [markerPos, setMarkerPos] = useState<any>(null);
-
 
   const handleMapClick = useCallback(
     (e: google.maps.MapMouseEvent) => {
@@ -38,7 +38,6 @@ export default function Map({
 
       setMarkerPos(pos);
 
-    
       if (onLocationSelect) {
         onLocationSelect(pos);
       }
@@ -46,8 +45,7 @@ export default function Map({
     [onLocationSelect]
   );
   console.log(markerPos);
-  if (loadError)
-    return <div>เกิดข้อผิดพลาดในการโหลดแผนที่</div>;
+  if (loadError) return <div>เกิดข้อผิดพลาดในการโหลดแผนที่</div>;
 
   if (!isLoaded)
     return (
@@ -66,10 +64,8 @@ export default function Map({
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
-
       }}
     >
-      {/* 🔥 Marker */}
       {markerPos && <Marker position={markerPos} />}
     </GoogleMap>
   );

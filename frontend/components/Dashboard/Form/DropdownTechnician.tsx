@@ -1,38 +1,41 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Wrench, ChevronDown, Check, X, Users, AlertCircle, Loader2 } from "lucide-react";
+import {
+  Wrench,
+  ChevronDown,
+  Check,
+  X,
+  Users,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
-export default function DropdownTechnician() {
+export default function DropdownTechnician({
+  technicians,
+}: {
+  technicians: any[];
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTechs, setSelectedTechs] = useState<any[]>([]);
   const [techList, setTechList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const ref = useRef<HTMLDivElement>(null);
-  const { register, setValue, formState: { errors } } = useFormContext();
+  const {
+    register,
+    setValue,
+    formState: { errors },
+  } = useFormContext();
 
-  // โหลดข้อมูลช่างจาก localStorage
+  // รับ technicians จาก props ไม่โหลด localStorage อีกแล้ว
   useEffect(() => {
-    const loadTechnicians = () => {
-      try {
-        setIsLoading(true);
-        const users = JSON.parse(localStorage.getItem("Users") || "[]");
-        const technicians = users.filter((u) => u.role === "technician");
-        setTechList(technicians);
-      } catch (error) {
-        console.error("Failed to load technicians:", error);
-        setTechList([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setTechList(technicians);
+    setIsLoading(false);
+  }, [technicians]);
 
-    loadTechnicians();
-  }, []);
-
-  // ปิด dropdown เมื่อกดนอกกรอบ
+  // ปิด dropdown เมื่อคลิกรอบนอก
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -50,13 +53,17 @@ export default function DropdownTechnician() {
 
     setSelectedTechs(updated);
 
-    // อัพเดตค่าใน react-hook-form
-    setValue("technicianId", updated.map((t) => t.id), {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    // update react-hook-form
+    setValue(
+      "technicianId",
+      updated.map((t) => t.id),
+      {
+        shouldValidate: true,
+        shouldDirty: true,
+      }
+    );
 
-    // Auto-assign supervisor จากช่างคนแรก
+    // auto assign supervisor
     if (updated.length > 0) {
       const users = JSON.parse(localStorage.getItem("Users") || "[]");
       const supervisor = users.find(
@@ -78,95 +85,80 @@ export default function DropdownTechnician() {
         ช่างผู้รับผิดชอบ <span className="text-red-500">*</span>
       </label>
 
-      {/* Hidden inputs */}
-      <input type="hidden" {...register("technicianId", { required: "กรุณาเลือกช่างเทคนิคอย่างน้อย 1 คน" })} />
+      <input
+        type="hidden"
+        {...register("technicianId", {
+          required: "กรุณาเลือกช่างเทคนิคอย่างน้อย 1 คน",
+        })}
+      />
       <input type="hidden" {...register("supervisorId")} />
 
-      {/* Selected Technicians Chips */}
+      {/* Selected chips */}
       {selectedTechs.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {selectedTechs.map((tech) => (
             <div
               key={tech.id}
-              className="flex items-center gap-2 bg-gradient-to-r from-primary/10 to-primary/5 text-primary px-3 py-1.5 rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200 group"
+              className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm font-medium"
             >
-              <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+              <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
                 {tech.name.charAt(0)}
               </div>
-              <span className="flex-1">{tech.name}</span>
-              <button
-                type="button"
-                onClick={() => toggleTech(tech)}
-                className="p-0.5 rounded-full hover:bg-red-100 transition-colors flex-shrink-0"
-              >
-                <X size={14} className="text-red-500 group-hover:text-red-700" />
+              <span>{tech.name}</span>
+              <button type="button" onClick={() => toggleTech(tech)}>
+                <X size={14} className="text-red-500" />
               </button>
             </div>
           ))}
         </div>
       )}
 
-      {/* Dropdown Button */}
+      {/* Dropdown */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-4 py-3 rounded-lg border bg-white flex items-center justify-between transition-all duration-200 ${
-          isOpen
-            ? "border-primary ring-2 ring-primary/20"
-            : "border-gray-300 hover:border-gray-400"
-        } ${errors.technicianId ? "border-red-500 ring-2 ring-red-500/20" : ""}`}
+        className={`w-full px-4 py-3 rounded-lg border bg-white flex items-center justify-between ${
+          isOpen ? "border-primary ring-2 ring-primary/20" : "border-gray-300"
+        }`}
       >
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 bg-gray-100 rounded-md">
-            <Wrench className={`w-4 h-4 ${isOpen ? "text-primary" : "text-gray-600"}`} />
-          </div>
-          <span className="text-sm font-medium text-gray-700">
-            {selectedTechs.length > 0
-              ? `เลือกแล้ว ${selectedTechs.length} คน`
-              : "เลือกช่างเทคนิค (เลือกได้หลายคน)"}
-          </span>
-        </div>
+        <span className="text-sm">
+          {selectedTechs.length > 0
+            ? `เลือกแล้ว ${selectedTechs.length} คน`
+            : "เลือกช่างเทคนิค (เลือกได้หลายคน)"}
+        </span>
         <ChevronDown
-          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+          className={`w-5 h-5 transition ${
             isOpen ? "rotate-180 text-primary" : ""
           }`}
         />
       </button>
 
-      {/* Error Message */}
       {errors.technicianId && (
-        <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
+        <div className="mt-2 text-sm text-red-500 flex items-center gap-2">
           <AlertCircle className="w-4 h-4" />
           {errorMessage}
         </div>
       )}
 
-      {/* Dropdown Menu */}
+      {/* Menu */}
       <div
-        className={`absolute w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden z-50 transition-all duration-200 ${
-          isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+        className={`absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 transition-all ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        {/* Loading State */}
         {isLoading && (
           <div className="px-4 py-6 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-              <span className="text-sm text-gray-500">กำลังโหลดข้อมูล...</span>
-            </div>
+            <Loader2 className="w-4 h-4 animate-spin text-gray-400 mx-auto" />
+            <p className="text-sm text-gray-500 mt-2">กำลังโหลดข้อมูล...</p>
           </div>
         )}
 
-        {/* Empty State */}
         {!isLoading && techList.length === 0 && (
-          <div className="px-4 py-6 text-center">
-            <Users className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">ไม่พบข้อมูลช่างเทคนิค</p>
-            <p className="text-xs text-gray-400 mt-1">กรุณาเพิ่มช่างเทคนิคก่อน</p>
+          <div className="px-4 py-6 text-center text-gray-500">
+            ไม่พบช่างเทคนิค
           </div>
         )}
 
-        {/* Technician List */}
         {!isLoading && techList.length > 0 && (
           <div className="max-h-64 overflow-y-auto">
             {techList.map((tech) => {
@@ -177,11 +169,7 @@ export default function DropdownTechnician() {
                   type="button"
                   onClick={() => toggleTech(tech)}
                   disabled={isSelected}
-                  className={`w-full px-4 py-3 flex items-center justify-between transition-all duration-150 ${
-                    isSelected
-                      ? "bg-primary/5 cursor-not-allowed opacity-60"
-                      : "hover:bg-gray-50"
-                  }`}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-3">
                     <div
@@ -203,7 +191,7 @@ export default function DropdownTechnician() {
                       </div>
                     </div>
                   </div>
-                  {isSelected && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
+                  {isSelected && <Check className="w-4 h-4 text-primary" />}
                 </button>
               );
             })}
