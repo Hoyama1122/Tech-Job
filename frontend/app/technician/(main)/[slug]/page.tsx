@@ -136,7 +136,7 @@ const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleStartJob = () => {
     updateJobStatus("กำลังทำงาน");
-    alert("เริ่มงานแล้ว!");
+    toast.success("เริ่มงานสำเร็จ!");
   };
 
   const handleCompleteJob = () => {

@@ -89,7 +89,7 @@ const FormModal = ({
             {images.length > 0 && (
               <div className="grid grid-cols-3 md:grid-cols-5 gap-3 mt-2">
                 {images.map((img, i) => (
-                  <div key={i} className="relative group">
+                  <div key={i} className="relative ">
                     <img
                       src={img}
                       alt={`Preview ${i + 1}`}
@@ -99,7 +99,7 @@ const FormModal = ({
                     {/* ปุ่มลบ */}
                     <button
                       onClick={() => removeImage(i)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      className="absolute -top-2 -right-2  text-white rounded-full w-6 h-6 flex items-center justify-center text-xs  transition-opacity bg-red-600"
                     >
                       ×
                     </button>

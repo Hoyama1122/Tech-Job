@@ -16,6 +16,7 @@ export type CardWorkTypes = {
   JobId: string;
   title: string;
   description: string;
+
   status:
     | "รอการตรวจสอบ"
     | "กำลังทำงาน"
@@ -40,10 +41,11 @@ export type CardWorkTypes = {
   leadTechnicianId?: number;
 
   image: StaticImageData;
-  imagesBefore?: string[];
-  imagesAfter?: string[];
 
-  loc: { lat: number; lng: number };
+  loc: {
+    lat: number;
+    lng: number;
+  };
 
   category?: "ไฟฟ้า" | "แอร์" | "ประปา" | "ระบบสื่อสาร" | "ทั่วไป";
 
@@ -61,11 +63,15 @@ export type CardWorkTypes = {
     cost?: number;
     repairOperations?: string;
     summaryOfOperatingResults?: string;
+
     technicianSignature?: string | null;
     customerSignature?: string | null;
+
     startTime?: string | null; 
-    endTime?: string | null; 
-    images?: string[];
+    endTime?: string | null;   
+
+    imagesBefore?: string[];   
+    imagesAfter?: string[];   
   } | null;
 
   rejectReason?: string | null;
@@ -76,6 +82,7 @@ export type CardWorkTypes = {
     time: string;
   }[];
 };
+
 
 export const CardWork: CardWorkTypes[] = [
   {
