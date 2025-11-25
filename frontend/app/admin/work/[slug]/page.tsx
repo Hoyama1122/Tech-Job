@@ -13,6 +13,7 @@ import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
+import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -24,7 +25,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(true);
-
+  const [showEditModal, setShowEditModal] = React.useState(false);
   React.useEffect(() => {
     setIsLoading(true);
 
@@ -72,8 +73,8 @@ export default function WorkDetailPage({ params }: PageProps) {
 
   return (
     <div>
-      <div className="p-4">
-        <Header job={job} pdfRef={pdfRef} />
+      <div className="p-4 h-[calc(100vh-64px)] overflow-y-auto">
+        <Header job={job} pdfRef={pdfRef} setShowEditModal={setShowEditModal} />
 
         <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
           <div className="space-y-4">
@@ -85,11 +86,19 @@ export default function WorkDetailPage({ params }: PageProps) {
           <Sidebar job={job} />
         </div>
       </div>
+      {showEditModal && (
+        <EditWorkModal
+          job={job}
+          onClose={() => setShowEditModal(false)}
+          onSave={(updated) => setJob(updated)}
+        />
+      )}
+
       <div
         ref={pdfRef}
         className="absolute opacity-0 pointer-events-none -z-50 top-0 left-0"
       >
-        <PDFWorkOrder  job={job} />
+        <PDFWorkOrder job={job} />
       </div>
     </div>
   );

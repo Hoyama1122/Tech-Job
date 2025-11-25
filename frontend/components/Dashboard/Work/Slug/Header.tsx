@@ -1,8 +1,15 @@
-import { FileText, Download, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import {
+  FileText,
+  Download,
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  Edit,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateWorkPDF } from "@/lib/pdf/generateWorkPDF";
 
-export default function Header({ job, pdfRef, onApprove, onReject }: any) {
+export default function Header({ job, pdfRef, onApprove, onReject, setShowEditModal }: any) {
   const router = useRouter();
 
   const handleDownload = async () => {
@@ -12,7 +19,6 @@ export default function Header({ job, pdfRef, onApprove, onReject }: any) {
 
   return (
     <div className="flex items-center justify-between mb-6">
-
       {/* Back + Title */}
       <div className="flex items-center gap-4">
         <button
@@ -35,8 +41,14 @@ export default function Header({ job, pdfRef, onApprove, onReject }: any) {
 
       {/* Buttons */}
       <div className="flex items-center gap-3">
-
-        {/* Reject Button */}
+        <button
+         onClick={() => setShowEditModal(true)}
+          className="flex items-center gap-2 bg-primary hover:bg-primary-hover
+            text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
+        >
+          <Edit className="w-4 h-4" />
+          แก้ไขงาน
+        </button>
         <button
           onClick={onReject}
           className="flex items-center gap-2 bg-red-600 hover:bg-red-700
@@ -46,17 +58,15 @@ export default function Header({ job, pdfRef, onApprove, onReject }: any) {
           ตีกลับงาน
         </button>
 
-        
         <button
           onClick={onApprove}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-hover
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600
             text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
         >
           <CheckCircle className="w-4 h-4" />
           อนุมัติงานสำเร็จ
         </button>
 
-      
         <button
           onClick={handleDownload}
           className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 
