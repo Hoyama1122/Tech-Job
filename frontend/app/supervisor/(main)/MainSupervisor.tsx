@@ -1,9 +1,11 @@
 "use client";
 
+import Activities from '@/components/Dashboard/Activities';
 import CardWork from '@/components/Dashboard/CardWork';
 import RenderModal from '@/components/Dashboard/Summary/RenderModal';
 import Summary from '@/components/Dashboard/Summary/Summary';
-import { ClipboardList, Clock, File, FileClock, Filter, Users } from 'lucide-react';
+import TeamMap from '@/components/Supervisor/Map/MapContainer';
+import { ClipboardList, Clock, File, FileClock, Filter, MapPin, Users } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react'
 
 
@@ -42,7 +44,7 @@ export default function MainSupervisor() {
         (u: any) => String(u.id) === String(parsedAuth.state.userId)
       )
 
-      if(currentSupervisor) {
+      if (currentSupervisor) {
         setSupervisorsDepartment(currentSupervisor.department);
       }
 
@@ -79,7 +81,8 @@ export default function MainSupervisor() {
 
   const filteredCard = useMemo(() => {
     return card.filter((job: any) => {
-      const matchesStatus = statusFilter === "all" || job.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" ? job.status !== "สำเร็จ" : job.status === statusFilter;
 
       const searchLower = searchTerm.toLowerCase().trim();
       const matchesSearch =
@@ -100,11 +103,11 @@ export default function MainSupervisor() {
     ).length;
 
 
-    const technicians = users.filter((u:any) => u.role === "technician" ).length;
+    const technicians = users.filter((u: any) => u.role === "technician").length;
 
-    const waitingJobs = card.filter((j:any) => j.status === "รอการตรวจสอบ").length;
+    const waitingJobs = card.filter((j: any) => j.status === "รอการตรวจสอบ").length;
 
-    const inProgressJobs = card.filter((j:any) => j.status === "กำลังทำงาน").length;
+    const inProgressJobs = card.filter((j: any) => j.status === "กำลังทำงาน").length;
 
     const baseStats = [
       {
@@ -141,15 +144,7 @@ export default function MainSupervisor() {
       },
     ]
 
-    if (searchTerm || statusFilter !== "all") {
-      return [
-        ...baseStats
-      ];
-    }
-
-    return [
-      ...baseStats,
-    ];
+    return baseStats;
   }, [users, card, filteredCard, searchTerm, statusFilter]);
 
   const itemPerPage = 6;
@@ -203,7 +198,7 @@ export default function MainSupervisor() {
       </div>
 
       {/* summary */}
-      <Summary summary={summary} onSelect={(item:any) => setDetail(item)} />
+      <Summary summary={summary} onSelect={(item: any) => setDetail(item)} />
 
       <RenderModal
         detail={detail}
@@ -244,7 +239,7 @@ export default function MainSupervisor() {
                   <option value="กำลังทำงาน">กำลังทำงาน</option>
                   <option value="รอการตรวจสอบ">รอการตรวจสอบ</option>
                   <option value="ตีกลับ">ตีกลับ</option>
-                  
+
                 </select>
               </div>
             </div>
@@ -273,7 +268,25 @@ export default function MainSupervisor() {
           </div>
 
         </div>
+        
+        {/* Right Bar */}
+        <div>
+          {/* Map */}
+          <div className="bg-white/90 rounded-lg shadow-md p-4">
+            <h1 className="text-base md:text-lg font-bold text-text mb-4 flex items-center gap-2">
+              <MapPin size={20} /> แผนที่ภาพรวม
+            </h1>
+            <TeamMap jobs={filteredCard} users={users} />
+          </div>
+
+            {/* log */}
+          <div>
+            <Activities/>
+          </div>
+        </div>
       </div>
+
+
     </div>
   )
 }

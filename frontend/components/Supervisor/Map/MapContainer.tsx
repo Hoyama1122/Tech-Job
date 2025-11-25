@@ -12,7 +12,7 @@ import { CircleCheck, Loader2, Phone, User } from "lucide-react";
 
 const containerStyle = {
   width: "100%",
-  height: "400px",
+  height: "300px",
   borderRadius: "12px",
 };
 
@@ -32,7 +32,7 @@ const getIconByStatus = (status: string) => {
   };
 };
 
-const TeamMap = () => {
+
 const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -95,7 +95,6 @@ const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
               key={m.id}
               position={{ lat, lng }}
               icon={getIconByStatus(m.status)}
-              onClick={() => setSelectedMember(m)}
               onClick={() => handleMarkerClick(m)}
               title={m.title}
             />
