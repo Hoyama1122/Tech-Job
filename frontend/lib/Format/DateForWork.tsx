@@ -1,4 +1,4 @@
-const DateFormat = (dateString) => {
+const DateFormatWork = (dateString) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "ไม่สามารถอ่านวันที่ได้";
@@ -15,4 +15,4 @@ const DateFormat = (dateString) => {
   return `${day} ${month} ${year} `;
 };
 
-export default DateFormat;
+export default DateFormatWork;

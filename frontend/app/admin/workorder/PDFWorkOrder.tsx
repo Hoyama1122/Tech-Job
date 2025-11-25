@@ -1,67 +1,29 @@
 "use client";
 import React, { useRef } from "react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import "./workorder.css"; // ถ้ามีจะใช้แค่ layout ภายนอก
+import "./workorder.css";
+import formatThaiDateTime from "@/lib/Format/DateFormatThai";
+import DateFormatWork from "@/lib/Format/DateForWork";
 
-const Page = () => {
-  const pdfRef = useRef<HTMLDivElement>(null);
 
-  const handleDownloadPDF = async () => {
-    const input = pdfRef.current;
-    if (!input) return;
-
-    const canvas = await html2canvas(input, {
-      scale: 1.2,
-      backgroundColor: "#ffffff",
-      useCORS: true,
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = (canvas.height * pageWidth) / canvas.width;
-
-    pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
-
-    // แปลงเป็น blob แล้วเปิดแท็บใหม่
-    const pdfBlob = pdf.output("blob");
-    const pdfURL = URL.createObjectURL(pdfBlob);
-    window.open(pdfURL, "_blank");
-  };
+export const PDFWorkOrder = ({ job }) => {
+  console.log(job);
 
   return (
     <div className="p-4">
-      <button
-        onClick={handleDownloadPDF}
-        style={{
-          marginTop: 0,
-          backgroundColor: "#2563eb",
-          color: "#fff",
-          padding: "6px 10px",
-          borderRadius: "8px",
-          cursor: "pointer",
-        }}
-      >
-        เปิด PDF
-      </button>
-
       <div className="flex flex-col mt-4 px-4">
         {/* PDF */}
         <div
-          ref={pdfRef}
           style={{
             fontFamily:
               "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
             backgroundColor: "#ffffff",
             color: "#111827",
-            padding: "24px",
+            overflow: "hidden",
             width: "800px",
             height: "1200px",
+            padding: "24px",
             margin: "0 auto 40px auto",
-
-            border: "1px solid #e5e7eb",
+            boxSizing: "border-box",
           }}
         >
           {/* header บริษัท */}
@@ -146,16 +108,25 @@ const Page = () => {
             }}
           >
             <div style={{ flex: 1 }}>
-              <Row label="รหัสใบงาน" value="JOB_001" />
-              <Row label="ชื่องาน" value="ตรวจสอบระบบไฟฟ้าอาคารสำนักงาน" />
-              <Row label="ลูกค้า" value="บริษัท ตัวอย่าง จำกัด" />
-              <Row label="สถานที่" value="อาคาร A ชั้น 5 ห้องเครื่อง" />
+              <Row label="รหัสใบงาน" value={job.JobId} />
+              <Row label="ชื่องาน" value={job.title} />
+              <Row label="ลูกค้า" value={job.customer?.name} />
+              <Row label="สถานที่" value={job.customer?.address} />
             </div>
             <div style={{ flex: 1 }}>
-              <Row label="วันที่แจ้งงาน" value="10/11/2025 09:30" />
-              <Row label="วันที่เริ่มทำงาน" value="11/11/2025 12:00" />
-              <Row label="วันที่สิ้นสุดงาน" value="11/11/2025 17:00" />
-              <Row label="เบอร์โทรลูกค่า" value="0934125122" />
+              <Row
+                label="วันที่แจ้งงาน"
+                value={DateFormatWork(job.createdAt)}
+              />
+              <Row
+                label="วันที่เริ่มทำงาน"
+                value={DateFormatWork(job.dateRange?.startAt)}
+              />
+              <Row
+                label="วันที่สิ้นสุดงาน"
+                value={DateFormatWork(job.dateRange?.endAt)}
+              />
+              <Row label="เบอร์โทรลูกค้า" value={job.customer?.phone} />
             </div>
           </div>
 
@@ -195,7 +166,7 @@ const Page = () => {
             </ul>
           </Section>
           {/*  */}
-          <Section title="อุปกรณ์ที่ใช้ในงาน">
+          {/* <Section title="อุปกรณ์ที่ใช้ในงาน">
             <table
               style={{
                 width: "100%",
@@ -218,7 +189,7 @@ const Page = () => {
                 </Tr>
               </tbody>
             </table>
-          </Section>
+          </Section> */}
 
           {/* ตารางทีมช่าง */}
           <Section title="ทีมช่างที่เข้าดำเนินการ">
@@ -236,26 +207,20 @@ const Page = () => {
                   <Th>ตำแหน่ง</Th>
                   <Th>เวลาเริ่ม</Th>
                   <Th>เวลาเสร็จ</Th>
-                  <Th>ชั่วโมงรวม</Th>
                 </tr>
               </thead>
               <tbody>
-                <Tr>
-                  <Td center>1</Td>
-                  <Td>นายโฟล์ค เทสระบบ</Td>
-                  <Td>หัวหน้าช่างไฟ</Td>
-                  <Td center>10:00</Td>
-                  <Td center>14:30</Td>
-                  <Td center>4.5</Td>
-                </Tr>
-                <Tr>
-                  <Td center>2</Td>
-                  <Td>นายเอ ช่างผู้ช่วย</Td>
-                  <Td>ผู้ช่วยช่างไฟ</Td>
-                  <Td center>10:00</Td>
-                  <Td center>14:30</Td>
-                  <Td center>4.5</Td>
-                </Tr>
+                {job.technician?.map((tech, index) => (
+                  <Tr key={tech.id}>
+                    <Td center>{index + 1}</Td>
+                    <Td>{tech.name}</Td>
+                    <Td>{tech.department}</Td>
+
+                    {/* เอาเวลามาจาก job.dateRange */}
+                    <Td>{formatThaiDateTime(job.dateRange.startAt)}</Td>
+                    <Td>{formatThaiDateTime(job.dateRange.endAt)}</Td>
+                  </Tr>
+                ))}
               </tbody>
             </table>
           </Section>
@@ -408,5 +373,3 @@ const SignatureBox = ({
     )}
   </div>
 );
-
-export default Page;

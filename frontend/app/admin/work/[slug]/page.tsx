@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useRef } from "react";
 import React from "react";
 import { notFound, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-
 import NotFoundPage from "@/components/Dashboard/Work/Slug/NotFoundPage";
 import Header from "@/components/Dashboard/Work/Slug/Header";
 import BasicInfoCard from "@/components/Dashboard/Work/Slug/BasicInfo";
@@ -12,16 +12,16 @@ import DescriptionCard from "@/components/Dashboard/Work/Slug/DescriptionCard";
 import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
+import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
-
 export default function WorkDetailPage({ params }: PageProps) {
   const router = useRouter();
 
   const { slug } = React.use(params);
-
+  const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -47,8 +47,7 @@ export default function WorkDetailPage({ params }: PageProps) {
 
           const technicians = users.filter(
             (u: any) =>
-              u.role === "technician" &&
-              found.technicianId?.includes(u.id)
+              u.role === "technician" && found.technicianId?.includes(u.id)
           );
 
           setJob({
@@ -72,17 +71,25 @@ export default function WorkDetailPage({ params }: PageProps) {
   if (!job) return <NotFoundPage jobId={slug} />;
 
   return (
-    <div className="p-4">
-      <Header job={job} />
+    <div>
+      <div className="p-4">
+        <Header job={job} pdfRef={pdfRef} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
-        <div className="space-y-4">
-          <BasicInfoCard job={job} />
-          <DescriptionCard job={job} />
-          <EvidenceCard job={job} />
+        <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
+          <div className="space-y-4">
+            <BasicInfoCard job={job} />
+            <DescriptionCard job={job} />
+            <EvidenceCard job={job} />
+          </div>
+
+          <Sidebar job={job} />
         </div>
-
-        <Sidebar job={job} />
+      </div>
+      <div
+        ref={pdfRef}
+        className="absolute opacity-0 pointer-events-none -z-50 top-0 left-0"
+      >
+        <PDFWorkOrder  job={job} />
       </div>
     </div>
   );

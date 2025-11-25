@@ -24,13 +24,12 @@ export type CardWorkTypes = {
     | "ตีกลับ"
     | "รอการดำเนินงาน";
 
-  createdAt: string; 
-  completedAt?: string; 
+  createdAt: string;
+  completedAt?: string;
 
- 
   dateRange: {
-    startAt: string | null; 
-    endAt: string | null;  
+    startAt: string | null;
+    endAt: string | null;
   };
 
   sla?: string;
@@ -62,6 +61,11 @@ export type CardWorkTypes = {
     cost?: number;
     repairOperations?: string;
     summaryOfOperatingResults?: string;
+    technicianSignature?: string | null;
+    customerSignature?: string | null;
+    startTime?: string | null; 
+    endTime?: string | null; 
+    images?: string[];
   } | null;
 
   rejectReason?: string | null;
@@ -854,7 +858,7 @@ export const CardWork: CardWorkTypes[] = [
       { by: "technician", action: "ปิดงาน", time: "2025-01-12T14:10" },
     ],
   },
-{
+  {
     id: 21,
     JobId: "JOB_021",
     title: "เบรกเกอร์ย่อยตัดบ่อย ห้องปฏิบัติการคอมพิวเตอร์",
@@ -1295,6 +1299,4 @@ export const CardWork: CardWorkTypes[] = [
       },
     ],
   },
-
 ];
-

@@ -1,11 +1,16 @@
 "use client";
 
+import DetailFromTech from "@/components/Technician/slug/DetailFromTech";
 import FormModal from "@/components/Technician/slug/FormModal";
 import HeaderSlugTechni from "@/components/Technician/slug/HeaderSlugTechni";
 import JobsDetail from "@/components/Technician/slug/JobsDetail";
-import Location from "@/components/Technician/slug/Location";
-import { FileText, Loader2, MapPin, Users } from "lucide-react";
+
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import {
+  technicianReportSchema,
+  TechnicianReportForm,
+} from "@/lib/Validations/technicianReportSchema";
 
 interface PageProps {
   params: { slug: string };
@@ -16,7 +21,7 @@ const page = ({ params }: PageProps) => {
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showFormModal, setShowFormModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TechnicianReportForm>({
     detail: "",
     inspectionResults: "",
     repairOperations: "",
@@ -24,6 +29,8 @@ const page = ({ params }: PageProps) => {
     technicianSignature: "",
     customerSignature: "",
   });
+const [errors, setErrors] = useState<Record<string, string>>({});
+
   const [images, setImages] = useState<string[]>([]);
   const [currentStatus, setCurrentStatus] = useState("");
   const [time, setTime] = useState("");
@@ -48,6 +55,7 @@ const page = ({ params }: PageProps) => {
     if (!cardData) return;
 
     const jobs = JSON.parse(cardData);
+
     const updated = jobs.map((j: any) => {
       if (j.JobId === slug) {
         return {
@@ -57,6 +65,7 @@ const page = ({ params }: PageProps) => {
             newStatus === "รอการตรวจสอบ"
               ? new Date().toISOString()
               : j.completedAt,
+
           technicianReport: reportData || j.technicianReport,
         };
       }
@@ -64,6 +73,7 @@ const page = ({ params }: PageProps) => {
     });
 
     localStorage.setItem("CardWork", JSON.stringify(updated));
+
     setJob((prev: any) => ({
       ...prev,
       status: newStatus,
@@ -73,6 +83,7 @@ const page = ({ params }: PageProps) => {
           : prev?.completedAt,
       technicianReport: reportData || prev?.technicianReport,
     }));
+
     setCurrentStatus(newStatus);
   };
 
@@ -90,25 +101,39 @@ const page = ({ params }: PageProps) => {
   };
 
   const handleSubmit = () => {
-    if (
-      !formData.detail ||
-      !formData.technicianSignature ||
-      !formData.customerSignature
-    ) {
-      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-      return;
-    }
+  const result = technicianReportSchema.safeParse(formData);
 
-    const reportData = {
-      ...formData,
-      images,
-      submittedAt: new Date().toISOString(),
-    };
+  if (!result.success) {
+   
+    const formErrors: Record<string, string> = {};
+    result.error.issues.forEach(issue => {
+      const field = issue.path[0] as string; 
+      formErrors[field] = issue.message;
+    });
 
-    updateJobStatus("รอการตรวจสอบ", reportData);
-    setShowFormModal(false);
-    alert("บันทึกข้อมูลสำเร็จ!");
+    setErrors(formErrors);
+
+    toast.warning("กรุณาตรวจสอบข้อมูลอีกครั้ง");
+    return;
+  }
+
+  // ถ้าถูกต้อง → ล้าง error
+  setErrors({});
+
+  const validData = result.data;
+
+  const reportData = {
+    ...validData,
+    images,
+    submittedAt: new Date().toISOString(),
   };
+
+  updateJobStatus("รอการตรวจสอบ", reportData);
+  setShowFormModal(false);
+  toast.success("บันทึกข้อมูลสำเร็จ!");
+};
+
+
   const handleStartJob = () => {
     updateJobStatus("กำลังทำงาน");
     alert("เริ่มงานแล้ว!");
@@ -159,6 +184,8 @@ const page = ({ params }: PageProps) => {
         <JobsDetail job={job} />
       </div>
 
+      {currentStatus === "รอการตรวจสอบ" && <DetailFromTech job={job} />}
+
       {currentStatus === "รอการดำเนินงาน" && (
         <button
           onClick={handleStartJob}
@@ -186,6 +213,7 @@ const page = ({ params }: PageProps) => {
           handleImageUpload={handleImageUpload}
           handleSubmit={handleSubmit}
           setShowFormModal={setShowFormModal}
+          errors={errors}
         />
       )}
     </div>

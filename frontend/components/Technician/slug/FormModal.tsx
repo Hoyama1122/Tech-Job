@@ -6,8 +6,10 @@ import {
   XCircle,
   Image as ImageIcon,
   FileText,
+  AlertCircle,
 } from "lucide-react";
 import { useState } from "react";
+import SignatureField from "./SignatureField";
 
 const FormModal = ({
   formData,
@@ -17,6 +19,7 @@ const FormModal = ({
   handleImageUpload,
   handleSubmit,
   setShowFormModal,
+  errors,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -121,6 +124,12 @@ const FormModal = ({
                   setFormData((prev) => ({ ...prev, detail: e.target.value }))
                 }
               />
+              {errors.detail && (
+                <div className="mt-1 flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.detail}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -139,6 +148,12 @@ const FormModal = ({
                   }))
                 }
               />
+              {errors.inspectionResults && (
+                <div className="mt-1 flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.inspectionResults}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -157,6 +172,12 @@ const FormModal = ({
                   }))
                 }
               />
+              {errors.repairOperations && (
+                <div className="mt-1 flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.repairOperations}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -175,52 +196,35 @@ const FormModal = ({
                   }))
                 }
               />
+              {errors.summaryOfOperatingResults && (
+                <div className="mt-1 flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.summaryOfOperatingResults}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Signatures */}
-          <div className="border-t border-gray-200 pt-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <User className="w-5 h-5 text-green-600" />
-              ลายเซ็นยืนยัน
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  ลายเซ็นช่าง <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  placeholder="ชื่อ-สกุล ช่าง"
-                  value={formData.technicianSignature}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      technicianSignature: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  ลายเซ็นลูกค้า <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  placeholder="ชื่อ-สกุล ลูกค้า"
-                  value={formData.customerSignature}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      customerSignature: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
+          <SignatureField
+            label="ลายเซ็นช่าง"
+            setValue={(base64) =>
+              setFormData((prev) => ({
+                ...prev,
+                technicianSignature: base64,
+              }))
+            }
+          />
+
+          <SignatureField
+            label="ลายเซ็นลูกค้า"
+            setValue={(base64) =>
+              setFormData((prev) => ({
+                ...prev,
+                customerSignature: base64,
+              }))
+            }
+          />
         </div>
 
         {/* Footer Actions */}

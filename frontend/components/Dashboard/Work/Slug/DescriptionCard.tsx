@@ -1,13 +1,29 @@
-import { FileText } from "lucide-react";
+import { FileText, Search, Wrench, CheckCircle2 } from "lucide-react";
 
 export default function DescriptionCard({ job }: any) {
   if (!job.description) return null;
 
   const reportSections = [
-    { title: "รายละเอียดอาการ", key: "detail", bg: "bg-blue-50", border: "border-blue-100" },
-    { title: "ผลการตรวจสอบ", key: "inspectionResults", bg: "bg-green-50", border: "border-green-100" },
-    { title: "การดำเนินการซ่อม", key: "repairOperations", bg: "bg-yellow-50", border: "border-yellow-100" },
-    { title: "สรุปผลการดำเนินงาน", key: "summaryOfOperatingResults", bg: "bg-purple-50", border: "border-purple-100" },
+    { 
+      title: "รายละเอียดอาการ", 
+      key: "detail", 
+      icon: <FileText className="w-5 h-5 text-blue-600" /> 
+    },
+    { 
+      title: "ผลการตรวจสอบ", 
+      key: "inspectionResults", 
+      icon: <Search className="w-5 h-5 text-green-600" /> 
+    },
+    { 
+      title: "การดำเนินการซ่อม", 
+      key: "repairOperations", 
+      icon: <Wrench className="w-5 h-5 text-yellow-600" /> 
+    },
+    { 
+      title: "สรุปผลการดำเนินงาน", 
+      key: "summaryOfOperatingResults", 
+      icon: <CheckCircle2 className="w-5 h-5 text-purple-600" /> 
+    },
   ];
 
   return (
@@ -18,24 +34,24 @@ export default function DescriptionCard({ job }: any) {
           <FileText className="w-5 h-5 text-blue-600" />
           รายละเอียดงาน
         </h2>
-        <div className="">
-          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-            {job.description}
-          </p>
-        </div>
+
+        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+          {job.description}
+        </p>
       </div>
 
       {/* Technician Report */}
       {job.technicianReport ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
           {reportSections.map((section) => (
-            <div 
-              key={section.key}
-              className={`${section.bg} ${section.border} rounded-lg p-5 border hover:shadow-md transition-shadow`}
-            >
-              <h3 className="font-semibold text-gray-900 mb-3 text-base uppercase tracking-wide">
-                {section.title}
-              </h3>
+            <div key={section.key}>
+              <div className="flex items-center gap-2 mb-2">
+                {section.icon}
+                <h3 className="font-semibold text-gray-900 text-sm tracking-wide">
+                  {section.title}
+                </h3>
+              </div>
+
               <p className="text-gray-700 text-sm whitespace-pre-wrap leading-relaxed min-h-[60px]">
                 {job.technicianReport?.[section.key] || "-"}
               </p>

@@ -61,11 +61,11 @@ const Jobs = ({ displayJobs, activeTab }) => {
 
                 <div className="flex  mt-3 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
+                    <MapPin className="w-4 h-4 text-primary" />
                     {job.customer?.address || "ไม่ระบุสถานที่"}
                   </span>
                 </div>
-                <div className="text-gray-500">
+                <div className="">
                   {formatThaiDateTime(job.createdAt)}
                 </div>
 

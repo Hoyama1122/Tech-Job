@@ -1,17 +1,24 @@
 import { FileText, Download, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { generateWorkPDF } from "@/lib/pdf/generateWorkPDF";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Header({ job }: any) {
+export default function Header({ job, pdfRef }: any) {
   const router = useRouter();
+
+  const handleDownload = async () => {
+    if (!pdfRef?.current) return;
+    await generateWorkPDF(pdfRef.current, "ใบงานช่าง_" + job.JobId );
+
+  };
 
   return (
     <div className="flex items-center justify-between mb-6">
-      {/* Left: Back + Title */}
+
+      {/* Back + Title */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="p-2 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer"
+          className="p-2 rounded-lg hover:bg-primary/10 transition"
         >
           <ArrowLeft className="w-6 h-6 text-primary" />
         </button>
@@ -27,13 +34,14 @@ export default function Header({ job }: any) {
         </div>
       </div>
 
-      {/* Right: Download */}
+      {/* Download Button */}
       <button
-        onClick={() => alert("กำลังดาวน์โหลด...")}
-        className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+        onClick={handleDownload}
+        className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 
+        text-primary py-2 px-4 rounded-lg text-sm font-medium transition"
       >
         <Download className="w-4 h-4" />
-        ดาวน์โหลด
+        ดาวน์โหลด PDF
       </button>
     </div>
   );
