@@ -1,8 +1,13 @@
 import SummaryModal from "./SummaryModal";
 import SupervisorListModal from "./SupervisorListModal";
 import TechnicianListModal from "./TechnicianListModal";
+import TechnicianListModalDepartment from "./TechnicianListModalDepartment";
 
 const RenderModal = ({ detail, users, card, onClose, }) => {
+
+  const auth = localStorage.getItem("auth-storage");
+  const parsedAuth = auth ? JSON.parse(auth) : [];
+
 
   if (!detail) return null;
   
@@ -11,6 +16,14 @@ const RenderModal = ({ detail, users, card, onClose, }) => {
       return (
         <TechnicianListModal
           technicians={users.filter(u => u.role === "technician")}
+          onClose={() => onClose()}
+        />
+      );
+
+    case "techniciansDepartment":
+      return (
+        <TechnicianListModalDepartment
+          technicians={users.filter(u => u.role === "technician" && u.department === parsedAuth.state.department)}
           onClose={() => onClose()}
         />
       );

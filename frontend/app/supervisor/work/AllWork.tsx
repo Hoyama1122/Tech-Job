@@ -1,118 +1,166 @@
-"use client";
-import React, { useEffect, useMemo, useState } from "react";
-import Card from "@/components/Supervisor/work/Card";
-import { ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
-import { AppLoader } from "@/store/AppLoader";
-import { Users } from "@/lib/Mock/UserMock";
-import { useAuthStore } from "@/store/useAuthStore";
+'use client';
 
-const STORAGE_KEY = "CardWork";
+import LoadingSkeleton from "@/components/Dashboard/Work/LoadingSkeleton";
+import EmptyState from "@/components/Dashboard/Work/EmptyState";
+import SearchBar from "@/components/Supervisor/work/SearchBar";
+import StatsSummary from "@/components/Supervisor/work/StatsSum";
+import DateFormat from "@/lib/Format/DateFormat";
+import { Calendar, ClipboardList } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import JobWork from "@/components/Supervisor/work/JobWork";
 
-const Allwork = () => {
-  const [jobs, setjobs] = useState([])
-  const { userId } = useAuthStore();
-  const [statusSearch, setStatusSearch] = useState("ทั้งหมด");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
-  useEffect(() => {
-    const cardWork = localStorage.getItem("CardWork");
-    if (cardWork) {
-      setjobs(JSON.parse(cardWork));
-    }
-    if(!cardWork) {
-    console.log("ไม่มีข้อมูลในlocalstorage");
-    
-    }
-  },[setjobs])
-  const myWork = useMemo(() => {
-    if (!userId) return [];
-    return jobs.filter((work) => work.supervisorId === userId);
-  }, [jobs, userId]);
+interface Job {
+    id: string;
+    JobId: string;
+    title: string;
+    description: string;
+    status: string;
+    technician?: any[];
+    date: string;
+    createdAt: string;
+}
+export default function Work() {
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [search, setSearch] = useState('');
+    const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
+    const [isLoading, setIsLoading] = useState(true);
 
-  const filteredStatus = useMemo(() => {
-    return statusSearch === "ทั้งหมด"
-      ? myWork
-      : myWork.filter((card) => card.status === statusSearch);
-  }, [myWork, statusSearch]);
+    useEffect(() => {
+        setIsLoading(true);
 
-  const sortedWork = useMemo(() => {
-    return [...filteredStatus].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        try {
+            const cardData = localStorage.getItem("CardWork");
+            const userData = localStorage.getItem("Users"); 
+            const auth = localStorage.getItem("auth-storage");
+            
+
+            if (cardData) {
+                const parsedCards = JSON.parse(cardData);
+                const parsedUsers = userData ? JSON.parse(userData) : [];
+                const parsedAuth = auth ? JSON.parse(auth) : [];
+                console.log("Parsed Users:", parsedUsers);
+                console.log("Parsed Auth:", parsedAuth.state.userId);
+
+                const supervisorJobs = parsedCards.filter((job : any) =>
+                    String(job.supervisorId) === String(parsedAuth.state.userId)
+                );
+
+                const joinedJobs = supervisorJobs.map((job: any) => {
+                    const supervisor = parsedUsers.find((user: any) =>
+                           
+                            user.role === "supervisor" &&
+                            String(user.id) === String(job.supervisorId)
+                           
+                    );
+
+                    const jobDate = job.date || job.createdAt || job.dueDate || null;
+                    const formattedDate = jobDate
+                        ? new Date(jobDate).toLocaleString("th-TH", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                        })
+                        : "ไม่ระบุวันที่";
+                    
+                    return {
+                        ...job,
+                        supervisorName: supervisor
+                            ? { name: supervisor.name, department: supervisor.department }
+                            : { name: "ไม่ระบุ", department: "-" },
+                        formattedDate,
+                    };
+                });
+
+                setJobs(joinedJobs);
+            }
+        } catch (error) {
+            console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+        } finally {
+            setTimeout(() => setIsLoading(false), 400);
+        }
+    }, [setJobs])
+
+    const filteredJobs = useMemo(() => {
+        if (!jobs.length) return [];
+
+        return jobs.filter((job) => {
+            const title = job.title?.toLowerCase() || "";
+            const jobId = job.JobId?.toLowerCase() || "";
+            const desc = job.description?.toLowerCase() || "";
+            const status = job.status?.trim() || "";
+            const searchTerm = search.toLowerCase().trim();
+
+            const matchSearch =
+                searchTerm === "" ||
+                title.includes(searchTerm) ||
+                jobId.includes(searchTerm) ||
+                desc.includes(searchTerm);
+
+            const matchStatus = filterStatus === "ทั้งหมด" || status === filterStatus;
+
+            return matchSearch && matchStatus;
+        });
+    }, [jobs, search, filterStatus]);
+
+    const stats = useMemo(
+        () => ({
+            รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
+                .length,
+            กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
+            สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
+            ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
+        }),
+        [jobs]
     );
-  }, [filteredStatus]);
+    return (
+        <div className="p-4">
+            {/* Header Section */}
+            <div className="mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
+                            <ClipboardList className="w-8 h-8" />
+                            ใบงานทั้งหมด
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            ติดตามใบงานทั้งระบบ
+                        </p>
+                    </div>
 
-  const totalPages = Math.ceil(sortedWork.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = sortedWork.slice(startIndex, startIndex + itemsPerPage);
+                    <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm">
+                        <Calendar className="w-5 h-5 text-primary" />
+                        <DateFormat />
+                    </div>
+                </div>
+            </div>
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStatusSearch(e.target.value);
-    setCurrentPage(1);
-  };
+            {/* Action Bar */}
+            <SearchBar
+                search={search}
+                setSearch={setSearch}
+                filterStatus={filterStatus}
+                setFilterStatus={setFilterStatus}
+            />
 
-  const workWithTech = useMemo(() => {
-    return currentItems.map((work) => ({
-      ...work,
-      technician: Users.find((t) => t.id === work.userId) || null,
-    }));
-  }, [currentItems]);
+            {/* Stats Summary */}
+            <StatsSummary stats={stats} />
 
-  const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleNext = () =>
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+            {/* Job Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
+                {isLoading ? (
+                    <LoadingSkeleton count={6} />
+                ) : filteredJobs.length === 0 ? (   
+                    <EmptyState />
+                ) : (
+                    filteredJobs.map((job) => <JobWork key={job.JobId} job={job} />)
+                )}
+            </div>
 
-  return (
-    <div className="mt-4">
-      <div className="flex justify-between items-center gap-3">
-        <h1 className="font-title font-semibold text-gray-800 text-lg">
-          ใบงานทั้งหมด (เชื่อมข้อมูลช่างแล้ว)
-        </h1>
-
-        {/* ตัวกรองสถานะ */}
-        <div className="relative">
-          <select
-            value={statusSearch}
-            onChange={handleStatusChange}
-            className="appearance-none bg-accent/90 text-white text-sm rounded-lg px-4 py-2 pr-10 cursor-pointer"
-          >
-            <option value="ทั้งหมด">ทั้งหมด</option>
-            <option value="รอการตรวจสอบ">รอตรวจสอบ</option>
-            <option value="รอการอนุมัติ">รอการอนุมัติ</option>
-            <option value="ตีกลับ">ตีกลับ</option>
-            <option value="สำเร็จ">สำเร็จ</option>
-          </select>
-          <ArrowDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white" />
+            {/* Results Count */}
+            {!isLoading && filteredJobs.length > 0 && (
+                <div className="mt-6 text-center text-sm text-gray-500">
+                    กำลังแสดง {filteredJobs.length} จาก {jobs.length} ใบงาน
+                </div>
+            )}
         </div>
-      </div>
-
-      <div className="mt-5">
-        <Card CardWork={workWithTech} />
-
-        {/* Pagination */}
-        <div className="max-w-4xl mx-auto flex justify-between items-center mt-5 text-sm">
-          <p>
-            หน้า {currentPage} จาก {totalPages}
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-              className="px-3 py-1 flex  items-center justify-center border rounded hover:bg-primary hover:text-white disabled:opacity-50"
-            >
-              <ArrowLeft size={14} className="mr-1" /> ก่อนหน้า
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 flex  items-center justify-center border rounded hover:bg-primary hover:text-white disabled:opacity-50"
-            >
-              ถัดไป <ArrowRight size={14} className="ml-1" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Allwork;
+    )
+}

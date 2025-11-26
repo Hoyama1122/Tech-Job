@@ -21,6 +21,7 @@ const FormLogin = () => {
 
   const onSubmit = (data: LoginFormInputs) => {
     const role = login(data.email, data.password);
+    console.log(role);
 
     if (role) {
       toast.success("เข้าสู่ระบบสำเร็จ!");

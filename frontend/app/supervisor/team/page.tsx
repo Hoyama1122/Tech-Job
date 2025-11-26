@@ -1,11 +1,17 @@
 import React from "react";
+import TableTechDepartment from "./TableTechDepartment";
 
+export const metadata = {
+  title: "Technician user",
+};
 const page = () => {
   return (
-    <div>
-      <h1 className="text-primary font-semibold text-2xl md:text-4xl">
-        ทีมของฉัน
-      </h1>
+    <div className="">
+      <div>
+        <h1 className="font-title ">ตารางช่างในแผนก</h1>
+      </div>
+      {/* Sort table */}
+      <TableTechDepartment />
     </div>
   );
 };

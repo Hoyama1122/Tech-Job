@@ -12,7 +12,7 @@ import { CircleCheck, Loader2, Phone, User } from "lucide-react";
 
 const containerStyle = {
   width: "100%",
-  height: "400px",
+  height: "300px",
   borderRadius: "12px",
 };
 
@@ -32,7 +32,8 @@ const getIconByStatus = (status: string) => {
   };
 };
 
-const TeamMap = () => {
+
+const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -40,6 +41,27 @@ const TeamMap = () => {
 
   const [members, setMembers] = useState<any[]>([]);
   const [selectedMember, setSelectedMember] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (jobs && users) {
+      const jobsWithTechnician = jobs.map(job => {
+        // สมมติว่างานแต่ละงานมี technicianId แค่คนเดียวใน InfoWindow
+        const mainTechnicianId = job.technicianId?.[0];
+        const technician = users.find(u => u.id === mainTechnicianId);
+
+        return {
+          ...job,
+          technicianName: technician ? technician.name : "ไม่ระบุ",
+          technicianPhone: technician ? technician.phone : "ไม่มีข้อมูล",
+        };
+      });
+      setMembers(jobsWithTechnician);
+    }
+  }, [jobs, users]);
+
+  const handleMarkerClick = (member: any) => {
+    setSelectedMember(member);
+  };
 
 
   if (!isLoaded)
@@ -73,7 +95,7 @@ const TeamMap = () => {
               key={m.id}
               position={{ lat, lng }}
               icon={getIconByStatus(m.status)}
-              onClick={() => setSelectedMember(m)}
+              onClick={() => handleMarkerClick(m)}
               title={m.title}
             />
           );

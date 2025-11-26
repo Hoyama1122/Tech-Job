@@ -11,9 +11,9 @@ interface Props {
     title: string;
     description?: string;
     status: string;
-    supervisor?: { name: string };
+    supervisorName?: { name: string, department: string };
     technician?: any[];
-    date: string;
+    createdAt: string;
   };
 }
 
@@ -27,17 +27,14 @@ const getStatusStyle = (status: string) => {
       return "bg-red-100 text-red-700 border-red-200";
     case "รอการตรวจสอบ":
       return "bg-blue-100 text-blue-700 border-blue-200";
-    case "รอการดำเนินงาน":
-      return "bg-orange-100 text-orange-700 border-orange-200";
+    case "รอการมอบหมายงาน":
+      return "bg-primary/80 text-white border-primary";
     default:
       return "bg-gray-100 text-gray-700 border-gray-200";
   }
 };
 
-export default function JobCard({ job }: Props) {
-  const Auth = localStorage.getItem("auth-storage");
-  const parsedAuth = Auth ? JSON.parse(Auth) : [];
-
+export default function JobWork({ job }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg  border border-gray-200 overflow-hidden group flex flex-col h-full">
       {/* Card Header */}
@@ -85,7 +82,7 @@ export default function JobCard({ job }: Props) {
               {typeof job.supervisorName === "object"
                 ? job.supervisorName.name
                 : job.supervisorName || "ไม่ระบุ"}
-                ({job.supervisorName.department})
+                ({job.supervisorName?.department})
             </span>
           </div>
 
@@ -98,23 +95,11 @@ export default function JobCard({ job }: Props) {
               {formatThaiDateTime(job.createdAt)}
             </span>
           </div>
-
-          {job.technician && job.technician.length > 0 && (
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <User className="w-4 h-4" />
-                <span>ช่างที่รับผิดชอบ:</span>
-              </div>
-              <span className="font-medium text-gray-900">
-                {job.technician.length} คน
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Action Button - อยู่ล่างสุดเสมอ */}
         <Link
-          href={`/${parsedAuth.state.role}/work/${job.JobId}`}
+          href={`/supervisor/work/${job.JobId}`}
           className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-md hover:shadow-lg mt-auto"
         >
           ดูรายละเอียด
