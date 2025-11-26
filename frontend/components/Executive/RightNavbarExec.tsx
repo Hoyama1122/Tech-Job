@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import { NavNotifacation } from "@/lib/Mock/NavNotifacation";
 import profile from "@/public/profile/profile.png";
 import Image from "next/image";
-import NotifacationBell from "../Dashboard/NotifacationBell";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { useAuthStore } from "@/store/useAuthStore";
+import NotificationBell from "../Layout/NotifacationBell";
 
 const RightNavbarExec = () => {
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);
@@ -27,14 +27,22 @@ const RightNavbarExec = () => {
           )}
         </button>
         {showNotificationsBell && (
-          <NotifacationBell notifications={NavNotifacation} onClose={() => setShowNotificationsBell(false)} />
+          <NotificationBell
+          
+          />
         )}
       </div>
       <div className="w-px h-8 bg-gray-200" />
       <div className="flex items-center gap-2">
-        <Image src={profile} alt="profile" className="w-10 h-10 rounded-full object-cover" />
+        <Image
+          src={profile}
+          alt="profile"
+          className="w-10 h-10 rounded-full object-cover"
+        />
         <div className="leading-4">
-          <p className="text-sm text-primary-test font-semibold">{name || "Executive"}</p>
+          <p className="text-sm text-primary-test font-semibold">
+            {name || "Executive"}
+          </p>
           <h1 className="text-md capitalize">{role}</h1>
         </div>
       </div>
