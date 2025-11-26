@@ -4,23 +4,20 @@ import { X } from "lucide-react";
 import { NavNotifacation } from "@/lib/Mock/NavNotifacation";
 
 
-interface NotificationBellProps {
-  notifications: Notification[];
-  onClose: () => void;
-}
 
-const NotificationBell = ({ notifications, onClose }: NotificationBellProps) => {
-  // หยุดการ bubbling เมื่อคลิกภายใน dropdown
+
+const NotificationBell = ({ notifications, setShowNotificationsBell  }) => {
+ 
   const handleDropdownClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
   return createPortal(
     <>
-      {/* Overlay ด้านหลัง - คลิกเพื่อปิด */}
+     
       <div
         className="fixed inset-0 z-[9999] bg-black/30 backdrop-blur-sm transition-opacity duration-300"
-        onClick={onClose}
+        onClick={() => setShowNotificationsBell(false)}
       />
       
       {/* Dropdown Container */}
@@ -32,7 +29,7 @@ const NotificationBell = ({ notifications, onClose }: NotificationBellProps) => 
         <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
           <h3 className="font-semibold text-xl text-gray-800">การแจ้งเตือน</h3>
           <button
-            onClick={onClose}
+            onClick={() => setShowNotificationsBell(false)}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
             <X className="w-5 h-5 text-gray-500" />
