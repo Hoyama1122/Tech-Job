@@ -1,310 +1,197 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, Edit, Save, X } from "lucide-react";
-import { Users as InitialUsers } from "@/lib/Mock/UserMock";
+import EditModal from "@/components/Dashboard/TableUser/EditModal";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Edit,
+  File,
+  Filter,
+  Search,
+  Trash2,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 
-// กำหนด Type สำหรับข้อมูลผู้ใช้
-interface UserType {
-  id: number;
-  employeeCode: string;
-  name: string;
-  role: string;
-  email: string;
-  phone: string;
-  area?: string;
-  status?: string;
-  lastActive?: string;
-  totalJobs?: number;
-}
+const ITEMS_PER_PAGE = 10;
 
 const TablePage = () => {
-  // ใช้ state เพื่อจัดการข้อมูลที่สามารถแก้ไขได้
-  const [users, setUsers] = useState<UserType[]>(InitialUsers);
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("ทั้งหมด");
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editedData, setEditedData] = useState<Partial<UserType>>({});
-  const itemsPerPage = 10;
 
-  // กรองข้อมูลตามคำค้นหา
-  const filteredData = users.filter((data) => {
-    const matchSearch =
-      data.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      data.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      data.phone.toLowerCase().includes(searchTerm.toLowerCase());
+  const [showModalEdit, setShowModalEdit] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null); // ⭐ เก็บ user ที่เลือก
 
-    const matchStatus =
-      statusFilter === "ทั้งหมด" || (data.status || "ว่าง") === statusFilter;
+  useEffect(() => {
+    const GetUser = localStorage.getItem("Users");
+    if (GetUser) {
+      setUsers(JSON.parse(GetUser));
+    }
+  }, []);
 
-    return matchSearch && matchStatus;
+  // Search
+  const filteredSearch = users.filter((item) => {
+    const text = searchTerm.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(text) ||
+      item.employeeCode.toLowerCase().includes(text) ||
+      item.email.toLowerCase().includes(text) ||
+      item.phone.toLowerCase().includes(text)
+    );
   });
 
-  // คำนวณ pagination
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(
+  // Filter ตามแผนก
+  const filteredByDept = filteredSearch.filter((item) => {
+    if (departmentFilter === "ทั้งหมด") return true;
+    return item.department === departmentFilter;
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(filteredByDept.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedData = filteredByDept.slice(
     startIndex,
-    startIndex + itemsPerPage
+    startIndex + ITEMS_PER_PAGE
   );
 
-  // เปลี่ยนหน้า
-  const handlePageChange = (page: number) => {
-    if (page > 0 && page <= totalPages) setCurrentPage(page);
-  };
-
-  // เริ่มต้นแก้ไขข้อมูล
-  const handleEdit = (item: UserType) => {
-    setEditingId(item.id);
-    setEditedData({
-      ...item,
-      area: item.area || "ไม่ระบุ",
-      status: item.status || "ว่าง",
-      lastActive: item.lastActive || "-",
-      totalJobs: item.totalJobs || 0,
-    });
-  };
-
-  // บันทึกข้อมูล
-  const handleSave = () => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === editingId ? { ...user, ...editedData } : user
-      )
-    );
-    console.log("กำลังบันทึกข้อมูล:", editedData);
-    setEditingId(null);
-    setEditedData({});
-  };
-
-  // ยกเลิกการแก้ไข
-  const handleCancel = () => {
-    setEditingId(null);
-    setEditedData({});
-  };
-
-  // อัพเดทข้อมูลใน input
-  const handleInputChange = (field: keyof UserType, value: string | number) => {
-    setEditedData((prev) => ({ ...prev, [field]: value }));
+  // ⭐ เปิด Modal พร้อมส่ง user ที่เลือกเข้าไป
+  const handleEdit = (user) => {
+    setSelectedUser(user);
+    setShowModalEdit(true);
   };
 
   return (
-    <div className="mt-4">
-      {/* Search */}
-      <div className="flex justify-end mb-4 gap-3">
-        <div className="relative w-full md:w-1/3">
-          <Search
-            className="absolute left-3 top-[11px] text-slate-400"
-            size={18}
-          />
+    <div className="bg-white p-4 rounded-lg shadow-md">
+      {/* Header + Filters */}
+      <div className="flex items-center gap-4 mb-4">
+        {/* Search */}
+        <div className="w-1/3 relative">
+          <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="ค้นหา..."
-            className="border border-gray-300 rounded-xl pl-10 pr-3 py-2 focus:ring-2 focus:ring-green-500 outline-none w-full"
+            placeholder="ค้นหาด้วย รหัสพนักงาน, ชื่อ, อีเมล, เบอร์โทร..."
+            className="w-full pl-10 pr-4 py-2.5 border text-sm border-gray-300 rounded-lg"
+            value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            value={searchTerm}
           />
         </div>
-        <div className="w-full md:w-1/4">
+
+        {/* Filter */}
+        <div className="flex items-center gap-2">
+          <Filter className="w-5 h-5 text-gray-500" />
           <select
-            className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-green-500 outline-none"
-            value={statusFilter}
+            className="px-4 py-2.5 border text-sm border-gray-300 rounded-lg bg-white"
+            value={departmentFilter}
             onChange={(e) => {
-              setStatusFilter(e.target.value);
+              setDepartmentFilter(e.target.value);
               setCurrentPage(1);
             }}
           >
             <option value="ทั้งหมด">ทั้งหมด</option>
-            <option value="ว่าง">ว่าง</option>
-            <option value="ทำงาน">ทำงาน</option>
-            <option value="ไม่ว่าง">ไม่ว่าง</option>
+            <option value="ไฟฟ้า">ไฟฟ้า</option>
+            <option value="แอร์">แอร์</option>
+            <option value="ประปา">ประปา</option>
+            <option value="ผู้บริหาร">ผู้บริหาร</option>
+            <option value="แอดมิน">แอดมิน</option>
           </select>
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto shadow-md sm:rounded-lg">
-        <table className="w-full text-center">
-          <thead className="uppercase bg-gray-100 text-sm text-left">
-            <tr>
-              <th className="py-3 px-6 text-center">#</th>
-              <th className="py-3 px-6">ชื่อ-นามสกุล</th>
-              <th className="py-3 px-6">รหัสพนักงาน</th>
-              <th className="py-3 px-6">อีเมล</th>
-              <th className="py-3 px-6">เบอร์โทร</th>
-              <th className="py-3 px-6">ตำแหน่ง</th>
-              <th className="py-3 px-6">งานทั้งหมด</th>
-              <th className="py-3 px-6">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length > 0 ? (
-              paginatedData.map((data, index) => {
-                const isEditing = editingId === data.id;
+      <table className="w-full border-collapse rounded-lg overflow-hidden shadow mt-4">
+        <thead>
+          <tr className="bg-primary text-white">
+            <th className="px-4 py-3 text-left">รหัสพนักงาน</th>
+            <th className="px-4 py-3 text-left">ชื่อ-นามสกุล</th>
+            <th className="px-4 py-3 text-left">แผนก</th>
+            <th className="px-4 py-3 text-left">อีเมล</th>
+            <th className="px-4 py-3 text-left">เบอร์โทร</th>
+            <th className="px-4 py-3 text-left">ทีม</th>
+            <th className="px-4 py-3 text-center">การจัดการ</th>
+          </tr>
+        </thead>
 
-                return (
-                  <tr
-                    key={data.id}
-                    className="border-b border-gray-200 text-sm hover:bg-gray-50 transition-all"
+        <tbody>
+          {paginatedData.map((item, index) => (
+            <tr
+              key={item.id || index}
+              className={`border-b border-gray-200 hover:bg-blue-50 transition${
+                index % 2 === 0 ? "bg-white" : "bg-gray-50"
+              }`}
+            >
+              <td className="px-4 py-3">{item.employeeCode}</td>
+              <td className="px-4 py-3">{item.name}</td>
+              <td className="px-4 py-3">{item.department}</td>
+              <td className="px-4 py-3">{item.email}</td>
+              <td className="px-4 py-3">{item.phone}</td>
+              <td className="px-4 py-3">{item.team?.slice(-1) || "-"}</td>
+              <td className="px-4 py-3 text-center">
+                <div className="flex items-center gap-2 justify-center">
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="bg-primary text-white px-3 py-2 rounded-lg flex items-center gap-1"
                   >
-                    <td className="py-3 px-6 text-center">
-                      {isEditing ? (
-                        <span className="text-gray-500">{data.id}</span>
-                      ) : (
-                        startIndex + index + 1
-                      )}
-                    </td>
-                    <td className="py-3 px-6">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                          value={editedData.name || ""}
-                          onChange={(e) =>
-                            handleInputChange("name", e.target.value)
-                          }
-                        />
-                      ) : (
-                        data.name
-                      )}
-                    </td>
-                    <td className="py-3 px-6">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          className="w-full px-2 py-1 border rounded bg-gray-100"
-                          value={editedData.employeeCode || ""}
-                          disabled
-                        />
-                      ) : (
-                        data.employeeCode
-                      )}
-                    </td>
-                    <td className="py-3 px-6">
-                      {isEditing ? (
-                        <input
-                          type="email"
-                          className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                          value={editedData.email || ""}
-                          onChange={(e) =>
-                            handleInputChange("email", e.target.value)
-                          }
-                        />
-                      ) : (
-                        data.email
-                      )}
-                    </td>
-                    <td className="py-3 px-6">
-                      {isEditing ? (
-                        <input
-                          type="tel"
-                          className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                          value={editedData.phone || ""}
-                          onChange={(e) =>
-                            handleInputChange("phone", e.target.value)
-                          }
-                        />
-                      ) : (
-                        data.phone
-                      )}
-                    </td>
-                    <td className="py-3 px-6">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                          value={editedData.role || ""}
-                          onChange={(e) =>
-                            handleInputChange("role", e.target.value)
-                          }
-                        />
-                      ) : (
-                        data.role
-                      )}
-                    </td>
-                    <td className="py-3 px-6">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                          value={editedData.area || ""}
-                          onChange={(e) =>
-                            handleInputChange("area", e.target.value)
-                          }
-                        />
-                      ) : (
-                        data.area || "ไม่ระบุ"
-                      )}
-                    </td>
+                    <Edit className="w-4 h-4" />
+                    แก้ไข
+                  </button>
 
-                    <td className="py-3 px-6">
-                      {isEditing ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={handleSave}
-                            className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
-                            title="บันทึก"
-                          >
-                            <Save size={16} />
-                          </button>
-                          <button
-                            onClick={handleCancel}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                            title="ยกเลิก"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleEdit(data)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          title="แก้ไข"
-                        >
-                          <Edit size={16} />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={11} className="py-5 text-gray-500">
-                  ไม่พบข้อมูล
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                  <button className="bg-red-500 text-white px-3 py-2 rounded-lg flex items-center gap-1">
+                    <Trash2 className="w-4 h-4" />
+                    ลบ
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
 
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-4 text-sm">
-        <p>
-          หน้า {currentPage} จาก {totalPages}
+          {paginatedData.length === 0 && (
+            <tr>
+              <td colSpan={6} className=" text-center py-6 text-gray-500">
+                <div className="flex items-center flex-col gap-4">
+                  <File className="w-6 h-6" /> ไม่พบข้อมูลที่ค้นหา
+                </div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      <div className="flex justify-between items-center mt-4">
+        <p className="text-sm text-gray-600">
+          หน้า {currentPage} จาก {totalPages || 1}
         </p>
+
         <div className="flex gap-2">
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            className="px-3 py-1 border-2 border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white duration-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-4 py-2 flex items-center gap-2 bg-primary text-white rounded-lg disabled:bg-gray-300"
           >
+            <ArrowLeft className="w-4 h-4" />
             ก่อนหน้า
           </button>
+
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            className="px-3 py-1 border-2 border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white duration-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-4 py-2 flex items-center gap-2 bg-primary text-white rounded-lg disabled:bg-gray-300"
           >
+            <ArrowRight className="w-4 h-4" />
             ถัดไป
           </button>
         </div>
       </div>
+
+      {showModalEdit && (
+        <EditModal
+          data={selectedUser}
+          onClose={() => setShowModalEdit(false)}
+        />
+      )}
     </div>
   );
 };

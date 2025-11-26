@@ -21,6 +21,7 @@ export const Users: UserType[] = [
     employeeCode: "CEO-OF-0001",
     name: "ฟ้าใส วิศวกร",
     role: "executive",
+    department: "ผู้บริหาร",
     email: "ceo@techjob.com",
     password: "ceo123",
     phone: "081-100-0001",
@@ -36,6 +37,7 @@ export const Users: UserType[] = [
     employeeCode: "ADM-OF-0001",
     name: "กชนิภา ใจดี",
     role: "admin",
+    department: "แอดมิน",
     email: "admin@techjob.com",
     password: "admin123",
     phone: "081-200-0001",
@@ -217,8 +219,6 @@ export const Users: UserType[] = [
     address: "ตำบลท่าฉลอม อำเภอเมือง สมุทรสาคร",
     notifications: [],
   },
-
-
 
   {
     id: 12,

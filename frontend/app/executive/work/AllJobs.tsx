@@ -10,7 +10,7 @@ import LoadingSkeleton from "@/components/Dashboard/Work/LoadingSkeleton";
 import EmptyState from "@/components/Dashboard/Work/EmptyState";
 
 import SearchBar from "@/components/Supervisor/work/SearchBar";
-import JobCard from "@/components/Dashboard/Work/JobCard";
+import JobCard from "@/components/Executive/Work/JobCard";
 
 interface Job {
   id: string;

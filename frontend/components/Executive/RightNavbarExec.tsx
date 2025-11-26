@@ -26,11 +26,7 @@ const RightNavbarExec = () => {
             </span>
           )}
         </button>
-        {showNotificationsBell && (
-          <NotificationBell
-          
-          />
-        )}
+        {showNotificationsBell && <NotificationBell />}
       </div>
       <div className="w-px h-8 bg-gray-200" />
       <div className="flex items-center gap-2">

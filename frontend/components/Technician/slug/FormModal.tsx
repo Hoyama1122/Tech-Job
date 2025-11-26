@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import SignatureField from "./SignatureField";
+import { compressImage } from "@/lib/compressImage";
 
 const FormModal = ({
   formData,
@@ -26,30 +27,24 @@ const FormModal = ({
   const uploadBeforeRef = useRef<HTMLInputElement>(null);
   const uploadAfterRef = useRef<HTMLInputElement>(null);
 
-  const handleUploadBefore = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadBefore = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagesBefore((prev) => [...prev, event.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of Array.from(files)) {
+      const base64 = await compressImage(file, 0.55);
+      setImagesBefore((prev) => [...prev, base64]);
+    }
   };
 
-  const handleUploadAfter = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadAfter = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagesAfter((prev) => [...prev, event.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of Array.from(files)) {
+      const base64 = await compressImage(file, 0.55);
+      setImagesAfter((prev) => [...prev, base64]);
+    }
   };
 
   const removeBefore = (i: number) => {

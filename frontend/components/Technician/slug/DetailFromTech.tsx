@@ -8,6 +8,7 @@ import {
   Settings,
   CheckCircle,
 } from "lucide-react";
+
 import { useMemo } from "react";
 
 interface TechnicianReport {
@@ -17,17 +18,24 @@ interface TechnicianReport {
   summaryOfOperatingResults: string;
   technicianSignature: string;
   customerSignature: string;
-  imagesBefore?: string[];
-  imagesAfter?: string[];
+
+  imagesBeforeKey?: string;
+  imagesAfterKey?: string;
 }
 
 interface DetailFromTechProps {
-  job: {
-    technicianReport?: TechnicianReport;
-  };
+  job: { technicianReport?: TechnicianReport };
+
+ 
+  imagesBefore: string[];
+  imagesAfter: string[];
 }
 
-export default function DetailFromTech({ job }: DetailFromTechProps) {
+export default function DetailFromTech({
+  job,
+  imagesBefore,
+  imagesAfter,
+}: DetailFromTechProps) {
   const report = job?.technicianReport;
 
   const sections = useMemo(
@@ -68,9 +76,9 @@ export default function DetailFromTech({ job }: DetailFromTechProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 md:p-8 space-y-2 mt-2">
+    <div className="bg-white rounded-xl shadow-md p-6 md:p-8 space-y-2 mt-3">
       {/* Header */}
-      <div className="border-b border-gray-200 pb-2">
+      <div className="border-b border-gray-200 pb-3">
         <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
           <FileText className="w-6 h-6 text-gray-700" />
           รายงานจากช่างเทคนิค
@@ -81,10 +89,10 @@ export default function DetailFromTech({ job }: DetailFromTechProps) {
       </div>
 
       {/* Report Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {sections.map((section) => (
-          <div key={section.title} className={``}>
-            <div className="flex items-center gap-2 mb-3">
+          <div key={section.title}>
+            <div className="flex items-center gap-2 mb-2">
               {section.icon}
               <h3 className="font-semibold text-gray-900 text-base">
                 {section.title}
@@ -104,43 +112,37 @@ export default function DetailFromTech({ job }: DetailFromTechProps) {
           ลายเซ็นยืนยัน
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Technician Signature */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-3">
+          {/* Technician */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
               <User className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-gray-700">
-                ลายเซ็นช่าง
-              </span>
-            </div>
+              ลายเซ็นช่าง
+            </p>
             {report.technicianSignature ? (
               <img
                 src={report.technicianSignature}
-                alt="ลายเซ็นช่าง"
-                className="w-full h-28 object-contain bg-gray-50 rounded-lg p-4 border border-gray-200"
+                className="w-full h-28 object-contain bg-gray-50 rounded-lg p-4 border"
               />
             ) : (
-              <div className="w-full h-28 bg-gray-100 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+              <div className="w-full h-28 bg-gray-100 rounded-lg border border-dashed flex items-center justify-center text-gray-400">
                 ไม่มีลายเซ็น
               </div>
             )}
           </div>
 
-          {/* Customer Signature */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-3">
+          {/* Customer */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
               <User className="w-4 h-4 text-green-500" />
-              <span className="text-sm font-medium text-gray-700">
-                ลายเซ็นลูกค้า
-              </span>
-            </div>
+              ลายเซ็นลูกค้า
+            </p>
             {report.customerSignature ? (
               <img
                 src={report.customerSignature}
-                alt="ลายเซ็นลูกค้า"
-                className="w-full h-28 object-contain bg-gray-50 rounded-lg p-4 border border-gray-200"
+                className="w-full h-28 object-contain bg-gray-50 rounded-lg p-4 border"
               />
             ) : (
-              <div className="w-full h-28 bg-gray-100 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+              <div className="w-full h-28 bg-gray-100 rounded-lg border border-dashed flex items-center justify-center text-gray-400">
                 ไม่มีลายเซ็น
               </div>
             )}
@@ -149,59 +151,55 @@ export default function DetailFromTech({ job }: DetailFromTechProps) {
       </div>
 
       {/* Images */}
-      {job.technicianReport && (
-        <div className="space-y-6">
-          {/* BEFORE */}
-          {job.technicianReport.imagesBefore?.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-blue-600" />
-                รูปก่อนทำงาน
-                <span className="text-sm font-normal text-gray-500">
-                  ({job.technicianReport?.imagesBefore.length} รูป)
-                </span>
-              </h3>
+      <div className="space-y-6">
+        {/* BEFORE */}
+        {imagesBefore.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-blue-600" />
+              รูปก่อนทำงาน
+              <span className="text-sm text-gray-500">
+                ({imagesBefore.length} รูป)
+              </span>
+            </h3>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {job.technicianReport.imagesBefore.map((img, index) => (
-                  <div key={index} className="group relative">
-                    <img
-                      src={img}
-                      className="w-full h-32 md:h-36 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                      onClick={() => window.open(img, "_blank")}
-                    />
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+              {imagesBefore.map((img, index) => (
+                <img
+                  key={index}
+                  src={img}
+                  className="w-full h-32 md:h-36 object-cover rounded-lg shadow cursor-pointer"
+                  onClick={() => window.open(img, "_blank")}
+                />
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* AFTER */}
-          {job.technicianReport.imagesAfter?.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-green-600" />
-                รูปหลังทำงาน
-                <span className="text-sm font-normal text-gray-500">
-                  ({job.technicianReport.imagesAfter.length} รูป)
-                </span>
-              </h3>
+        {/* AFTER */}
+        {imagesAfter.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-green-600" />
+              รูปหลังทำงาน
+              <span className="text-sm text-gray-500">
+                ({imagesAfter.length} รูป)
+              </span>
+            </h3>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {job.technicianReport.imagesAfter.map((img, index) => (
-                  <div key={index} className="group relative">
-                    <img
-                      src={img}
-                      className="w-full h-32 md:h-36 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                      onClick={() => window.open(img, "_blank")}
-                    />
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+              {imagesAfter.map((img, index) => (
+                <img
+                  key={index}
+                  src={img}
+                  className="w-full h-32 md:h-36 object-cover rounded-lg shadow cursor-pointer"
+                  onClick={() => window.open(img, "_blank")}
+                />
+              ))}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

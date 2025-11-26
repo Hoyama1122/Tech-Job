@@ -19,7 +19,6 @@ export const getStatusClass = (status: JobStatus): string => {
 
 const CardWork = ({ card }) => {
   const auth = localStorage.getItem("auth-storage");
-  const parsedAuth = auth ? JSON.parse(auth) : [];
 
   const DesktopView = () => (
     <div className="hidden md:block overflow-x-auto">

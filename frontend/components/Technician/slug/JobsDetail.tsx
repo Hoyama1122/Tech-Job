@@ -8,7 +8,7 @@ const JobsDetail = ({ job }) => {
 
   return (
     <div>
-      <div className="bg-white rounded-xl shadow-md p-6">
+      <div className="bg-white rounded-xl shadow-md p-6 mt-2">
         <div>
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-2">
             <FileText className="w-5 h-5 text-gray-700" />

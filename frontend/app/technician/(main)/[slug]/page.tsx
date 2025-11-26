@@ -36,16 +36,44 @@ export default function page({ params }: PageProps) {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [imagesBefore, setImagesBefore] = useState<string[]>([]);
-  const [imagesAfter, setImagesAfter] = useState<string[]>([]);
+  // รูปก่อน/หลังทำงานใหม่ (เก็บในฟอร์ม)
+  const [formBeforeImages, setFormBeforeImages] = useState<string[]>([]);
+  const [formAfterImages, setFormAfterImages] = useState<string[]>([]);
+
+  // รูปเก็บจริงใน store หลัง submit
+  const [storedBeforeImages, setStoredBeforeImages] = useState<string[]>([]);
+  const [storedAfterImages, setStoredAfterImages] = useState<string[]>([]);
 
   const [currentStatus, setCurrentStatus] = useState("");
 
-  // โหลดข้อมูลจาก localStorage
+  const getDistanceMeters = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
+    const R = 6371e3;
+    const toRad = (x: number) => (x * Math.PI) / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  };
+
+  // โหลดข้อมูลงาน + โหลดรูปจาก ImagesStore
   useEffect(() => {
     setIsLoading(true);
 
     const cardData = localStorage.getItem("CardWork");
+    const imgStore = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+
     if (cardData) {
       const jobs = JSON.parse(cardData);
       const found = jobs.find((j: any) => j.JobId === slug);
@@ -53,14 +81,22 @@ export default function page({ params }: PageProps) {
       if (found) {
         setJob(found);
         setCurrentStatus(found.status);
+
+    
+        const beforeKey = found.technicianReport?.imagesBeforeKey;
+        const afterKey = found.technicianReport?.imagesAfterKey;
+
+        setStoredBeforeImages(imgStore[beforeKey] || []);
+        setStoredAfterImages(imgStore[afterKey] || []);
       } else {
         setJob(null);
       }
     }
 
-    setTimeout(() => setIsLoading(false), 300);
+    setTimeout(() => setIsLoading(false), 250);
   }, [slug]);
 
+  // อัปเดตสถานะงาน
   const updateJobStatus = (newStatus: string, reportData?: any) => {
     const cardData = localStorage.getItem("CardWork");
     if (!cardData) return;
@@ -73,7 +109,6 @@ export default function page({ params }: PageProps) {
           ...j,
           status: newStatus,
 
-          // ใส่เวลาปิดงานเมื่อกดส่งรายงาน
           completedAt:
             newStatus === "รอการตรวจสอบ"
               ? new Date().toISOString()
@@ -87,7 +122,6 @@ export default function page({ params }: PageProps) {
 
     localStorage.setItem("CardWork", JSON.stringify(updated));
 
-    // update หน้า
     setJob((prev: any) => ({
       ...prev,
       status: newStatus,
@@ -101,20 +135,55 @@ export default function page({ params }: PageProps) {
     setCurrentStatus(newStatus);
   };
 
+  // เริ่มงาน
   const handleStartJob = () => {
-    updateJobStatus("กำลังทำงาน");
-    toast.success("เริ่มงานสำเร็จ!");
+    if (!navigator.geolocation) {
+      toast.error("ไม่รองรับการหาตำแหน่ง");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const myLat = pos.coords.latitude;
+        const myLng = pos.coords.longitude;
+
+        const jobLat = job.loc?.lat;
+        const jobLng = job.loc?.lng;
+
+        if (!jobLat || !jobLng) {
+          toast.error("ไม่พบตำแหน่งของงาน");
+          return;
+        }
+
+        const distance = getDistanceMeters(myLat, myLng, jobLat, jobLng);
+
+        if (distance > 200) {
+          toast.error(
+            `คุณอยู่ห่างจากจุดงาน ${Math.floor(
+              distance
+            )} เมตร — ไม่สามารถเริ่มงานได้`
+          );
+          return;
+        }
+
+        updateJobStatus("กำลังทำงาน");
+        toast.success("เริ่มงานสำเร็จ!");
+      },
+      () => toast.error("เปิดพิกัดไม่สำเร็จ กรุณาอนุญาต Location")
+    );
   };
 
+  // เปิดฟอร์มปิดงาน
   const handleCompleteJob = () => {
     setShowFormModal(true);
   };
 
+  // Submit รายงาน & เก็บรูปลง ImagesStore
   const handleSubmitReport = () => {
     const result = technicianReportSchema.safeParse({
       ...formData,
-      imagesBefore,
-      imagesAfter,
+      imagesBefore: formBeforeImages,
+      imagesAfter: formAfterImages,
     });
 
     if (!result.success) {
@@ -129,12 +198,22 @@ export default function page({ params }: PageProps) {
 
     setErrors({});
 
-    const validData = result.data;
+    // สร้าง key สำหรับรูป
+    const beforeKey = `before_${slug}_${Date.now()}`;
+    const afterKey = `after_${slug}_${Date.now()}`;
+
+    // เซฟรูปลง ImagesStore
+    const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+
+    store[beforeKey] = formBeforeImages;
+    store[afterKey] = formAfterImages;
+
+    localStorage.setItem("ImagesStore", JSON.stringify(store));
 
     const reportData = {
-      ...validData,
-      imagesBefore,
-      imagesAfter,
+      ...result.data,
+      imagesBeforeKey: beforeKey,
+      imagesAfterKey: afterKey,
       submittedAt: new Date().toISOString(),
     };
 
@@ -150,6 +229,7 @@ export default function page({ params }: PageProps) {
       สำเร็จ: "bg-green-100 text-green-700 border-green-200",
       รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
       รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
+      ตีกลับ: "bg-red-100 text-red-700 border-red-200",
     };
 
     return (
@@ -166,15 +246,7 @@ export default function page({ params }: PageProps) {
   if (isLoading)
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-full border-4 border-blue-300 border-t-blue-600 animate-spin"></div>
-            <div className="absolute inset-0 w-14 h-14 rounded-full blur-xl bg-blue-500 opacity-20 animate-pulse"></div>
-          </div>
-          <p className="text-gray-600 text-sm animate-pulse">
-            กำลังโหลดข้อมูลงาน...
-          </p>
-        </div>
+        <p className="text-gray-600 animate-pulse">กำลังโหลดข้อมูลงาน...</p>
       </div>
     );
 
@@ -187,17 +259,21 @@ export default function page({ params }: PageProps) {
 
   return (
     <div className="max-w-4xl mx-auto p-2">
-      <div className="relative space-y-2">
-        <HeaderSlugTechni job={job} getStatusBadge={getStatusBadge} />
-        <JobsDetail job={job} />
-      </div>
+      <HeaderSlugTechni job={job} getStatusBadge={getStatusBadge} />
+      <JobsDetail job={job} />
 
-      {currentStatus === "รอการตรวจสอบ" && <DetailFromTech job={job} />}
+      {(currentStatus === "รอการตรวจสอบ" || currentStatus === "สำเร็จ") && (
+        <DetailFromTech
+          job={job}
+          imagesBefore={storedBeforeImages}
+          imagesAfter={storedAfterImages}
+        />
+      )}
 
-      {currentStatus === "รอการดำเนินงาน" && (
+      {(currentStatus === "รอการดำเนินงาน" || currentStatus === "ตีกลับ") && (
         <button
           onClick={handleStartJob}
-          className="fixed bottom-6 right-6 px-5 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition"
+          className="fixed bottom-6 right-6 px-5 py-3 bg-blue-600 text-white rounded-full shadow-lg"
         >
           เริ่มงาน
         </button>
@@ -206,21 +282,20 @@ export default function page({ params }: PageProps) {
       {currentStatus === "กำลังทำงาน" && (
         <button
           onClick={handleCompleteJob}
-          className="fixed bottom-6 right-6 px-5 py-3 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700 transition"
+          className="fixed bottom-6 right-6 px-5 py-3 bg-green-600 text-white rounded-full shadow-lg"
         >
           บันทึกเพื่อปิดงาน
         </button>
       )}
 
-      {/* MODAL FORM */}
       {showFormModal && (
         <FormModal
           formData={formData}
           setFormData={setFormData}
-          imagesBefore={imagesBefore}
-          setImagesBefore={setImagesBefore}
-          imagesAfter={imagesAfter}
-          setImagesAfter={setImagesAfter}
+          imagesBefore={formBeforeImages}
+          setImagesBefore={setFormBeforeImages}
+          imagesAfter={formAfterImages}
+          setImagesAfter={setFormAfterImages}
           handleSubmit={handleSubmitReport}
           setShowFormModal={setShowFormModal}
           errors={errors}

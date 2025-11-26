@@ -14,7 +14,7 @@ const Dashboard = () => {
   const [jobs, setjobs] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [time, setTime] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"today" | "week">("today");
+  const [activeTab, setActiveTab] = useState<"today" | "all">("today");
   const router = useRouter();
 
   useEffect(() => {

@@ -1,25 +1,56 @@
 "use client";
 
-import React, { useState } from "react";
+import formatThaiDateTime from "@/lib/Format/DateFormatThai";
+import DateFormatWork from "@/lib/Format/DateForWork";
+import {
+  Calendar,
+  CalendarCheck,
+  ChevronRight,
+  FileText,
+  MapPin,
+  Users,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState, useMemo } from "react";
 
-type Event = {
-  date: string; // YYYY-MM-DD
+type CardWork = {
+  id: number;
+  JobId: string;
+  title: string;
+  description: string;
+  createdAt: string;
+  dateRange?: {
+    startAt: string;
+    endAt: string;
+  };
+  technicianId: number[];
+  customer: { name: string; phone: string; address: string };
+  status: string;
 };
 
-const events: Event[] = [
-  { date: "2024-04-09" },
-  { date: "2024-04-10" },
-  { date: "2024-04-19" },
-  { date: "2024-04-22" },
-  { date: "2024-04-28" },
-];
+export default function CalendarTechJob() {
+  const router = useRouter();
 
-const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [jobs, setJobs] = useState<CardWork[]>([]);
+  const [techId, setTechId] = useState<number | null>(null);
+  useEffect(() => {
+  
+    const today = new Date();
+    setSelectedDate(today);
 
-export default function Calendar() {
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 3)); // April 2024
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date(2024, 3, 22));
+    // โหลดข้อมูล technician
+    const auth = JSON.parse(localStorage.getItem("auth-storage") || "{}");
+    const userId = auth?.state?.userId;
+    setTechId(userId);
 
+    // โหลดงาน
+    const cw = JSON.parse(localStorage.getItem("CardWork") || "[]");
+    setJobs(cw);
+  }, []);
+
+  // Get day and change month
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
@@ -34,198 +65,224 @@ export default function Calendar() {
 
   const changeMonth = (offset: number) => {
     setCurrentDate(new Date(year, month + offset, 1));
+    setSelectedDate(null);
   };
 
+  // Get job date
+  const getJobDate = (job: CardWork) => {
+    if (job.dateRange?.startAt) return job.dateRange.startAt.slice(0, 10);
+    return job.createdAt.slice(0, 10);
+  };
+
+  // Check if day is in range
+  const isInRange = (day: number, job: CardWork) => {
+    if (!job.dateRange) return false;
+
+    const current = new Date(year, month, day).getTime();
+    const start = new Date(job.dateRange.startAt).getTime();
+    const end = new Date(job.dateRange.endAt).getTime();
+
+    return current >= start && current <= end;
+  };
+  // Check if day is event
   const isEventDay = (day: number | null) => {
-    if (!day) return false;
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return events.some((e) => e.date === dateStr);
+    if (!day || !techId) return false;
+
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+      day
+    ).padStart(2, "0")}`;
+
+    return jobs.some((j) => {
+      if (!j.technicianId.includes(techId)) return false;
+
+      // งาน 1 วัน
+      if (getJobDate(j) === dateStr) return true;
+
+      // งานหลายวัน
+      if (j.dateRange && isInRange(day, j)) return true;
+
+      return false;
+    });
   };
 
-  const isSelected = (day: number | null) => {
-    if (!day || !selectedDate) return false;
+ 
+  const jobsOfSelectedDay = useMemo(() => {
+    if (!selectedDate || !techId) return [];
+
+    const d = `${selectedDate.getFullYear()}-${String(
+      selectedDate.getMonth() + 1
+    ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+
+    return jobs.filter((j) => {
+      if (!j.technicianId.includes(techId)) return false;
+
+      // งาน 1 วัน
+      const jobDate = getJobDate(j);
+      if (jobDate === d) return true;
+
+      // งานหลายวัน
+      if (j.dateRange && isInRange(selectedDate.getDate(), j)) return true;
+
+      return false;
+    });
+  }, [selectedDate, jobs, techId]);
+
+
+  const getStatusBadge = (status: string) => {
+    const styles = {
+      กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      สำเร็จ: "bg-green-100 text-green-700 border-green-200",
+      รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
+      รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
+    };
+
+    const defaultStyle = "bg-gray-100 text-gray-700 border-gray-200";
+
     return (
-      selectedDate.getFullYear() === year &&
-      selectedDate.getMonth() === month &&
-      selectedDate.getDate() === day
+      <span
+        className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+          styles[status] || defaultStyle
+        }`}
+      >
+        {status}
+      </span>
     );
   };
 
-  const handleSelect = (day: number | null) => {
-    if (!day) return;
-    setSelectedDate(new Date(year, month, day));
-  };
 
   return (
-    <div>
-    <div className="max-w-md mx-auto p-4 bg-white rounded-xl shadow">
+    <div className="p-4">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">
-          {currentDate.toLocaleString("en-US", { month: "long" })} {year}
-        </h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => changeMonth(-1)}
-            className="px-2 py-1 rounded-lg hover:bg-gray-100"
-          >
-            ▲
-          </button>
-          <button
-            onClick={() => changeMonth(1)}
-            className="px-2 py-1 rounded-lg hover:bg-gray-100"
-          >
-            ▼
-          </button>
+      <div className="flex flex-col mb-4">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Calendar className="w-6 h-6 text-primary" />
+          ปฏิทินงาน
+        </h1>
+        <p className="text-sm text-gray-600 px-2">ปฏิทินงานของคุณ</p>
+      </div>
+
+      {/* Calendar */}
+      <div className="max-w-md mx-auto p-4 bg-white rounded-xl shadow">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">
+            {currentDate.toLocaleString("th-TH", {
+              month: "long",
+              year: "numeric",
+            })}
+          </h2>
+
+          <div className="flex gap-2">
+            <button onClick={() => changeMonth(-1)} className="px-2 py-1">
+              ▲
+            </button>
+            <button onClick={() => changeMonth(1)} className="px-2 py-1">
+              ▼
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-7 text-center gap-2">
+          {days.map((day, i) => (
+            <div
+              key={i}
+              onClick={() => day && setSelectedDate(new Date(year, month, day))}
+              className={`relative p-2 rounded-lg cursor-pointer 
+                ${day ? "hover:bg-gray-100" : "invisible"}
+                ${
+                  selectedDate &&
+                  day &&
+                  selectedDate.getDate() === day &&
+                  selectedDate.getMonth() === month
+                    ? "bg-blue-200"
+                    : ""
+                }
+              `}
+            >
+              {day}
+
+              {/* Event Dot */}
+              {isEventDay(day) && (
+                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-600 rounded-full"></div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
-
-      {/* Days of week */}
-      <div className="grid grid-cols-7 text-center text-gray-500 font-medium mb-2">
-        {daysOfWeek.map((d) => (
-          <div key={d}>{d}</div>
-        ))}
+      {/* Text */}
+      <div className="flex items-center gap-2 mt-2 px-4">
+        <h1 className="text-2xl text-primary font-semibold flex items-center gap-2">
+          <CalendarCheck className="w-6 h-6" />
+          งานวันนี้
+        </h1>
+        <p className="text-sm text-gray-600 ">
+          {jobsOfSelectedDay.length} งาน
+        </p>
       </div>
+      {/* Job List */}
+      <div className="mt-4">
+        {jobsOfSelectedDay.length > 0
+          ? jobsOfSelectedDay.map((job: any) => (
+              <div
+                key={job.JobId}
+                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer mb-3"
+                onClick={() => router.push(`/technician/${job.JobId}`)}
+              >
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="bg-primary/20 rounded-lg p-2">
+                        <FileText className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-1">
+                          ลูกค้า: {job.customer?.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {job.description}
+                        </p>
+                      </div>
+                    </div>
 
-      {/* Dates */}
-      <div className="grid grid-cols-7 text-center gap-2">
-        {days.map((day, idx) => (
-          <div
-            key={idx}
-            onClick={() => handleSelect(day)}
-            className={`relative py-2 rounded-lg cursor-pointer transition-all 
-              ${day ? "hover:bg-gray-100" : ""}
-              ${isSelected(day) ? "bg-blue-100 text-blue-700 font-semibold" : ""}
-              ${!day ? "invisible" : ""}
-            `}
-          >
-            {day && <span>{day}</span>}
+                    <div className="flex mt-3 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4 text-primary" />
+                        {job.customer?.address}
+                      </span>
+                    </div>
 
-            {/* Event dot */}
-            {isEventDay(day) && (
-              <span
-                className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${
-                  isSelected(day) ? "bg-blue-700" : "bg-blue-500"
-                }`}
-              ></span>
+                    <div className="mt-1 text-sm text-gray-600">
+                      {DateFormatWork(job.dateRange.startAt)} -{" "}
+                      {DateFormatWork(job.dateRange.endAt)}
+                    </div>
+
+                    <div className="mt-2 text-xs text-gray-500">
+                      หมายเลขงาน: #{job.JobId}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1 mt-1">
+                      <Users className="w-4 h-4 text-gray-400" />
+                      <span className="text-xs text-gray-500">
+                        {job.technicianId?.length} ช่าง
+                      </span>
+                    </div>
+
+                    <div className="flex items-center">
+                      {getStatusBadge(job.status)}
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          : selectedDate && (
+              <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-gray-200">
+                <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">ไม่มีงานในวันนี้</p>
+              </div>
             )}
-          </div>
-        ))}
       </div>
-      
-    </div>
-    <div>
-      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
-        <div>
-          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
-          <p>รายละเอียดงาน</p>
-          <p>ทีม: 5หัวหน้าสมิง</p>
-          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
-        </div>
-
-        <div className="flex flex-col justify-between text-right">
-          <p className="">เลขที่ใบงาน : 0001</p>
-          <div className="">
-            <div className="flex justify-end mr-1">
-              <svg
-                className="w-6 h-6 text-red-800 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <p>map</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
-        <div>
-          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
-          <p>รายละเอียดงาน</p>
-          <p>ทีม: 5หัวหน้าสมิง</p>
-          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
-        </div>
-
-        <div className="flex flex-col justify-between text-right">
-          <p className="">เลขที่ใบงาน : 0001</p>
-          <div className="">
-            <div className="flex justify-end mr-1">
-              <svg
-                className="w-6 h-6 text-red-800 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <p>map</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 bg-gray-300 rounded-lg p-3 flex justify-between">
-        <div>
-          <span className="text-xl">ลูกค้า : บริษัทกำลังสร้าง</span>
-          <p>รายละเอียดงาน</p>
-          <p>ทีม: 5หัวหน้าสมิง</p>
-          <p>วันจันทร์ที่ 13 กุมภาพันธ์ 2568</p>
-        </div>
-
-        <div className="flex flex-col justify-between text-right">
-          <p className="">เลขที่ใบงาน : 0001</p>
-          <div className="">
-            <div className="flex justify-end mr-1">
-              <svg
-                className="w-6 h-6 text-red-800 "
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <p>map</p>
-          </div>
-        </div>
-      </div>
-    </div>
     </div>
   );
 }

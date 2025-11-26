@@ -9,9 +9,17 @@ import {
 import { useRouter } from "next/navigation";
 import { generateWorkPDF } from "@/lib/pdf/generateWorkPDF";
 
-export default function Header({ job, pdfRef, onApprove, onReject, setShowEditModal }: any) {
+export default function Header({
+  job,
+  pdfRef,
+  onApprove,
+  onReject,
+  setShowEditModal,
+}: any) {
   const router = useRouter();
-
+  const auth = JSON.parse(localStorage.getItem("auth-storage") || "{}");
+  const myRole = auth?.state?.role;
+  const isExecutive = myRole === "executive";
   const handleDownload = async () => {
     if (!pdfRef?.current) return;
     await generateWorkPDF(pdfRef.current, "ใบงานช่าง_" + job.JobId);
@@ -41,31 +49,42 @@ export default function Header({ job, pdfRef, onApprove, onReject, setShowEditMo
 
       {/* Buttons */}
       <div className="flex items-center gap-3">
-        <button
-         onClick={() => setShowEditModal(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-hover
-            text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
-        >
-          <Edit className="w-4 h-4" />
-          แก้ไขงาน
-        </button>
-        <button
-          onClick={onReject}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700
-            text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
-        >
-          <XCircle className="w-4 h-4" />
-          ตีกลับงาน
-        </button>
+        {!isExecutive && (
+          <>
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="flex items-center gap-2 bg-primary hover:bg-primary-hover
+        text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
+            >
+              <Edit className="w-4 h-4" />
+              แก้ไขงาน
+            </button>
 
-        <button
-          onClick={onApprove}
-          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600
-            text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
-        >
-          <CheckCircle className="w-4 h-4" />
-          อนุมัติงานสำเร็จ
-        </button>
+            <button
+              disabled={job.status !== "รอการตรวจสอบ"}
+              className={`px-4 py-2 rounded-md text-white ${
+                job.status === "รอการตรวจสอบ"
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+              onClick={onReject}
+            >
+              ตีกลับงาน
+            </button>
+
+            <button
+              disabled={job.status !== "รอการตรวจสอบ"}
+              className={`px-4 py-2 rounded-md text-white ${
+                job.status === "รอการตรวจสอบ"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+              onClick={onApprove}
+            >
+              อนุมัติงาน
+            </button>
+          </>
+        )}
 
         <button
           onClick={handleDownload}

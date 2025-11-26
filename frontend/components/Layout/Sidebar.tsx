@@ -107,16 +107,7 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
 
         <div className="h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent flex-shrink-0" />
 
-        {/* Search button */}
-        <div className="px-4 mt-4 flex-shrink-0">
-          <button
-            onClick={() => setIsSearchOpen(true)}
-            className="bg-accent shadow-xl cursor-pointer rounded gap-2 px-4 py-2 flex items-center w-full text-left text-lg hover:bg-accent/80 transition transform hover:scale-[1.02]"
-          >
-            <Search size={20} className="text-white" />
-            <span className="text-white font-semibold">ค้นหา...</span>
-          </button>
-        </div>
+       
 
         <nav className="py-4 flex-1 overflow-y-auto relative">
           <div

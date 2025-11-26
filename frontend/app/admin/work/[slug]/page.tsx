@@ -67,6 +67,11 @@ export default function WorkDetailPage({ params }: PageProps) {
       setTimeout(() => setIsLoading(false), 300);
     }
   }, [slug]);
+  const imgStore = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+
+  const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
+
+  const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
 
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
@@ -80,7 +85,11 @@ export default function WorkDetailPage({ params }: PageProps) {
           <div className="space-y-4">
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
-            <EvidenceCard job={job} />
+            <EvidenceCard
+              job={job}
+              imagesBefore={imagesBefore}
+              imagesAfter={imagesAfter}
+            />
           </div>
 
           <Sidebar job={job} />

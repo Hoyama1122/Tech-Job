@@ -8,7 +8,8 @@ import Header from "@/components/Dashboard/Work/Slug/Header";
 import BasicInfoCard from "@/components/Dashboard/Work/Slug/BasicInfo";
 import DescriptionCard from "@/components/Dashboard/Work/Slug/DescriptionCard";
 import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
-import Sidebar from "@/components/Supervisor/work/sideBar";
+import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
+
 
 interface PageProps {
   params: Promise<{ slug: string }>;

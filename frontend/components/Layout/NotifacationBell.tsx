@@ -1,9 +1,8 @@
 "use client";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { BellDot, X } from "lucide-react";
 
 const NotificationBell = ({ Noti, setShowNotificationsBell }) => {
-  
   const handleDropdownClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
@@ -18,7 +17,6 @@ const NotificationBell = ({ Noti, setShowNotificationsBell }) => {
     const idx = users.findIndex((u: any) => u.id === techId);
     if (idx === -1) return;
 
-   
     users[idx].notifications = users[idx].notifications.map((n: any) =>
       n.id === notifId ? { ...n, read: true } : n
     );
@@ -26,7 +24,7 @@ const NotificationBell = ({ Noti, setShowNotificationsBell }) => {
     localStorage.setItem("Users", JSON.stringify(users));
 
     console.log(notifId);
-    
+
     setShowNotificationsBell(false);
   };
 
@@ -44,7 +42,10 @@ const NotificationBell = ({ Noti, setShowNotificationsBell }) => {
       >
         {/* Header */}
         <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="font-semibold text-xl text-gray-800">การแจ้งเตือน</h3>
+          <h3 className="font-semibold text-xl text-gray-800 flex items-center gap-2">
+            <BellDot className="w-6 h-6 text-primary" />
+            การแจ้งเตือน
+          </h3>
           <button
             onClick={() => setShowNotificationsBell(false)}
             className="p-1 hover:bg-gray-100 rounded-full"
@@ -59,11 +60,9 @@ const NotificationBell = ({ Noti, setShowNotificationsBell }) => {
             Noti.map((notif) => (
               <div
                 key={notif.id}
-                onClick={() => markAsRead(notif.id)}  
+                onClick={() => markAsRead(notif.id)}
                 className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ransition-colors ${
-                  notif.read === false
-                    ? "bg-blue-50 border-l-4 border-blue-500"
-                    : ""
+                  notif.read === false ? "" : ""
                 }`}
               >
                 <p className="text-sm text-gray-800 font-medium">
@@ -86,13 +85,6 @@ const NotificationBell = ({ Noti, setShowNotificationsBell }) => {
               <p>ไม่มีการแจ้งเตือน</p>
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-4 py-2 bg-gray-50 text-center">
-          <button className="text-sm text-[#2E7D32] font-medium hover:underline">
-            ดูทั้งหมด
-          </button>
         </div>
       </div>
     </>,

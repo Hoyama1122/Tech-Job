@@ -20,3 +20,29 @@ function sendNotificationToTechnicians(techIds: number[], job: any) {
   localStorage.setItem("Users", JSON.stringify(updated));
 }
 export { sendNotificationToTechnicians };
+const notifyTechnicians = (techIds: number[], message: string) => {
+  const users = JSON.parse(localStorage.getItem("Users") || "[]");
+
+  const updated = users.map((u: any) => {
+    if (u.role === "technician" && techIds.includes(u.id)) {
+      const newNoti = {
+        id: Date.now(),
+        message,
+        read: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      return {
+        ...u,
+        notifications: u.notifications
+          ? [...u.notifications, newNoti]
+          : [newNoti],
+      };
+    }
+    return u;
+  });
+
+  localStorage.setItem("Users", JSON.stringify(updated));
+};
+
+export { notifyTechnicians };

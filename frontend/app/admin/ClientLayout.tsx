@@ -10,14 +10,13 @@ import { CardWork } from "@/lib/Mock/Jobs";
 import { useAuthStore } from "@/store/useAuthStore";
 import { redirect } from "next/navigation";
 
-
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { setCardWork, setUsers ,} = AppLoader();
-  
+  const { setCardWork, setUsers } = AppLoader();
+
   // Loader
   useEffect(() => {
     try {
@@ -46,8 +45,6 @@ export default function ClientLayout({
       console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
     }
   }, [setUsers]);
-
-  
 
   return (
     <div className={`min-h-screen bg-primary`}>

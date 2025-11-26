@@ -13,6 +13,7 @@ import {
   Search,
   X,
   Filter,
+  Home,
 } from "lucide-react";
 import CardWork from "@/components/Dashboard/CardWork";
 import Activities from "@/components/Dashboard/Activities";
@@ -211,7 +212,7 @@ const MainDashboard = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <div>
-          <h1 className="text-3xl font-bold text-primary">หน้าหลัก</h1>
+          <h1 className="text-3xl font-bold text-primary flex items-center gap-3"><Home className="w-8 h-8"/>หน้าหลัก</h1>
           <p className="text-sm text-text-secondary mt-1">
             ภาพรวมระบบจัดการงานช่าง
           </p>
