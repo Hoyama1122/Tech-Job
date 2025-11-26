@@ -5,7 +5,7 @@ import {
 } from "@/lib/Mock/NavNotifacation";
 import profile from "@/public/profile/profile.png";
 import Image from "next/image";
-import NotifacationBell from "../Dashboard/NotifacationBell";
+import NotifacationBell from "../Layout/NotifacationBell";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell } from '@fortawesome/free-solid-svg-icons';
 const RightNavbar = () => {

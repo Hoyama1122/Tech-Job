@@ -1,7 +1,8 @@
 import { Users } from "lucide-react";
 import React from "react";
 
-const Team = ({ job, technicians }) => {
+const Team = ({ job }) => {
+  
   return (
     <div className="mt-2">
       <div className="">
@@ -13,9 +14,9 @@ const Team = ({ job, technicians }) => {
           </p>
         </h3>
 
-        {technicians.length > 0 ? (
+        {job.technician.length > 0 ? (
           <ul className="space-y-1">
-            {technicians.map((t) => (
+            {job.technician.map((t) => (
               <li
                 key={t.id}
                 className="text-gray-700 text-sm flex items-center gap-2"

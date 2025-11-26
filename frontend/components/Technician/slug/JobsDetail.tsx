@@ -4,21 +4,8 @@ import Location from "./Location";
 import Team from "./Team";
 
 const JobsDetail = ({ job }) => {
-  const [technicians, setTechnicians] = useState([]);
-  useEffect(() => {
-    const usersRaw = localStorage.getItem("Users");
-    if (!usersRaw) return;
+ 
 
-    const users = JSON.parse(usersRaw);
-
-    const techUsers = users.filter((u) => u.role === "technician");
-
-    // Find technicians assigned to the job
-    const team = techUsers.filter((t) => job.technicianId?.includes(t.id));
-
-    setTechnicians(team);
-  }, [job]);
-  console.log(technicians);
   return (
     <div>
       <div className="bg-white rounded-xl shadow-md p-6">
@@ -63,7 +50,7 @@ const JobsDetail = ({ job }) => {
           </div>
         )}
         <Location job={job} />
-        <Team job={job} technicians={technicians} />
+        <Team job={job}  />
       </div>
     </div>
   );

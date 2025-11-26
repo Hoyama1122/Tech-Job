@@ -1,7 +1,9 @@
 import React from 'react'
 import RightNavbar from './RightNavbarTech'
 
-const NavbarTech = () => {
+const NavbarTech = ({ Noti }: { Noti: any[] }) => {
+    
+  
   return (
    <div className="bg-[#29335C] shadow-lg px-6 py-4 sticky top-0 z-40">
       <div className="flex items-center justify-between gap-4">
@@ -11,7 +13,7 @@ const NavbarTech = () => {
         </div>
         <div></div>
         {/* Right Side */}
-        <RightNavbar />
+        <RightNavbar Noti={Noti}/>
       </div>
     </div>
   )

@@ -4,10 +4,11 @@ import SidebarWrapper from "@/components/Technician/SidebarWrapper";
 import { CardWork } from "@/lib/Mock/Jobs";
 import { Users } from "@/lib/Mock/UserMock";
 import { AppLoader } from "@/store/AppLoader";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const ClientLayout = ({ children }: { children: React.ReactNode }) => {
   const { setCardWork, setUsers } = AppLoader();
+  const [Noti, setNoti] = useState([]);
   // Loader
   useEffect(() => {
     try {
@@ -37,6 +38,23 @@ const ClientLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, [setUsers]);
 
+  useEffect(() => {
+    const auth = JSON.parse(localStorage.getItem("auth-storage") || "{}");
+
+    const techId = Number(auth?.state?.userId);
+
+    if (!techId) return;
+
+    const users = JSON.parse(localStorage.getItem("Users") || "[]");
+    const me = users.find((u: any) => u.id === techId);
+
+    if (me?.notifications) {
+      setNoti(me.notifications);
+    }
+  }, []);
+
+  console.log(Noti);
+
   return (
     <div className={`min-h-screen bg-primary`}>
       <SidebarWrapper />
@@ -47,7 +65,7 @@ const ClientLayout = ({ children }: { children: React.ReactNode }) => {
           transition-all duration-300
           lg:ml-64  "
       >
-        <NavbarTech />
+        <NavbarTech Noti={Noti} />
         <main className="flex-1 p-3 md:p-4 overflow-y-auto">{children}</main>
       </div>
     </div>

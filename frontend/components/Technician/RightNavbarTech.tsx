@@ -1,18 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { Bell, Mail, Search } from "lucide-react";
-import {
-  NavNotifacation,
- 
-} from "@/lib/Mock/NavNotifacation";
+
 import profile from "@/public/profile/profile.png";
 import Image from "next/image";
-import NotifacationBell from "../Dashboard/NotifacationBell";
+import NotifacationBell from "../Layout/NotifacationBell";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
 
-const RightNavbar = () => {
+const RightNavbar = ({ Noti }: { Noti: any[] }) => {
 
   const router = useRouter();
   
@@ -30,9 +26,9 @@ const RightNavbar = () => {
           onClick={() => setShowNotificationsBell(!showNotificationsBell)}
         >
          <FontAwesomeIcon icon={faBell} size='lg'/>
-          {NavNotifacation.length > 0 && (
+          {Noti.length > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-              {NavNotifacation.length}
+              {Noti.length}
             </span>
           )}
         </button>
@@ -40,7 +36,7 @@ const RightNavbar = () => {
         {showNotificationsBell && (
           <NotifacationBell
             setShowNotificationsBell={setShowNotificationsBell}
-            NavNotifacation={NavNotifacation}
+            Noti={Noti}
           />
         )}
       </div>
@@ -53,12 +49,7 @@ const RightNavbar = () => {
           className="w-10 h-10 rounded-full bg-cover bg-no-repeat" 
           onClick={goToProfile}
         />
-        {/* <div className=" leading-4">
-          <h1 className="text-md text-primary-test font-semibold">
-            Technician
-          </h1>
-          <p className="text-sm">นายสมอน</p>
-        </div> */}
+        
       </div>
     </div>
   );

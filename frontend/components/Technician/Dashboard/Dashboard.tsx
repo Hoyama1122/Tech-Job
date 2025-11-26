@@ -38,7 +38,7 @@ const Dashboard = () => {
     setjobs(parsed);
   }, []);
 
-  // ดึงงานตาม technicianId
+  
   useEffect(() => {
     if (technicianId == null) return;
 
@@ -65,7 +65,7 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  console.log(technicianId);
+  
 
   const todayJobs = myJobs.filter((job: any) => {
     const jobDate = new Date(job.createdAt).toDateString();
