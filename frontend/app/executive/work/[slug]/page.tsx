@@ -1,7 +1,7 @@
 "use client";
 
-import React, { use, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { use } from "react";
+
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import NotFoundPage from "@/components/Dashboard/Work/Slug/NotFoundPage";
 import Header from "@/components/Dashboard/Work/Slug/Header";
@@ -9,17 +9,14 @@ import BasicInfoCard from "@/components/Dashboard/Work/Slug/BasicInfo";
 import DescriptionCard from "@/components/Dashboard/Work/Slug/DescriptionCard";
 import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Supervisor/work/sideBar";
-import TeamMap from "@/components/Supervisor/Map/MapContainer";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
 }
 
 export default function WorkDetailPage({ params }: PageProps) {
-    const router = useRouter();
-    const { slug } = use(params);
-    const [users, setUsers] = useState([]);
 
+    const { slug } = use(params);
 
     const [job, setJob] = React.useState<any>(null);
     const [isLoading, setIsLoading] = React.useState(true);
@@ -49,8 +46,7 @@ export default function WorkDetailPage({ params }: PageProps) {
               u.role === "technician" &&
               found.technicianId?.includes(u.id)
           );
-          setUsers(users);
-          
+
           setJob({
             ...found,
             supervisor: supervisor || null,
@@ -66,7 +62,6 @@ export default function WorkDetailPage({ params }: PageProps) {
             setTimeout(() => setIsLoading(false), 300);
         }
     }, [slug]);
-    console.log(job);
 
     if (isLoading) return <LoadingSkeleton />;
     if (!job) return <NotFoundPage jobId={slug} />;
@@ -80,15 +75,7 @@ export default function WorkDetailPage({ params }: PageProps) {
                   <DescriptionCard job={job} />
                   <EvidenceCard job={job} />
                 </div>
-                <div>
-                  <Sidebar job={job} />
-                  <div className="bg-white/90 rounded-lg shadow-md p-4 mt-4 ">
-                    <TeamMap jobs={[job]} users={[users]} />
-                  </div>
-                  
-                </div>
-                
-                
+                <Sidebar job={job} />
               </div>
             </div>
     );

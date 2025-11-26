@@ -1,7 +1,7 @@
 export type UserType = {
   id: number;
   name: string;
-  role: "ceo" | "admin" | "supervisor" | "technician";
+  role: "executive" | "admin" | "supervisor" | "technician";
   department?: string;
   team?: string;
   phone?: string;
@@ -15,7 +15,7 @@ export const Users: UserType[] = [
   {
     id: 100,
     name: "ฟ้าใส วิศวกร",
-    role: "ceo",
+    role: "executive",
     email: "ceo@techjob.com",
     password: "ceo123",
     phone: "081-100-0001",

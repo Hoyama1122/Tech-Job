@@ -35,6 +35,9 @@ const getStatusStyle = (status: string) => {
 };
 
 export default function JobCard({ job }: Props) {
+  const Auth = localStorage.getItem("auth-storage");
+  const parsedAuth = Auth ? JSON.parse(Auth) : [];
+
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg  border border-gray-200 overflow-hidden group flex flex-col h-full">
       {/* Card Header */}
@@ -111,7 +114,7 @@ export default function JobCard({ job }: Props) {
 
         {/* Action Button - อยู่ล่างสุดเสมอ */}
         <Link
-          href={`/admin/work/${job.JobId}`}
+          href={`/${parsedAuth.state.role}/work/${job.JobId}`}
           className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-md hover:shadow-lg mt-auto"
         >
           ดูรายละเอียด
