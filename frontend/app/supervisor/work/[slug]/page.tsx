@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import React from "react";
 import { notFound, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -29,7 +29,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [showEditModal, setShowEditModal] = React.useState(false);
 
-   const [imgStore, setImgStore] = useState<any>({});
+  const [imgStore, setImgStore] = useState<any>({});
   React.useEffect(() => {
     setIsLoading(true);
 
@@ -71,21 +71,19 @@ export default function WorkDetailPage({ params }: PageProps) {
       setTimeout(() => setIsLoading(false), 300);
     }
   }, [slug]);
+  
   // อนุมัติงาน
   const handleApprove = () => {
     if (job.status !== "รอการตรวจสอบ") {
       toast.error("ไม่สามารถอนุมัติได้ เนื่องจากสถานะไม่ใช่ 'รอการตรวจสอบ'");
       return;
     }
-
     const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
-
     const updated = cardData.map((c: any) =>
       c.JobId === job.JobId
         ? { ...c, status: "สำเร็จ", approvedAt: new Date().toISOString() }
         : c
     );
-
     localStorage.setItem("CardWork", JSON.stringify(updated));
 
     notifyTechnicians(
@@ -141,6 +139,10 @@ export default function WorkDetailPage({ params }: PageProps) {
     });
   };
 
+  const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
+
+  const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
+
   const adminImages = imgStore[job?.imageKey] || [];
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
@@ -160,7 +162,12 @@ export default function WorkDetailPage({ params }: PageProps) {
           <div className="space-y-4">
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
-            <EvidenceCard job={job} />
+            <EvidenceCard
+              job={job}
+              adminImages={adminImages}
+              imagesBefore={imagesBefore}
+              imagesAfter={imagesAfter}
+            />
           </div>
 
           <Sidebar job={job} />
