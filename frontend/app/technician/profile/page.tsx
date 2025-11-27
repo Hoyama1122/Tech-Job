@@ -12,6 +12,7 @@ import {
   Loader2,
   Users,
   Building2,
+  Calendar1,
 } from "lucide-react";
 
 export default function TechnicianProfilePage() {
@@ -59,7 +60,7 @@ export default function TechnicianProfilePage() {
       </div>
       {/* Profile card */}
       <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/60 overflow-hidden">
-        <div className="relative bg-white/60 px-6 py-10 text-center border-b border-gray-200">
+        <div className="relative bg-white/60 px-4 py-4 text-center border-b border-gray-200">
           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
           <div className="relative mx-auto w-28 h-28 rounded-full bg-primary/80  border-4  flex items-center justify-center shadow-lg backdrop-blur-sm border-primary/90">
             <span className="text-4xl font-bold text-white">
@@ -139,6 +140,74 @@ export default function TechnicianProfilePage() {
                 </p>
                 <p className="text-sm md:text-base font-medium text-gray-900 mt-1">
                   {user.phone || "-"}
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* Gender */}
+          <div className="group p-4 rounded-2xl bg-gray-100  backdrop-blur-sm border border-gray-200/50 ">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 font-semibold tracking-wide uppercase">
+                  เพศ
+                </p>
+                <p className="text-sm md:text-base font-medium text-gray-900 mt-1">
+                  {user.gender === "male"
+                    ? "ชาย"
+                    : user.gender === "female"
+                    ? "หญิง"
+                    : "อื่น ๆ"}
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* Birthday */}
+          <div className="group p-4 rounded-2xl bg-gray-100  backdrop-blur-sm border border-gray-200/50 ">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <Calendar className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 font-semibold tracking-wide uppercase">
+                  วันเกิด
+                </p>
+                <p className="text-sm md:text-base font-medium text-gray-900 mt-1">
+                  {user.birthday || "-"}
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* ID Card */}
+          <div className="group p-4 rounded-2xl bg-gray-100  backdrop-blur-sm border border-gray-200/50 ">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <IdCard className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 font-semibold tracking-wide uppercase">
+                  เลขบัตรประชาชน
+                </p>
+                <p className="text-sm md:text-base font-medium text-gray-900 mt-1">
+                  {user.citizenId || "-"}
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* Address */}
+          <div className="group p-4 rounded-2xl bg-gray-100  backdrop-blur-sm border border-gray-200/50 ">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <MapPin className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 font-semibold tracking-wide uppercase">
+                  ที่อยู่
+                </p>
+                <p className="text-sm md:text-base font-medium text-gray-900 mt-1">
+                  {user.address || "-"}
                 </p>
               </div>
             </div>
