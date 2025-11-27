@@ -52,7 +52,7 @@ const ClientLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  console.log(Noti);
+  
 
   return (
     <div className={`min-h-screen bg-primary`}>

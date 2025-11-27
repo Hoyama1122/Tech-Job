@@ -38,8 +38,7 @@ export default function Work() {
                 const parsedCards = JSON.parse(cardData);
                 const parsedUsers = userData ? JSON.parse(userData) : [];
                 const parsedAuth = auth ? JSON.parse(auth) : [];
-                console.log("Parsed Users:", parsedUsers);
-                console.log("Parsed Auth:", parsedAuth.state.userId);
+
 
                 const supervisorJobs = parsedCards.filter((job : any) =>
                     String(job.supervisorId) === String(parsedAuth.state.userId)
