@@ -14,8 +14,6 @@ const TableTechDepartment = () => {
   const supervisorDepartment = parsedAuth.state.department;
   console.log(supervisorDepartment);
 
-
-  // 1. กรองข้อมูลช่างในแผนกของ Supervisor
   const techniciansInDepartment = useMemo(() => {
     if (!supervisorDepartment) return [];
     return UserData.filter(
@@ -23,7 +21,6 @@ const TableTechDepartment = () => {
     );
   }, [supervisorDepartment]);
 
-  // 2. กรองข้อมูลจากช่างในแผนกตามคำค้นหาและสถานะ
   const filteredData = techniciansInDepartment.filter((data) => {
     const matchSearch =
       data.username.toLowerCase().includes(searchTerm.toLowerCase()) ||

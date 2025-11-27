@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "react";
 const ClientLayout = ({ children }: { children: React.ReactNode }) => {
   const { setCardWork, setUsers } = AppLoader();
   const [Noti, setNoti] = useState([]);
-  // Loader
+  // Loader Card
   useEffect(() => {
     try {
       const savedWork = localStorage.getItem("CardWork");
@@ -23,7 +23,7 @@ const ClientLayout = ({ children }: { children: React.ReactNode }) => {
       console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
     }
   }, [setCardWork]);
-  // Loader
+  // Loader User
   useEffect(() => {
     try {
       const users = localStorage.getItem("Users");
@@ -40,7 +40,6 @@ const ClientLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const auth = JSON.parse(localStorage.getItem("auth-storage") || "{}");
-
     const techId = Number(auth?.state?.userId);
 
     if (!techId) return;
@@ -71,5 +70,4 @@ const ClientLayout = ({ children }: { children: React.ReactNode }) => {
     </div>
   );
 };
-
 export default ClientLayout;

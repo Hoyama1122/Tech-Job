@@ -12,6 +12,7 @@ import {
   technicianReportSchema,
   TechnicianReportForm,
 } from "@/lib/Validations/technicianReportSchema";
+import { log } from "console";
 
 const LS = {
   WORK: "CardWork",
@@ -77,8 +78,7 @@ export default function Page({ params }: PageProps) {
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   };
 
-  //  
-
+  
   const loadJobAndImages = () => {
     const cardData = localStorage.getItem(LS.WORK);
     const imgStore = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
@@ -87,7 +87,8 @@ export default function Page({ params }: PageProps) {
 
     const jobs = JSON.parse(cardData);
     const found = jobs.find((j: any) => j.JobId === slug);
-
+ 
+    
     if (!found) {
       setJob(null);
       return;
