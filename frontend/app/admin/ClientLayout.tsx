@@ -17,7 +17,7 @@ export default function ClientLayout({
 }) {
   const { setCardWork, setUsers } = AppLoader();
 
-  // Loader
+  // Loader CardWork
   useEffect(() => {
     try {
       const savedWork = localStorage.getItem("CardWork");
@@ -31,7 +31,7 @@ export default function ClientLayout({
       console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
     }
   }, [setCardWork]);
-  // Loader
+  // Loader Users
   useEffect(() => {
     try {
       const users = localStorage.getItem("Users");

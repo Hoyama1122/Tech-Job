@@ -118,7 +118,7 @@ export default function Page({ params }: PageProps) {
     setTimeout(() => setIsLoading(false), 250);
   }, [slug]);
 
-  //  UPDATE JOB STATUS
+  //  update job status
   const updateJobStatus = (newStatus: string, reportData?: any) => {
     const cardData = localStorage.getItem(LS.WORK);
     if (!cardData) return;
@@ -144,7 +144,7 @@ export default function Page({ params }: PageProps) {
     setCurrentStatus(newStatus);
   };
 
-  //  START JOB
+  //  start job
   const handleStartJob = () => {
     if (!navigator.geolocation) {
       toast.error("ไม่รองรับการหาตำแหน่ง");
@@ -176,7 +176,7 @@ export default function Page({ params }: PageProps) {
     );
   };
 
-  //  SUBMIT  REPORT
+  //  sumbit report
   const handleSubmitReport = () => {
     const validated = technicianReportSchema.safeParse({
       ...formData,
