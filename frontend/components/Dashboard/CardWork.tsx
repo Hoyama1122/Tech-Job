@@ -1,6 +1,7 @@
+"use client";
 import { Eye } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 export const getBadgeStatusClass = (status): string => {
   const statusMap = {
@@ -10,7 +11,7 @@ export const getBadgeStatusClass = (status): string => {
     รอการตรวจสอบ: "bg-blue-100 text-blue-700",
     รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
   };
-  
+
   return statusMap[status] || "bg-gray-50 text-gray-600";
 };
 
@@ -19,6 +20,22 @@ export const getStatusClass = (status: JobStatus): string => {
 };
 
 const CardWork = ({ card }) => {
+  const [role, setRole] = useState<string | null>(null);
+  
+
+  useEffect(() => {
+    try {
+      const auth = localStorage.getItem("auth-storage");
+      if (auth) {
+        const parsedAuth = JSON.parse(auth);
+        if (parsedAuth?.state?.role) {
+          setRole(parsedAuth.state.role);
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing auth storage:", error);
+    }
+  }, []);
 
   const DesktopView = () => (
     <div className="hidden md:block overflow-x-auto">
@@ -48,16 +65,15 @@ const CardWork = ({ card }) => {
             card.map((work, index) => (
               <tr
                 key={work.id}
-                className={`border-b border-gray-200 hover:bg-blue-50 transition-colors ${
-                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                }`}
+                className={`border-b border-gray-200 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  }`}
               >
                 <td className="px-4 py-2 text-sm font-semibold text-gray-800">
                   {work.JobId}
                 </td>
                 <td
                   className="px-4 py-2 text-sm text-gray-700 max-w-[150px] truncate"
-                
+
                 >
                   {work.technicians?.map((t) => t.name).join(", ") || "-"}
                 </td>
@@ -82,9 +98,10 @@ const CardWork = ({ card }) => {
                   </span>
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-700 text-center">
+
                   <Link
-                    href={`/admin/work/${work.JobId}`}
-                  className="flex items-center justify-center">
+                    href={`/${role}/work/${work.JobId}`}
+                    className="flex items-center justify-center">
                     <Eye className="w-6 h-6 text-primary cursor-pointer" />
                   </Link>
                 </td>
@@ -105,7 +122,7 @@ const CardWork = ({ card }) => {
     </div>
   );
 
- 
+
   const MobileView = () => (
     <div className="md:hidden space-y-3 mt-4">
       {card.length > 0 ? (

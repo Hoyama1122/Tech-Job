@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import React from "react";
 import { notFound, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -22,12 +22,14 @@ interface PageProps {
 }
 export default function WorkDetailPage({ params }: PageProps) {
   const router = useRouter();
- const [imgStore, setImgStore] = useState<any>({});
+
   const { slug } = React.use(params);
   const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [showEditModal, setShowEditModal] = React.useState(false);
+
+   const [imgStore, setImgStore] = useState<any>({});
   React.useEffect(() => {
     setIsLoading(true);
 
@@ -138,9 +140,6 @@ export default function WorkDetailPage({ params }: PageProps) {
       rejectedAt: new Date().toISOString(),
     });
   };
- const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
-
-  const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
 
   const adminImages = imgStore[job?.imageKey] || [];
   if (isLoading) return <LoadingSkeleton />;
@@ -161,12 +160,7 @@ export default function WorkDetailPage({ params }: PageProps) {
           <div className="space-y-4">
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
-            <EvidenceCard
-              job={job}
-              adminImages={adminImages}
-              imagesBefore={imagesBefore}
-              imagesAfter={imagesAfter}
-            />
+            <EvidenceCard job={job} />
           </div>
 
           <Sidebar job={job} />
