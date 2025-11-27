@@ -117,12 +117,7 @@ const FormLogin = () => {
         <span className="w-full border-t border-gray-700"></span>
       </div>
 
-      <button
-        type="button"
-        className="w-full bg-red-600 text-white py-3 rounded-full font-semibold text-lg hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
-      >
-        <span>เข้าสู่ระบบด้วย Google</span>
-      </button>
+     
     </form>
   );
 };

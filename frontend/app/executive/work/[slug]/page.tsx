@@ -1,32 +1,47 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { use } from "react";
+import { useRef, useEffect, useState } from "react";
+import React from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
-import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import NotFoundPage from "@/components/Dashboard/Work/Slug/NotFoundPage";
 import Header from "@/components/Dashboard/Work/Slug/Header";
 import BasicInfoCard from "@/components/Dashboard/Work/Slug/BasicInfo";
 import DescriptionCard from "@/components/Dashboard/Work/Slug/DescriptionCard";
 import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
-
+import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
+import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
+import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export default function WorkDetailPage({ params }: PageProps) {
-  const { slug } = use(params);
+  const router = useRouter();
+  const { slug } = React.use(params);
 
-  const [job, setJob] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const pdfRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  const [job, setJob] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // เก็บ ImagesStore จาก localStorage แบบปลอดภัย
+  const [imgStore, setImgStore] = useState<any>({});
+
+  // โหลดข้อมูลใบงาน + Users
+  useEffect(() => {
     setIsLoading(true);
 
     try {
-      const cardData = localStorage.getItem("CardWork");
-      const usersData = localStorage.getItem("Users");
+      const cardData =
+        typeof window !== "undefined" ? localStorage.getItem("CardWork") : null;
+      const usersData =
+        typeof window !== "undefined" ? localStorage.getItem("Users") : null;
 
       if (cardData) {
         const jobs = JSON.parse(cardData);
@@ -34,7 +49,9 @@ export default function WorkDetailPage({ params }: PageProps) {
 
         const found = jobs.find((j: any) => j.JobId === slug);
 
-        if (found) {
+        if (!found) {
+          setJob(null);
+        } else {
           const supervisor = users.find(
             (u: any) =>
               u.role === "supervisor" &&
@@ -51,30 +68,71 @@ export default function WorkDetailPage({ params }: PageProps) {
             supervisor: supervisor || null,
             technician: technicians || [],
           });
-        } else {
-          setJob(null);
         }
       }
     } catch (err) {
       console.error(err);
+      toast.error("โหลดข้อมูลล้มเหลว");
     } finally {
       setTimeout(() => setIsLoading(false), 300);
     }
   }, [slug]);
 
+  useEffect(() => {
+    try {
+      const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+      setImgStore(store);
+    } catch {
+      setImgStore({});
+    }
+  }, []);
+
+  const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
+
+  const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
+
+  const adminImages = imgStore[job?.imageKey] || [];
+
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
-  return (
-    <div className="p-4">
-      <Header job={job} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-        <div className="lg:col-span-2 space-y-4">
-          <BasicInfoCard job={job} />
-          <DescriptionCard job={job} />
-          <EvidenceCard job={job} />
+  return (
+    <div>
+      <div className="p-4 h-[calc(100vh-64px)] overflow-y-auto">
+        <Header job={job} pdfRef={pdfRef} setShowEditModal={setShowEditModal} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
+          <div className="space-y-4">
+            <BasicInfoCard job={job} />
+            <DescriptionCard job={job} />
+
+            {/* Evidence Card */}
+            <EvidenceCard
+              job={job}
+              adminImages={adminImages}
+              imagesBefore={imagesBefore}
+              imagesAfter={imagesAfter}
+            />
+          </div>
+
+          <Sidebar job={job} />
         </div>
-        <Sidebar job={job} />
+      </div>
+
+      {/* Modal */}
+      {showEditModal && (
+        <EditWorkModal
+          job={job}
+          onClose={() => setShowEditModal(false)}
+          onSave={(updated) => setJob(updated)}
+        />
+      )}
+
+      <div
+        ref={pdfRef}
+        className="absolute opacity-0 pointer-events-none -z-50 top-0 left-0"
+      >
+        <PDFWorkOrder job={job} />
       </div>
     </div>
   );
