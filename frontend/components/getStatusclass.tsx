@@ -8,8 +8,8 @@ export const getStatusClass = (status: string) => {
       return "bg-red-100 text-red-700";
     case "รอการตรวจสอบ":
       return "bg-blue-100 text-blue-700";
-    case "รอการหมอบหมายงาน":
-      return "bg-gray-100 text-gray-700";
+    case "รอการดำเนินงาน":
+      return "bg-purple-100 text-white";
     default:
       return "bg-gray-50 text-gray-600";
   }

@@ -2,14 +2,15 @@ import { Eye } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-export const getBadgeStatusClass = (status: JobStatus): string => {
-  const statusMap: Record<JobStatus, string> = {
+export const getBadgeStatusClass = (status): string => {
+  const statusMap = {
     สำเร็จ: "bg-green-100 text-green-700",
     กำลังทำงาน: "bg-yellow-100 text-yellow-700",
     ตีกลับ: "bg-red-100 text-red-700",
     รอการตรวจสอบ: "bg-blue-100 text-blue-700",
     รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
   };
+  
   return statusMap[status] || "bg-gray-50 text-gray-600";
 };
 
@@ -18,7 +19,6 @@ export const getStatusClass = (status: JobStatus): string => {
 };
 
 const CardWork = ({ card }) => {
-  const auth = localStorage.getItem("auth-storage");
 
   const DesktopView = () => (
     <div className="hidden md:block overflow-x-auto">
@@ -57,7 +57,7 @@ const CardWork = ({ card }) => {
                 </td>
                 <td
                   className="px-4 py-2 text-sm text-gray-700 max-w-[150px] truncate"
-                  title={work.technicians?.map((t) => t.name).join(", ")}
+                
                 >
                   {work.technicians?.map((t) => t.name).join(", ") || "-"}
                 </td>
@@ -105,7 +105,7 @@ const CardWork = ({ card }) => {
     </div>
   );
 
-  // Mobile Card View
+ 
   const MobileView = () => (
     <div className="md:hidden space-y-3 mt-4">
       {card.length > 0 ? (

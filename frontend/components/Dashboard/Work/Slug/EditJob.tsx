@@ -6,15 +6,13 @@ import {
   X,
   FileText,
   ImageIcon,
-  Users,
-  Plus,
   Upload,
-  Trash2,
   Check,
   XCircle,
   Loader2,
   AlertCircle,
 } from "lucide-react";
+
 import DropdownTechnician from "../../Form/DropdownTechnician";
 
 interface Technician {
@@ -28,7 +26,7 @@ interface Job {
   title: string;
   description: string;
   technician: Technician[];
-  image?: any;
+  imageKey?: string;
 }
 
 interface EditWorkModalProps {
@@ -42,101 +40,108 @@ export default function EditWorkModal({
   onClose,
   onSave,
 }: EditWorkModalProps) {
-  const [images, setImages] = useState<string[]>(
-    Array.isArray(job.image) ? job.image : job.image ? [job.image] : []
-  );
-  const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [images, setImages] = useState<string[]>([]);
+  useEffect(() => {
+    try {
+      const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+      const list = store[job.imageKey] || [];
+      setImages(list);
+    } catch {
+      setImages([]);
+    }
+  }, [job.imageKey]);
   const [availableTechnicians, setAvailableTechnicians] = useState<
     Technician[]
   >([]);
-
+  const [isSaving, setIsSaving] = useState(false);
   const methods = useForm({
     defaultValues: {
-      title: job.title || "",
-      description: job.description || "",
+      title: job.title,
+      description: job.description,
       technicianId: job.technician?.map((t) => t.id) || [],
-      supervisorId: "",
     },
   });
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const {
     handleSubmit,
-    setValue,
     formState: { errors },
   } = methods;
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-
-    document.addEventListener("keydown", handleEscape);
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onEsc);
     document.body.style.overflow = "hidden";
-
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", onEsc);
       document.body.style.overflow = "";
     };
   }, [onClose]);
 
   useEffect(() => {
-    const usersData = localStorage.getItem("Users");
-    if (usersData) {
-      const users = JSON.parse(usersData);
+    try {
+      const users = JSON.parse(localStorage.getItem("Users") || "[]");
       const techs = users.filter((u: any) => u.role === "technician");
       setAvailableTechnicians(techs);
+    } catch {
+      setAvailableTechnicians([]);
     }
-    setValue("description", job.description || "");
-  }, [job, setValue]);
-
-  const onSubmit = async (data: any) => {
-    setIsSaving(true);
-
-    const users = JSON.parse(localStorage.getItem("Users") || "[]");
-    const selectedTechnicians = users.filter((u: any) =>
-      data.technicianId?.map(Number).includes(u.id)
-    );
-    const updatedJob = {
-      ...job,
-      title: data.title,
-
-      description: data.description,
-      technician: selectedTechnicians,
-      supervisorId: data.supervisorId,
-      image: images,
-    };
-
-    // Save to localStorage
-    const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
-    const updated = cardData.map((j: any) =>
-      j.JobId === job.JobId ? updatedJob : j
-    );
-    localStorage.setItem("CardWork", JSON.stringify(updated));
-
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    onSave(updatedJob);
-    setIsSaving(false);
-    onClose();
-  };
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-
     Array.from(files).forEach((file) => {
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = () =>
         setImages((prev) => [...prev, reader.result as string]);
-      };
       reader.readAsDataURL(file);
     });
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = (index: number) =>
     setImages((prev) => prev.filter((_, i) => i !== index));
+
+  const onSubmit = async (data: any) => {
+    setIsSaving(true);
+
+    try {
+      const users = JSON.parse(localStorage.getItem("Users") || "[]");
+
+      const selectedTechnicians = users.filter((u: any) =>
+        data.technicianId?.map(Number).includes(u.id)
+      );
+      const imageKey = job.imageKey || `IMG_${job.JobId}`;
+
+      const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+
+      store[imageKey] = images;
+      
+      localStorage.setItem("ImagesStore", JSON.stringify(store));
+
+      const updatedJob = {
+        ...job,
+        title: data.title,
+        description: data.description,
+        technician: selectedTechnicians,
+        imageKey,
+      };
+
+      const cardList = JSON.parse(localStorage.getItem("CardWork") || "[]");
+      const newList = cardList.map((x: any) =>
+        x.JobId === job.JobId ? updatedJob : x
+      );
+
+      localStorage.setItem("CardWork", JSON.stringify(newList));
+
+      await new Promise((res) => setTimeout(res, 500));
+
+      onSave(updatedJob);
+      onClose();
+    } catch (err) {
+      console.error("Error saving job:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -146,67 +151,69 @@ export default function EditWorkModal({
           onSubmit={handleSubmit(onSubmit)}
           className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
         >
-          {/* Sticky Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          {/* HEADER */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
               แก้ไขรายละเอียดใบงาน
             </h2>
+
             <button
-              type="button"
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="ปิดหน้าต่าง"
+              type="button"
+              className="p-2 rounded-full hover:bg-gray-100"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
 
-          {/* Scrollable Body */}
+          {/* BODY */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {/* Title */}
+            {/* TITLE */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <label className="text-sm font-semibold flex items-center gap-2 mb-2">
                 <FileText className="w-4 h-4 text-blue-600" />
                 หัวข้อใบงาน
               </label>
+
               <input
                 type="text"
-                defaultValue={job.title}
                 {...methods.register("title", {
                   required: "กรุณากรอกหัวข้อใบงาน",
                 })}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
               />
             </div>
 
+            {/* DESCRIPTION */}
             <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <label className="text-sm font-semibold flex items-center gap-2">
                 <FileText className="w-4 h-4 text-blue-600" />
                 รายละเอียดงาน
               </label>
+
               <textarea
                 {...methods.register("description", {
                   required: "กรุณากรอกรายละเอียดงาน",
                 })}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400 resize-none"
                 rows={4}
-                placeholder="กรอกรายละเอียดงาน..."
               />
+
               {errors.description && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
-                  {errors.description.message}
+                  {String(errors.description.message)}
                 </p>
               )}
             </div>
 
-            {/* Technician Dropdown */}
+            {/* TECHNICIANS */}
             <DropdownTechnician technicians={availableTechnicians} />
 
-            {/* Images Section */}
+            {/* IMAGES */}
             <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <label className="text-sm font-semibold flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-blue-600" />
                 รูปภาพหลักฐาน ({images.length} รูป)
               </label>
@@ -216,14 +223,12 @@ export default function EditWorkModal({
                   <div key={i} className="relative group">
                     <img
                       src={img}
-                      alt={`รูปภาพ ${i + 1}`}
-                      className="w-24 h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                      className="w-24 h-24 object-cover rounded-lg shadow-sm"
                     />
                     <button
-                      type="button"
                       onClick={() => removeImage(i)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                      aria-label={`ลบรูปภาพ ${i + 1}`}
+                      type="button"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100"
                     >
                       X
                     </button>
@@ -231,51 +236,49 @@ export default function EditWorkModal({
                 ))}
               </div>
 
-              <div className="flex  items-center">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center bg-primary text-white px-4 py-1 rounded-lg hover:bg-primary-hover transition-colors"
-                >
-                  <Upload className="w-6 h-6 mb-2" />
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-
-                  <span className="text-sm font-medium">เพิ่มรูปภาพ</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center bg-primary text-white px-4 py-1 rounded-lg"
+              >
+                <Upload className="w-6 h-6 mb-1" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+                <span className="text-sm ml-2">เพิ่มรูปภาพ</span>
+              </button>
             </div>
           </div>
 
-          {/* Fixed Footer */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 flex gap-3">
+          {/* FOOTER */}
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-2 flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 bg-gray-100 py-2 rounded-lg"
             >
-              <XCircle className="w-4 h-4" />
+              <XCircle className="w-4 h-4 inline-block mr-1" />
               ยกเลิก
             </button>
+
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 bg-primary text-white py-2 rounded-lg disabled:opacity-50"
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin inline-block mr-2" />
                   กำลังบันทึก...
                 </>
               ) : (
                 <>
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4 inline-block mr-1" />
                   บันทึกการแก้ไข
                 </>
               )}

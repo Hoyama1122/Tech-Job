@@ -1,14 +1,13 @@
 import { FileText, ImageIcon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Location from "./Location";
 import Team from "./Team";
 
-const JobsDetail = ({ job }) => {
- 
-
+const JobsDetail = ({ job, adminImages }) => {
   return (
     <div>
       <div className="bg-white rounded-xl shadow-md p-6 mt-2">
+        {/* Detail */}
         <div>
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-2">
             <FileText className="w-5 h-5 text-gray-700" />
@@ -25,17 +24,20 @@ const JobsDetail = ({ job }) => {
             </p>
           </div>
         </div>
-        {job.image && job.image.length > 0 && (
-          <div className="space-y-2">
+
+        {/* Admin Images */}
+        {adminImages && adminImages.length > 0 && (
+          <div className="space-y-2 mt-4">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-purple-600" />
-              รูปภาพประกอบ{" "}
+              รูปภาพประกอบ
               <span className="text-sm font-normal text-gray-500">
-                ({job.image.length} รูป)
+                ({adminImages.length} รูป)
               </span>
             </h3>
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {job.image.map((img, index) => (
+              {adminImages.map((img, index) => (
                 <div key={index} className="group relative">
                   <img
                     src={img}
@@ -49,8 +51,10 @@ const JobsDetail = ({ job }) => {
             </div>
           </div>
         )}
+
+        {/* Location  Team */}
         <Location job={job} />
-        <Team job={job}  />
+        <Team job={job} />
       </div>
     </div>
   );

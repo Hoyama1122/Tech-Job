@@ -15,20 +15,71 @@ import LocationSection from "./LocationSection";
 import CustomerSection from "./CustomerSection";
 import { sendNotificationToTechnicians } from "@/lib/Noti/SendNoti";
 
+
+const LS = {
+  USERS: "Users",
+  WORK: "CardWork",
+  IMAGES: "ImagesStore",
+};
+
+
+const parseThaiDate = (str: string | null) => {
+  if (!str) return null;
+
+  const months: Record<string, number> = {
+    มกราคม: 0,
+    กุมภาพันธ์: 1,
+    มีนาคม: 2,
+    เมษายน: 3,
+    พฤษภาคม: 4,
+    มิถุนายน: 5,
+    กรกฎาคม: 6,
+    สิงหาคม: 7,
+    กันยายน: 8,
+    ตุลาคม: 9,
+    พฤศจิกายน: 10,
+    ธันวาคม: 11,
+  };
+
+  const match = str.match(/(\d{1,2}) (\S+) (\d{4})/);
+  if (!match) return null;
+
+  const [, d, m, y] = match;
+  const year = Number(y) - 543;
+  return new Date(year, months[m], Number(d));
+};
+
+const generateJobId = (count: number) =>
+  `JOB_${String(count + 1).padStart(3, "0")}`;
+
+const createImageKey = (jobId: string) => `${jobId}_ADMIN`;
+
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(file);
+  });
+
+
+const getTechnicians = () => {
+  const users = JSON.parse(localStorage.getItem(LS.USERS) || "[]");
+  return users.filter((u: any) => u.role === "technician");
+};
+
+
 const WorkForm = () => {
-  const [loc, setLoc] = useState({ lat: 13.85, lng: 100.58 });
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [availableTechnicians, setAvailableTechnicians] = useState<any[]>([]);
+  const [loc, setLoc] = useState({ lat: 13.85, lng: 100.58 });
 
+  // Form
   const methods = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
     defaultValues: {
       technicianId: [],
-      dateRange: {
-        startAt: "",
-        endAt: "",
-      },
+      dateRange: { startAt: "", endAt: "" },
       location: { lat: null, lng: null },
     },
   });
@@ -42,126 +93,82 @@ const WorkForm = () => {
   } = methods;
 
   useEffect(() => {
-    const users = JSON.parse(localStorage.getItem("Users") || "[]");
-    const technicians = users.filter((u) => u.role === "technician");
-    setAvailableTechnicians(technicians);
+    setAvailableTechnicians(getTechnicians());
   }, []);
-
-  // Convert file to Base64
-  const convertToBase64 = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
 
   const onSubmit = async (data: WorkFormValues) => {
     try {
       setLoading(true);
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 400));
 
-      const users = JSON.parse(localStorage.getItem("Users") || "[]");
-      const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
+      const users = JSON.parse(localStorage.getItem(LS.USERS) || "[]");
+      const jobs = JSON.parse(localStorage.getItem(LS.WORK) || "[]");
 
-      // Convert uploaded images → base64
+      const jobId = generateJobId(jobs.length);
+      const imageKey = createImageKey(jobId);
+
       const images = data.image?.length
-        ? await Promise.all(Array.from(data.image).map(convertToBase64))
+        ? await Promise.all(Array.from(data.image).map(fileToBase64))
         : [];
 
-      // Map technicians
-      const technicianObjects = users.filter((u) =>
-        data.technicianId?.map(Number).includes(u.id)
+      // map technicians
+      const techIds = data.technicianId.map(Number);
+
+      const technicianObjects = users.filter((u: any) =>
+        techIds.includes(Number(u.id))
       );
 
-      // Parse Thai Date → JS Date
-      const parseThaiDate = (str: string) => {
-        const months: Record<string, number> = {
-          มกราคม: 0,
-          กุมภาพันธ์: 1,
-          มีนาคม: 2,
-          เมษายน: 3,
-          พฤษภาคม: 4,
-          มิถุนายน: 5,
-          กรกฎาคม: 6,
-          สิงหาคม: 7,
-          กันยายน: 8,
-          ตุลาคม: 9,
-          พฤศจิกายน: 10,
-          ธันวาคม: 11,
-        };
-        const match = str.match(/(\d{1,2}) (\S+) (\d{4})/);
-        if (!match) return null;
+      // Date
+      const startDate = parseThaiDate(data.dateRange.startAt);
+      const endDate = parseThaiDate(data.dateRange.endAt);
 
-        const [, d, m, y] = match;
-        return new Date(Number(y) - 543, months[m], Number(d));
-      };
+      const startISO =
+        startDate &&
+        `${startDate.toISOString().split("T")[0]}T${
+          data.startTime || "00:00"
+        }:00`;
 
-      const startObj = parseThaiDate(data.dateRange.startAt);
-      const endObj = parseThaiDate(data.dateRange.endAt);
-
-      const startISO = startObj
-        ? `${startObj.toISOString().split("T")[0]}T${
-            data.startTime || "00:00"
-          }:00`
-        : null;
-
-      const endISO = endObj
-        ? `${endObj.toISOString().split("T")[0]}T${data.endTime || "00:00"}:00`
-        : null;
+      const endISO =
+        endDate &&
+        `${endDate.toISOString().split("T")[0]}T${data.endTime || "00:00"}:00`;
 
       const now = new Date();
 
-      // Generate imageKey สำหรับเก็บรูป admin
-      const imageKey = `JOB_${String(current.length + 1).padStart(
-        3,
-        "0"
-      )}_ADMIN`;
-
-      const newWork = {
-        id: current.length + 1,
-        JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
+      // New job 
+      const newJob = {
+        id: jobs.length + 1,
+        JobId: jobId,
         title: data.title,
         description: data.description,
-        dateRange: { startAt: startISO, endAt: endISO },
+        category: data.category,
         status: "รอการดำเนินงาน",
         createdAt: now.toISOString(),
-        assignedAt: null,
-        dueDate: null,
-        completedAt: null,
-        approvedAt: null,
-        category: data.category,
-        userId: 1,
-        supervisorId: Number(data.supervisorId) || 0,
-        technicianId: data.technicianId?.map(Number) || [],
+        dateRange: { startAt: startISO, endAt: endISO },
+        supervisorId: Number(data.supervisorId) || null,
+        technicianId: data.technicianId.map(Number),
         technician: technicianObjects,
         customer: {
           name: data.customerName,
           phone: data.customerPhone,
           address: data.address,
         },
-
-        // รูปเก็บแบบ key
         imageKey,
-        image: [],
-
-        loc: loc,
+        loc,
       };
 
-      localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
-
-      const imgStore = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+      // Save Jobs
+      localStorage.setItem(LS.WORK, JSON.stringify([...jobs, newJob]));
+      const imgStore = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
       imgStore[imageKey] = images;
-      localStorage.setItem("ImagesStore", JSON.stringify(imgStore));
-
-      sendNotificationToTechnicians(newWork.technicianId, newWork);
-
+      localStorage.setItem(LS.IMAGES, JSON.stringify(imgStore));
+      // send noti
+      sendNotificationToTechnicians(newJob.technicianId, newJob);
       reset();
       toast.success("เพิ่มใบงานสำเร็จ!");
       router.push("/admin");
     } catch (err) {
       console.error(err);
-      toast.error("เพิ่มใบงานไม่สำเร็จ!");
+      toast.error("เกิดข้อผิดพลาดในการสร้างใบงาน");
     } finally {
       setLoading(false);
     }
@@ -171,7 +178,7 @@ const WorkForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          {/* LEFT */}
+          {/* left */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
             <JobInfoSection register={register} errors={errors} />
             <DateRangeSection
@@ -181,7 +188,7 @@ const WorkForm = () => {
             <ImageUpload setValue={setValue} register={register} />
           </div>
 
-          {/* RIGHT */}
+          {/* right */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
             <LocationSection
               onLocationSelect={(pos) => setLoc(pos)}

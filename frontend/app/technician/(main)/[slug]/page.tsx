@@ -13,18 +13,34 @@ import {
   TechnicianReportForm,
 } from "@/lib/Validations/technicianReportSchema";
 
+const LS = {
+  WORK: "CardWork",
+  IMAGES: "ImagesStore",
+};
+
 interface PageProps {
   params: { slug: string };
 }
 
-export default function page({ params }: PageProps) {
+export default function Page({ params }: PageProps) {
   const { slug } = params;
 
+  //  STATES 
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentStatus, setCurrentStatus] = useState("");
 
+  // admin images
+  const [adminImages, setAdminImages] = useState<string[]>([]);
+
+  // technician stored images
+  const [storedBeforeImages, setStoredBeforeImages] = useState<string[]>([]);
+  const [storedAfterImages, setStoredAfterImages] = useState<string[]>([]);
+
+  // technician form modal
   const [showFormModal, setShowFormModal] = useState(false);
 
+  // data entered in modal
   const [formData, setFormData] = useState<TechnicianReportForm>({
     detail: "",
     inspectionResults: "",
@@ -34,24 +50,23 @@ export default function page({ params }: PageProps) {
     customerSignature: "",
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // form errors
+  const [errors, setErrors] = useState({});
 
-  // รูปก่อน/หลังทำงานใหม่ (เก็บในฟอร์ม)
+  // NEW uploaded images (not saved to store yet)
   const [formBeforeImages, setFormBeforeImages] = useState<string[]>([]);
   const [formAfterImages, setFormAfterImages] = useState<string[]>([]);
 
-  // รูปเก็บจริงใน store หลัง submit
-  const [storedBeforeImages, setStoredBeforeImages] = useState<string[]>([]);
-  const [storedAfterImages, setStoredAfterImages] = useState<string[]>([]);
 
-  const [currentStatus, setCurrentStatus] = useState("");
+ 
 
-  const getDistanceMeters = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) => {
+  const saveImagesToStore = (key: string, images: string[]) => {
+    const store = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
+    store[key] = images;
+    localStorage.setItem(LS.IMAGES, JSON.stringify(store));
+  };
+
+  const getDistanceMeters = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371e3;
     const toRad = (x: number) => (x * Math.PI) / 180;
 
@@ -62,80 +77,71 @@ export default function page({ params }: PageProps) {
       Math.sin(dLat / 2) ** 2 +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c;
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   };
 
-  // โหลดข้อมูลงาน + โหลดรูปจาก ImagesStore
-  useEffect(() => {
-    setIsLoading(true);
+  //  
 
-    const cardData = localStorage.getItem("CardWork");
-    const imgStore = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+  const loadJobAndImages = () => {
+    const cardData = localStorage.getItem(LS.WORK);
+    const imgStore = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
 
-    if (cardData) {
-      const jobs = JSON.parse(cardData);
-      const found = jobs.find((j: any) => j.JobId === slug);
+    if (!cardData) return;
 
-      if (found) {
-        setJob(found);
-        setCurrentStatus(found.status);
+    const jobs = JSON.parse(cardData);
+    const found = jobs.find((j: any) => j.JobId === slug);
 
-    
-        const beforeKey = found.technicianReport?.imagesBeforeKey;
-        const afterKey = found.technicianReport?.imagesAfterKey;
-
-        setStoredBeforeImages(imgStore[beforeKey] || []);
-        setStoredAfterImages(imgStore[afterKey] || []);
-      } else {
-        setJob(null);
-      }
+    if (!found) {
+      setJob(null);
+      return;
     }
 
+    setJob(found);
+    setCurrentStatus(found.status);
+
+    // --- admin images 
+    setAdminImages(imgStore[found.imageKey] || []);
+
+    //  technician stored images
+    setStoredBeforeImages(imgStore[found.technicianReport?.imagesBeforeKey] || []);
+    setStoredAfterImages(imgStore[found.technicianReport?.imagesAfterKey] || []);
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    loadJobAndImages();
     setTimeout(() => setIsLoading(false), 250);
   }, [slug]);
 
-  // อัปเดตสถานะงาน
+  //  UPDATE JOB STATUS 
+
   const updateJobStatus = (newStatus: string, reportData?: any) => {
-    const cardData = localStorage.getItem("CardWork");
+    const cardData = localStorage.getItem(LS.WORK);
     if (!cardData) return;
 
     const jobs = JSON.parse(cardData);
 
-    const updated = jobs.map((j: any) => {
-      if (j.JobId === slug) {
-        return {
-          ...j,
-          status: newStatus,
+    const updatedJobs = jobs.map((j: any) =>
+      j.JobId === slug
+        ? {
+            ...j,
+            status: newStatus,
+            completedAt:
+              newStatus === "รอการตรวจสอบ"
+                ? new Date().toISOString()
+                : j.completedAt,
+            technicianReport: reportData || j.technicianReport,
+          }
+        : j
+    );
 
-          completedAt:
-            newStatus === "รอการตรวจสอบ"
-              ? new Date().toISOString()
-              : j.completedAt,
-
-          technicianReport: reportData || j.technicianReport,
-        };
-      }
-      return j;
-    });
-
-    localStorage.setItem("CardWork", JSON.stringify(updated));
-
-    setJob((prev: any) => ({
-      ...prev,
-      status: newStatus,
-      completedAt:
-        newStatus === "รอการตรวจสอบ"
-          ? new Date().toISOString()
-          : prev?.completedAt,
-      technicianReport: reportData || prev?.technicianReport,
-    }));
-
+    localStorage.setItem(LS.WORK, JSON.stringify(updatedJobs));
+    setJob(updatedJobs.find((x: any) => x.JobId === slug));
     setCurrentStatus(newStatus);
   };
 
-  // เริ่มงาน
+  //  START JOB 
+
   const handleStartJob = () => {
     if (!navigator.geolocation) {
       toast.error("ไม่รองรับการหาตำแหน่ง");
@@ -144,25 +150,15 @@ export default function page({ params }: PageProps) {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const myLat = pos.coords.latitude;
-        const myLng = pos.coords.longitude;
-
-        const jobLat = job.loc?.lat;
-        const jobLng = job.loc?.lng;
-
-        if (!jobLat || !jobLng) {
-          toast.error("ไม่พบตำแหน่งของงาน");
-          return;
-        }
-
-        const distance = getDistanceMeters(myLat, myLng, jobLat, jobLng);
+        const distance = getDistanceMeters(
+          pos.coords.latitude,
+          pos.coords.longitude,
+          job.loc?.lat,
+          job.loc?.lng
+        );
 
         if (distance > 200) {
-          toast.error(
-            `คุณอยู่ห่างจากจุดงาน ${Math.floor(
-              distance
-            )} เมตร — ไม่สามารถเริ่มงานได้`
-          );
+          toast.error(`คุณอยู่ห่างจากจุดงาน ${Math.floor(distance)} เมตร`);
           return;
         }
 
@@ -173,58 +169,50 @@ export default function page({ params }: PageProps) {
     );
   };
 
-  // เปิดฟอร์มปิดงาน
-  const handleCompleteJob = () => {
-    setShowFormModal(true);
-  };
+  //  SUBMIT  REPORT 
 
-  // Submit รายงาน & เก็บรูปลง ImagesStore
   const handleSubmitReport = () => {
-    const result = technicianReportSchema.safeParse({
+    const validated = technicianReportSchema.safeParse({
       ...formData,
       imagesBefore: formBeforeImages,
       imagesAfter: formAfterImages,
     });
 
-    if (!result.success) {
-      const formErrors: Record<string, string> = {};
-      result.error.issues.forEach((issue) => {
-        formErrors[issue.path[0]] = issue.message;
+    if (!validated.success) {
+      const errObj: Record<string, string> = {};
+      validated.error.issues.forEach((issue) => {
+        errObj[issue.path[0]] = issue.message;
       });
-      setErrors(formErrors);
+      setErrors(errObj);
       toast.warning("กรุณาตรวจสอบข้อมูลอีกครั้ง");
       return;
     }
 
     setErrors({});
 
-    // สร้าง key สำหรับรูป
+
     const beforeKey = `before_${slug}_${Date.now()}`;
     const afterKey = `after_${slug}_${Date.now()}`;
 
-    // เซฟรูปลง ImagesStore
-    const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
 
-    store[beforeKey] = formBeforeImages;
-    store[afterKey] = formAfterImages;
-
-    localStorage.setItem("ImagesStore", JSON.stringify(store));
+    saveImagesToStore(beforeKey, formBeforeImages);
+    saveImagesToStore(afterKey, formAfterImages);
 
     const reportData = {
-      ...result.data,
+      ...validated.data,
       imagesBeforeKey: beforeKey,
       imagesAfterKey: afterKey,
       submittedAt: new Date().toISOString(),
     };
 
     updateJobStatus("รอการตรวจสอบ", reportData);
-
     setShowFormModal(false);
     toast.success("บันทึกรายงานปิดงานสำเร็จ!");
   };
 
+
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
+    const styles= {
       กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
       สำเร็จ: "bg-green-100 text-green-700 border-green-200",
       รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
@@ -243,6 +231,8 @@ export default function page({ params }: PageProps) {
     );
   };
 
+
+
   if (isLoading)
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -260,7 +250,7 @@ export default function page({ params }: PageProps) {
   return (
     <div className="max-w-4xl mx-auto p-2">
       <HeaderSlugTechni job={job} getStatusBadge={getStatusBadge} />
-      <JobsDetail job={job} />
+      <JobsDetail job={job} adminImages={adminImages} />
 
       {(currentStatus === "รอการตรวจสอบ" || currentStatus === "สำเร็จ") && (
         <DetailFromTech
@@ -270,7 +260,8 @@ export default function page({ params }: PageProps) {
         />
       )}
 
-      {(currentStatus === "รอการดำเนินงาน" || currentStatus === "ตีกลับ") && (
+      {(currentStatus === "รอการดำเนินงาน" ||
+        currentStatus === "ตีกลับ") && (
         <button
           onClick={handleStartJob}
           className="fixed bottom-6 right-6 px-5 py-3 bg-blue-600 text-white rounded-full shadow-lg"
@@ -281,7 +272,7 @@ export default function page({ params }: PageProps) {
 
       {currentStatus === "กำลังทำงาน" && (
         <button
-          onClick={handleCompleteJob}
+          onClick={() => setShowFormModal(true)}
           className="fixed bottom-6 right-6 px-5 py-3 bg-green-600 text-white rounded-full shadow-lg"
         >
           บันทึกเพื่อปิดงาน

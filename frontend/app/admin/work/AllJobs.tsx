@@ -1,7 +1,7 @@
 // app/admin/work/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ClipboardList, Calendar } from "lucide-react";
 import DateFormat from "@/lib/Format/DateFormat";
 import SearchBar from "@/components/Dashboard/Work/SearchBar";
@@ -10,111 +10,97 @@ import LoadingSkeleton from "@/components/Dashboard/Work/LoadingSkeleton";
 import EmptyState from "@/components/Dashboard/Work/EmptyState";
 import JobCard from "@/components/Dashboard/Work/JobCard";
 
-interface Job {
-  id: string;
-  JobId: string;
-  title: string;
-  description: string;
-  status: string;
-  supervisor?: { name: string };
-  technician?: any[];
-  date: string;
-}
-
 export default function Work() {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState([]);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const jobsPerPage = 12;
 
-  const startIndex = (currentPage - 1) * jobsPerPage;
-  const endIndex = startIndex + jobsPerPage;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setIsLoading(true);
+
     try {
-      const cardData = localStorage.getItem("CardWork");
-      const userData = localStorage.getItem("Users"); //
+      const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
+      const userData = JSON.parse(localStorage.getItem("Users") || "[]");
 
-      if (cardData) {
-        const parsedCards = JSON.parse(cardData);
-        const parsedUsers = userData ? JSON.parse(userData) : [];
+      const joined = cardData.map((job) => {
+        const sp = userData.find(
+          (u) =>
+            u.role === "supervisor" && String(u.id) === String(job.supervisorId)
+        );
 
-        const joinedJobs = parsedCards.map((job: any) => {
-          const supervisor = parsedUsers.find(
-            (user: any) =>
-              user.role === "supervisor" &&
-              String(user.id) === String(job.supervisorId)
-          );
+        const dateSource = job.date || job.createdAt || job.dueDate || null;
+        const formattedDate = dateSource
+          ? new Date(dateSource).toLocaleString("th-TH", {
+              dateStyle: "short",
+              timeStyle: "short",
+            })
+          : "ไม่ระบุวันที่";
 
-          const jobDate = job.date || job.createdAt || job.dueDate || null;
-          const formattedDate = jobDate
-            ? new Date(jobDate).toLocaleString("th-TH", {
-                dateStyle: "short",
-                timeStyle: "short",
-              })
-            : "ไม่ระบุวันที่";
+        return {
+          ...job,
+          supervisorName: sp
+            ? { name: sp.name, department: sp.department }
+            : { name: "ไม่ระบุ", department: "-" },
+          formattedDate,
+        };
+      });
 
-          return {
-            ...job,
-            supervisorName: supervisor
-              ? { name: supervisor.name, department: supervisor.department }
-              : { name: "ไม่ระบุ", department: "-" },
-            formattedDate,
-          };
-        });
-
-        setJobs(joinedJobs);
-      }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
-    } finally {
-      setTimeout(() => setIsLoading(false), 400);
+      setJobs(joined);
+    } catch (e) {
+      console.error("Error loading jobs:", e);
     }
-  }, [setJobs]);
 
-  const filteredJobs = useMemo(() => {
-    if (!jobs.length) return [];
+    setTimeout(() => setIsLoading(false), 300);
+  }, []);
 
-    return jobs.filter((job) => {
-      const title = job.title?.toLowerCase() || "";
-      const jobId = job.JobId?.toLowerCase() || "";
-      const desc = job.description?.toLowerCase() || "";
-      const status = job.status?.trim() || "";
-      const searchTerm = search.toLowerCase().trim();
+  // Filter + Search
+  const filteredJobs = jobs.filter((job) => {
+    const searchTerm = search.toLowerCase().trim();
 
-      const matchSearch =
-        searchTerm === "" ||
-        title.includes(searchTerm) ||
-        jobId.includes(searchTerm) ||
-        desc.includes(searchTerm);
+    const title = job.title?.toLowerCase() || "";
+    const jobId = job.JobId?.toLowerCase() || "";
+    const desc = job.description?.toLowerCase() || "";
 
-      const matchStatus = filterStatus === "ทั้งหมด" || status === filterStatus;
+    const matchSearch =
+      searchTerm === "" ||
+      title.includes(searchTerm) ||
+      jobId.includes(searchTerm) ||
+      desc.includes(searchTerm);
 
-      return matchSearch && matchStatus;
-    });
-  }, [jobs, search, filterStatus]);
+    const matchStatus =
+      filterStatus === "ทั้งหมด" || job.status?.trim() === filterStatus;
+
+    return matchSearch && matchStatus;
+  });
+
+  // Pagination
+  const jobsPerPage = 12;
+  const startIndex = (currentPage - 1) * jobsPerPage;
+  const endIndex = startIndex + jobsPerPage;
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
   const paginatedJobs = filteredJobs.slice(startIndex, endIndex);
 
-  const stats = useMemo(
-    () => ({
-      รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
-        .length,
-      รอการดำเนินงาน: jobs.filter((j) => j.status?.trim() === "รอการดำเนินงาน")
-        .length,
-      กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
-      สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
-      ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
-    }),
-    [jobs]
-  );
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus]);
+
+  // Stats summary
+  const stats = {
+    รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
+      .length,
+    รอการดำเนินงาน: jobs.filter((j) => j.status?.trim() === "รอการดำเนินงาน")
+      .length,
+    กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
+    สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
+    ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
+  };
 
   return (
     <div className="p-4">
-      {/* Header Section */}
+      {/* Header */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -134,7 +120,7 @@ export default function Work() {
         </div>
       </div>
 
-      {/* Action Bar */}
+      {/* Search + Filter */}
       <SearchBar
         search={search}
         setSearch={setSearch}
@@ -145,7 +131,7 @@ export default function Work() {
       {/* Stats Summary */}
       <StatsSummary stats={stats} />
 
-      {/* Job Cards Grid */}
+      {/* Jobs List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
         {isLoading ? (
           <LoadingSkeleton count={6} />
@@ -155,28 +141,29 @@ export default function Work() {
           paginatedJobs.map((job) => <JobCard key={job.JobId} job={job} />)
         )}
       </div>
-      {/*  */}
+
+      {/* Pagination */}
       <div className="flex justify-center items-center gap-2 mt-4">
         <button
           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           disabled={currentPage === 1}
-          className="px-4 py-2 bg-primary cursor-pointer hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors text-white"
+          className="px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
         >
           ก่อนหน้า
         </button>
+
         <span className="text-sm text-gray-600">
           หน้า {currentPage} / {totalPages || 1}
         </span>
+
         <button
           onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
           disabled={currentPage === totalPages || totalPages === 0}
-          className="px-4 py-2 bg-primary cursor-pointer hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors text-white"
+          className="px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
         >
           ถัดไป
         </button>
       </div>
-     
-      
     </div>
   );
 }

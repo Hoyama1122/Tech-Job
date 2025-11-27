@@ -13,6 +13,7 @@ interface LocationSectionProps {
 }
 
 const LocationSection: React.FC<LocationSectionProps> = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onLocationSelect,
   setLoc,
   setValue,

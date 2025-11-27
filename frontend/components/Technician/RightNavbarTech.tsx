@@ -12,7 +12,7 @@ const RightNavbar = ({ Noti }: { Noti: any[] }) => {
   const router = useRouter();
 
   const goToProfile = () => {
-    router.push("/technician/Profile");
+    router.push("/technician/profile");
   };
 
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);

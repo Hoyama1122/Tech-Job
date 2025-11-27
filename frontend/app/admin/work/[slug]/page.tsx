@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -26,16 +26,22 @@ export default function WorkDetailPage({ params }: PageProps) {
 
   const pdfRef = useRef<HTMLDivElement>(null);
 
-  const [job, setJob] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [showEditModal, setShowEditModal] = React.useState(false);
+  const [job, setJob] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  React.useEffect(() => {
+  // เก็บ ImagesStore จาก localStorage แบบปลอดภัย
+  const [imgStore, setImgStore] = useState<any>({});
+
+  // โหลดข้อมูลใบงาน + Users
+  useEffect(() => {
     setIsLoading(true);
 
     try {
-      const cardData = localStorage.getItem("CardWork");
-      const usersData = localStorage.getItem("Users");
+      const cardData =
+        typeof window !== "undefined" ? localStorage.getItem("CardWork") : null;
+      const usersData =
+        typeof window !== "undefined" ? localStorage.getItem("Users") : null;
 
       if (cardData) {
         const jobs = JSON.parse(cardData);
@@ -43,7 +49,9 @@ export default function WorkDetailPage({ params }: PageProps) {
 
         const found = jobs.find((j: any) => j.JobId === slug);
 
-        if (found) {
+        if (!found) {
+          setJob(null);
+        } else {
           const supervisor = users.find(
             (u: any) =>
               u.role === "supervisor" &&
@@ -60,8 +68,6 @@ export default function WorkDetailPage({ params }: PageProps) {
             supervisor: supervisor || null,
             technician: technicians || [],
           });
-        } else {
-          setJob(null);
         }
       }
     } catch (err) {
@@ -72,12 +78,21 @@ export default function WorkDetailPage({ params }: PageProps) {
     }
   }, [slug]);
 
-  const imgStore = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+  useEffect(() => {
+    try {
+      const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+      setImgStore(store);
+    } catch {
+      setImgStore({});
+    }
+  }, []);
 
   const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
 
   const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
+
   const adminImages = imgStore[job?.imageKey] || [];
+
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
 
@@ -91,7 +106,7 @@ export default function WorkDetailPage({ params }: PageProps) {
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
 
-            {/* EvidenceCard */}
+            {/* Evidence Card */}
             <EvidenceCard
               job={job}
               adminImages={adminImages}
@@ -104,6 +119,7 @@ export default function WorkDetailPage({ params }: PageProps) {
         </div>
       </div>
 
+      {/* Modal */}
       {showEditModal && (
         <EditWorkModal
           job={job}

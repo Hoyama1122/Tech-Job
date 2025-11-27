@@ -1,11 +1,8 @@
 import {
   X,
-  Upload,
-  User,
   Check,
   XCircle,
   Image as ImageIcon,
-  FileText,
   AlertCircle,
 } from "lucide-react";
 import { useRef, useState } from "react";

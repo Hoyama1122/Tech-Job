@@ -140,7 +140,7 @@ export const PDFWorkOrder = ({ job }) => {
               <p
                 style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}
               >
-                {job.technicianReport.detail}
+                {job.technicianReport?.detail}
               </p>
             </Section>
 
@@ -148,7 +148,7 @@ export const PDFWorkOrder = ({ job }) => {
               <p
                 style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}
               >
-                {job.technicianReport.inspectionResults}
+                {job.technicianReport?.inspectionResults}
               </p>
             </Section>
 
@@ -156,7 +156,7 @@ export const PDFWorkOrder = ({ job }) => {
               <p
                 style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}
               >
-                {job.technicianReport.repairOperations}
+                {job.technicianReport?.repairOperations}
               </p>
             </Section>
             {/*  */}
@@ -210,7 +210,7 @@ export const PDFWorkOrder = ({ job }) => {
                       <Td>{tech.name}</Td>
                       <Td>{tech.department}</Td>
 
-                      {/* เอาเวลามาจาก job.dateRange */}
+                    
                       <Td>{formatThaiDateTime(job.dateRange.startAt)}</Td>
                       <Td>{formatThaiDateTime(job.dateRange.endAt)}</Td>
                     </Tr>
@@ -224,7 +224,7 @@ export const PDFWorkOrder = ({ job }) => {
               <p
                 style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}
               >
-                {job.technicianReport.summaryOfOperatingResults}
+                {job.technicianReport?.summaryOfOperatingResults}
               </p>
             </Section>
           </div>
@@ -376,23 +376,7 @@ const SignatureBox = ({
           }}
         />
       ) : (
-        <div
-          style={{
-            width: "120px",
-            height: "60px",
-            margin: "0 auto",
-            backgroundColor: "#f3f4f6",
-            borderRadius: "6px",
-            border: "1px dashed #d1d5db",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#9ca3af",
-            fontSize: "12px",
-          }}
-        >
-          ไม่มีลายเซ็น
-        </div>
+        <div></div>
       )}
     </div>
 

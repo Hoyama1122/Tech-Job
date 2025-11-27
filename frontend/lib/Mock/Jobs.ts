@@ -1,22 +1,9 @@
-import Image from "@/uploads/Image.jpg";
 import { StaticImageData } from "next/image";
-
-const randomLocation = (
-  baseLat: number = 13.85,
-  baseLng: number = 100.58,
-  range: number = 0.02
-) => {
-  const lat = baseLat + (Math.random() - 0.5) * range;
-  const lng = baseLng + (Math.random() - 0.5) * range;
-  return { lat: Number(lat.toFixed(3)), lng: Number(lng.toFixed(3)) };
-};
-
 export type CardWorkTypes = {
   id: number;
   JobId: string;
   title: string;
   description: string;
-
   status:
     | "รอการตรวจสอบ"
     | "กำลังทำงาน"
@@ -62,7 +49,6 @@ export type CardWorkTypes = {
   rejectReason?: string | null;
  
 };
-
 
 export const CardWork: CardWorkTypes[] = [
   // {
