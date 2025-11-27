@@ -41,9 +41,10 @@ export const navLinkSupervisor: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
   { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck }, 
   // { name: "มอบหมายงาน", path: "/assign", icon: UserCog }, 
-  { name: "ตรวจงาน", path: "/review", icon: Wrench }, 
+ // { name: "ตรวจงาน", path: "/review", icon: Wrench },   
+  { name: "สถิติทีม", path: "/review", icon: BarChart3 },  
   { name: "ทีมของฉัน", path: "/team", icon: Users2 },
-  // { name: "สถิติทีม", path: "/report", icon: BarChart3 }, 
+
   // { name: "ตั้งค่า", path: "/settings", icon: Settings }, 
 ];
 
