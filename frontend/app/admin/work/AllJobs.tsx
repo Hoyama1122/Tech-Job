@@ -113,7 +113,7 @@ export default function Work() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm">
+          <div className="flex items-center gap-3  bg-white rounded-xl px-4 py-2 shadow-sm">
             <Calendar className="w-5 h-5 text-primary" />
             <DateFormat />
           </div>

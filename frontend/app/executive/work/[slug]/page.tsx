@@ -13,8 +13,8 @@ import DescriptionCard from "@/components/Dashboard/Work/Slug/DescriptionCard";
 import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
-import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
+import { PDFWorkOrder } from "@/app/admin/workorder/PDFWorkOrder";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -30,7 +30,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // เก็บ ImagesStore จาก localStorage แบบปลอดภัย
+  // State Image
   const [imgStore, setImgStore] = useState<any>({});
 
   // โหลดข้อมูลใบงาน + Users

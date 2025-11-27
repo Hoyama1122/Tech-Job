@@ -166,7 +166,6 @@ export default function Page({ params }: PageProps) {
   };
 
   //  SUBMIT  REPORT 
-
   const handleSubmitReport = () => {
     const validated = technicianReportSchema.safeParse({
       ...formData,
