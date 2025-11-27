@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import React from "react";
 import { notFound, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -21,13 +21,15 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 export default function WorkDetailPage({ params }: PageProps) {
-  const router = useRouter();
+ 
 
   const { slug } = React.use(params);
   const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [showEditModal, setShowEditModal] = React.useState(false);
+
+   const [imgStore, setImgStore] = useState<any>({});
   React.useEffect(() => {
     setIsLoading(true);
 
@@ -139,6 +141,22 @@ export default function WorkDetailPage({ params }: PageProps) {
     });
   };
 
+  useEffect(() => {
+      try {
+        const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+        setImgStore(store);
+      } catch {
+        setImgStore({});
+      }
+    }, []);
+
+
+  const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
+
+  const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
+
+  const adminImages = imgStore[job?.imageKey] || [];
+
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
 
@@ -157,7 +175,11 @@ export default function WorkDetailPage({ params }: PageProps) {
           <div className="space-y-4">
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
-            <EvidenceCard job={job} />
+            <EvidenceCard 
+              job={job}
+              adminImages={adminImages}
+              imagesBefore={imagesBefore}
+              imagesAfter={imagesAfter} />
           </div>
 
           <Sidebar job={job} />
