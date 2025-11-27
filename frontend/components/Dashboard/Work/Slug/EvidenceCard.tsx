@@ -92,8 +92,8 @@ export default function EvidenceCard({
           <div className="flex items-start gap-8 flex-wrap">
             {job.technicianReport?.customerSignature && (
               <div>
-                <p className="font-semibold text-gray-700 mb-2">
-                  ลายเซ็นลูกค้า
+                <p className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Signature className="w-6 h-6 text-green-700" /> ลายเซ็นลูกค้า
                 </p>
                 <img
                   src={job.technicianReport.customerSignature}
@@ -104,7 +104,10 @@ export default function EvidenceCard({
 
             {job.technicianReport?.technicianSignature && (
               <div>
-                <p className="font-semibold text-gray-700 mb-2">ลายเซ็นช่าง</p>
+                <p className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Signature className="w-6 h-6 text-primary" />
+                  ลายเซ็นช่าง
+                </p>
                 <img
                   src={job.technicianReport.technicianSignature}
                   className="w-56 h-auto object-contain bg-gray-50 rounded-lg p-3 shadow"
