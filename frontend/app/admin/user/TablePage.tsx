@@ -21,7 +21,7 @@ const TablePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [showModalEdit, setShowModalEdit] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null); // ⭐ เก็บ user ที่เลือก
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const GetUser = localStorage.getItem("Users");
@@ -55,7 +55,7 @@ const TablePage = () => {
     startIndex + ITEMS_PER_PAGE
   );
 
-  // ⭐ เปิด Modal พร้อมส่ง user ที่เลือกเข้าไป
+  // Handle Edit
   const handleEdit = (user) => {
     setSelectedUser(user);
     setShowModalEdit(true);
@@ -188,6 +188,7 @@ const TablePage = () => {
 
       {showModalEdit && (
         <EditModal
+         
           data={selectedUser}
           onClose={() => setShowModalEdit(false)}
         />

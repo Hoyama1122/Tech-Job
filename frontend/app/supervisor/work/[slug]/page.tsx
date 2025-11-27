@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import React from "react";
 import { notFound, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -22,7 +22,7 @@ interface PageProps {
 }
 export default function WorkDetailPage({ params }: PageProps) {
   const router = useRouter();
-
+ const [imgStore, setImgStore] = useState<any>({});
   const { slug } = React.use(params);
   const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = React.useState<any>(null);
@@ -138,7 +138,11 @@ export default function WorkDetailPage({ params }: PageProps) {
       rejectedAt: new Date().toISOString(),
     });
   };
+ const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
 
+  const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
+
+  const adminImages = imgStore[job?.imageKey] || [];
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
 
@@ -157,7 +161,12 @@ export default function WorkDetailPage({ params }: PageProps) {
           <div className="space-y-4">
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
-            <EvidenceCard job={job} />
+            <EvidenceCard
+              job={job}
+              adminImages={adminImages}
+              imagesBefore={imagesBefore}
+              imagesAfter={imagesAfter}
+            />
           </div>
 
           <Sidebar job={job} />
