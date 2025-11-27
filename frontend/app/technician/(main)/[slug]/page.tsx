@@ -40,7 +40,7 @@ export default function Page({ params }: PageProps) {
   // technician form modal
   const [showFormModal, setShowFormModal] = useState(false);
 
-  // data entered in modal
+  // data in modal
   const [formData, setFormData] = useState<TechnicianReportForm>({
     detail: "",
     inspectionResults: "",
@@ -53,12 +53,9 @@ export default function Page({ params }: PageProps) {
   // form errors
   const [errors, setErrors] = useState({});
 
-  // NEW uploaded images (not saved to store yet)
+  // form images
   const [formBeforeImages, setFormBeforeImages] = useState<string[]>([]);
   const [formAfterImages, setFormAfterImages] = useState<string[]>([]);
-
-
- 
 
   const saveImagesToStore = (key: string, images: string[]) => {
     const store = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
@@ -99,7 +96,7 @@ export default function Page({ params }: PageProps) {
     setJob(found);
     setCurrentStatus(found.status);
 
-    // --- admin images 
+    //  admin images 
     setAdminImages(imgStore[found.imageKey] || []);
 
     //  technician stored images
@@ -114,7 +111,6 @@ export default function Page({ params }: PageProps) {
   }, [slug]);
 
   //  UPDATE JOB STATUS 
-
   const updateJobStatus = (newStatus: string, reportData?: any) => {
     const cardData = localStorage.getItem(LS.WORK);
     if (!cardData) return;
@@ -141,7 +137,6 @@ export default function Page({ params }: PageProps) {
   };
 
   //  START JOB 
-
   const handleStartJob = () => {
     if (!navigator.geolocation) {
       toast.error("ไม่รองรับการหาตำแหน่ง");
@@ -190,10 +185,8 @@ export default function Page({ params }: PageProps) {
 
     setErrors({});
 
-
     const beforeKey = `before_${slug}_${Date.now()}`;
     const afterKey = `after_${slug}_${Date.now()}`;
-
 
     saveImagesToStore(beforeKey, formBeforeImages);
     saveImagesToStore(afterKey, formAfterImages);

@@ -9,12 +9,14 @@ const Settings: React.FC = () => {
       <div>
         <button className="bg-gray-300 rounded-sm p-2 w-auto mt-4">
           ศูนย์ช่วยเหลือ
-        </button><br />
+        </button>
+        <br />
         <button className="bg-gray-300 rounded-sm p-2 w-auto mt-4">
-            นโยบายความเป็นส่วนตัว
-        </button><br />
+          นโยบายความเป็นส่วนตัว
+        </button>
+        <br />
         <button className="bg-gray-300 rounded-sm p-2 w-auto mt-4">
-            ข้อกำหนดและเงื่อนไข
+          ข้อกำหนดและเงื่อนไข
         </button>
       </div>
     </div>
