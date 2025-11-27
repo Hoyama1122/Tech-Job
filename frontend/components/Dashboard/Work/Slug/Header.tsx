@@ -1,11 +1,4 @@
-import {
-  FileText,
-  Download,
-  ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Edit,
-} from "lucide-react";
+import { FileText, Download, ArrowLeft, Edit, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateWorkPDF } from "@/lib/pdf/generateWorkPDF";
 
@@ -15,10 +8,12 @@ export default function Header({
   onApprove,
   onReject,
   setShowEditModal,
+  setShowCancelModal,
 }: any) {
   const router = useRouter();
   const auth = JSON.parse(localStorage.getItem("auth-storage") || "{}");
   const myRole = auth?.state?.role;
+
   const handleDownload = async () => {
     if (!pdfRef?.current) return;
     await generateWorkPDF(pdfRef.current, "ใบงานช่าง_" + job.JobId);
@@ -48,69 +43,104 @@ export default function Header({
 
       {/* Buttons */}
       <div className="flex items-center gap-3">
-        {myRole === "admin" ? (
+        {/* Supervisor: เห็นเฉพาะ ตีกลับ + อนุมัติ */}
+        {myRole === "supervisor" && (
           <>
+            <button
+              disabled={job.status !== "รอการตรวจสอบ"}
+              className={`px-4 py-2 rounded-md text-white 
+                ${
+                  job.status === "รอการตรวจสอบ"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-gray-300 cursor-not-allowed"
+                }
+              `}
+              onClick={onReject}
+            >
+              ตีกลับงาน
+            </button>
+
+            <button
+              disabled={job.status !== "รอการตรวจสอบ"}
+              className={`px-4 py-2 rounded-md text-white 
+                ${
+                  job.status === "รอการตรวจสอบ"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-gray-300 cursor-not-allowed"
+                }
+              `}
+              onClick={onApprove}
+            >
+              อนุมัติงาน
+            </button>
+          </>
+        )}
+
+        {/* Admin: เห็น แก้ไข + ตีกลับ + อนุมัติ + ยกเลิกงาน */}
+        {myRole === "admin" && (
+          <>
+            {/* แก้ไขงาน */}
             <button
               onClick={() => setShowEditModal(true)}
               className="flex items-center gap-2 bg-primary hover:bg-primary-hover
-        text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
+              text-white py-2 px-4 rounded-lg text-sm cursor-pointer transition font-semibold"
             >
               <Edit className="w-4 h-4" />
               แก้ไขงาน
             </button>
 
+            {/* ตีกลับ */}
             <button
               disabled={job.status !== "รอการตรวจสอบ"}
-              className={`px-4 py-2 rounded-md text-white ${job.status === "รอการตรวจสอบ"
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-gray-300 cursor-not-allowed"
-                }`}
+              className={`px-4 py-2 rounded-md text-white 
+                ${
+                  job.status === "รอการตรวจสอบ"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-gray-300 cursor-not-allowed"
+                }
+              `}
               onClick={onReject}
             >
               ตีกลับงาน
             </button>
 
+            {/* อนุมัติ */}
             <button
               disabled={job.status !== "รอการตรวจสอบ"}
-              className={`px-4 py-2 rounded-md text-white ${job.status === "รอการตรวจสอบ"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-gray-300 cursor-not-allowed"
-                }`}
+              className={`px-4 py-2 rounded-md text-white 
+                ${
+                  job.status === "รอการตรวจสอบ"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-gray-300 cursor-not-allowed"
+                }
+              `}
               onClick={onApprove}
             >
               อนุมัติงาน
             </button>
-          </>
-        ) : myRole === "supervisor" ? (
-          <>
-            <button
-              disabled={job.status !== "รอการตรวจสอบ"}
-              className={`px-4 py-2 rounded-md text-white ${job.status === "รอการตรวจสอบ"
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-gray-300 cursor-not-allowed"
-                }`}
-              onClick={onReject}
-            >
-              ตีกลับงาน
-            </button>
 
             <button
-              disabled={job.status !== "รอการตรวจสอบ"}
-              className={`px-4 py-2 rounded-md text-white ${job.status === "รอการตรวจสอบ"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-gray-300 cursor-not-allowed"
-                }`}
-              onClick={onApprove}
+              disabled={job.status !== "รอการดำเนินงาน"}
+              onClick={() => setShowCancelModal(true)}
+              className={`px-4 py-2 rounded-md text-white flex items-center gap-1
+                ${
+                  job.status === "รอการดำเนินงาน"
+                    ? "bg-gray-600 hover:bg-gray-700"
+                    : "bg-gray-300 cursor-not-allowed"
+                }
+              `}
             >
-              อนุมัติงาน
+              <Trash className="h-4 w-4" />
+              ยกเลิกงาน
             </button>
           </>
-        ) : null}
+        )}
 
+        {/* ปุ่มโหลด PDF */}
         <button
           onClick={handleDownload}
           className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 
-          text-primary py-2 px-4 rounded-lg text-sm font-medium transition"
+            text-primary py-2 px-4 rounded-lg text-sm font-medium transition"
         >
           <Download className="w-4 h-4" />
           ดาวน์โหลด PDF

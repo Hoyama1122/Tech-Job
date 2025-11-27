@@ -26,7 +26,7 @@ interface PageProps {
 export default function Page({ params }: PageProps) {
   const { slug } = params;
 
-  //  STATES 
+  //  STATES
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentStatus, setCurrentStatus] = useState("");
@@ -64,7 +64,12 @@ export default function Page({ params }: PageProps) {
     localStorage.setItem(LS.IMAGES, JSON.stringify(store));
   };
 
-  const getDistanceMeters = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const getDistanceMeters = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
     const R = 6371e3;
     const toRad = (x: number) => (x * Math.PI) / 180;
 
@@ -78,7 +83,6 @@ export default function Page({ params }: PageProps) {
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   };
 
-  
   const loadJobAndImages = () => {
     const cardData = localStorage.getItem(LS.WORK);
     const imgStore = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
@@ -87,8 +91,7 @@ export default function Page({ params }: PageProps) {
 
     const jobs = JSON.parse(cardData);
     const found = jobs.find((j: any) => j.JobId === slug);
- 
-    
+
     if (!found) {
       setJob(null);
       return;
@@ -97,12 +100,16 @@ export default function Page({ params }: PageProps) {
     setJob(found);
     setCurrentStatus(found.status);
 
-    //  admin images 
+    //  admin images
     setAdminImages(imgStore[found.imageKey] || []);
 
     //  technician stored images
-    setStoredBeforeImages(imgStore[found.technicianReport?.imagesBeforeKey] || []);
-    setStoredAfterImages(imgStore[found.technicianReport?.imagesAfterKey] || []);
+    setStoredBeforeImages(
+      imgStore[found.technicianReport?.imagesBeforeKey] || []
+    );
+    setStoredAfterImages(
+      imgStore[found.technicianReport?.imagesAfterKey] || []
+    );
   };
 
   useEffect(() => {
@@ -111,7 +118,7 @@ export default function Page({ params }: PageProps) {
     setTimeout(() => setIsLoading(false), 250);
   }, [slug]);
 
-  //  UPDATE JOB STATUS 
+  //  UPDATE JOB STATUS
   const updateJobStatus = (newStatus: string, reportData?: any) => {
     const cardData = localStorage.getItem(LS.WORK);
     if (!cardData) return;
@@ -137,7 +144,7 @@ export default function Page({ params }: PageProps) {
     setCurrentStatus(newStatus);
   };
 
-  //  START JOB 
+  //  START JOB
   const handleStartJob = () => {
     if (!navigator.geolocation) {
       toast.error("ไม่รองรับการหาตำแหน่ง");
@@ -157,15 +164,19 @@ export default function Page({ params }: PageProps) {
           toast.error(`คุณอยู่ห่างจากจุดงาน ${Math.floor(distance)} เมตร`);
           return;
         }
+        const now = new Date().toISOString();
 
-        updateJobStatus("กำลังทำงาน");
+        updateJobStatus("กำลังทำงาน", {
+          ...(job.technicianReport || {}),
+          startTime: now,
+        });
         toast.success("เริ่มงานสำเร็จ!");
       },
       () => toast.error("เปิดพิกัดไม่สำเร็จ กรุณาอนุญาต Location")
     );
   };
 
-  //  SUBMIT  REPORT 
+  //  SUBMIT  REPORT
   const handleSubmitReport = () => {
     const validated = technicianReportSchema.safeParse({
       ...formData,
@@ -184,6 +195,7 @@ export default function Page({ params }: PageProps) {
     }
 
     setErrors({});
+    const now = new Date().toISOString();
 
     const beforeKey = `before_${slug}_${Date.now()}`;
     const afterKey = `after_${slug}_${Date.now()}`;
@@ -196,6 +208,8 @@ export default function Page({ params }: PageProps) {
       imagesBeforeKey: beforeKey,
       imagesAfterKey: afterKey,
       submittedAt: new Date().toISOString(),
+      endTime: now, 
+      startTime: job?.technicianReport?.startTime, 
     };
 
     updateJobStatus("รอการตรวจสอบ", reportData);
@@ -203,9 +217,8 @@ export default function Page({ params }: PageProps) {
     toast.success("บันทึกรายงานปิดงานสำเร็จ!");
   };
 
-
   const getStatusBadge = (status: string) => {
-    const styles= {
+    const styles = {
       กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
       สำเร็จ: "bg-green-100 text-green-700 border-green-200",
       รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
@@ -223,8 +236,6 @@ export default function Page({ params }: PageProps) {
       </span>
     );
   };
-
-
 
   if (isLoading)
     return (
@@ -253,8 +264,7 @@ export default function Page({ params }: PageProps) {
         />
       )}
 
-      {(currentStatus === "รอการดำเนินงาน" ||
-        currentStatus === "ตีกลับ") && (
+      {(currentStatus === "รอการดำเนินงาน" || currentStatus === "ตีกลับ") && (
         <button
           onClick={handleStartJob}
           className="fixed bottom-6 right-6 px-5 py-3 bg-blue-600 text-white rounded-full shadow-lg"

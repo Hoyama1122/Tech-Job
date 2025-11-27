@@ -1,65 +1,68 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileEdit, Search } from "lucide-react";
 import { Users } from "@/lib/Mock/UserMock";
 
 export default function TableTechDepartment() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState(1);
   const [supervisorDept, setSupervisorDept] = useState("");
+  const [myId, setMyId] = useState(null);
 
   const itemsPerPage = 10;
-
 
   useEffect(() => {
     const authRaw = localStorage.getItem("auth-storage");
     if (!authRaw) return;
 
     const auth = JSON.parse(authRaw);
-    if (auth?.state?.department) {
-      setSupervisorDept(auth.state.department);
-    }
+    setMyId(auth?.state?.userId || null);
+    setSupervisorDept(auth?.state?.department || "");
   }, []);
 
- 
-  const technicians = Users.filter(
-    (u) => u.role === "technician" && u.department === supervisorDept
+  // -----------------------------
+  // รวม: Supervisor ตัวเอง + Technicians ในแผนก
+  // -----------------------------
+  const people = Users.filter(
+    (u) =>
+      // ช่างในแผนก
+      (u.role === "technician" && u.department === supervisorDept) ||
+      // Supervisor ตัวเอง
+      (u.role === "supervisor" && u.id === myId)
   );
 
-  // Filter + Search แบบง่าย
-  const filteredTechs = technicians.filter((t) => {
+  // -----------------------------
+  // Search
+  // -----------------------------
+  const filteredList = people.filter((p) => {
     const s = searchTerm.toLowerCase();
 
-    const matchSearch =
-      t.name.toLowerCase().includes(s) ||
-      t.phone.toLowerCase().includes(s) ||
-      t.area.toLowerCase().includes(s);
-
-    const matchStatus =
-      statusFilter === "ทั้งหมด" || t.status === statusFilter;
-
-    return matchSearch && matchStatus;
+    return (
+      p.name.toLowerCase().includes(s) ||
+      p.phone.toLowerCase().includes(s) ||
+      (p.email && p.email.toLowerCase().includes(s))
+    );
   });
 
-  // Pagination แบบง่าย
-  const totalPages = Math.ceil(filteredTechs.length / itemsPerPage) || 1;
+  // -----------------------------
+  // Pagination
+  // -----------------------------
+  const totalPages = Math.ceil(filteredList.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const pageItems = filteredTechs.slice(startIndex, startIndex + itemsPerPage);
+  const pageItems = filteredList.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="mt-6">
-
-      {/* Search + Filter */}
-      <div className="flex flex-col md:flex-row gap-3 justify-between mb-4">
-
-        <div className="relative w-full md:w-1/2">
-          <Search className="absolute left-3 top-3 text-gray-400" size={18} />
+    <div className="bg-white p-4 rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-4">
+        {/* Search */}
+        <div className="w-1/3 relative">
+          <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="ค้นหาช่างในแผนก..."
-            className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-primary/40 outline-none"
+            placeholder="ค้นหา ชื่อ, เบอร์โทร, อีเมล..."
+            className="w-full pl-10 pr-4 py-2.5 border text-sm border-gray-300 rounded-lg"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -67,72 +70,54 @@ export default function TableTechDepartment() {
             }}
           />
         </div>
-
-        <select
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full md:w-1/4 py-2.5 px-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-primary/40 outline-none"
-        >
-          <option value="ทั้งหมด">ทั้งหมด</option>
-          <option value="ว่าง">ว่าง</option>
-          <option value="ทำงาน">ทำงาน</option>
-          <option value="ไม่ว่าง">ไม่ว่าง</option>
-        </select>
       </div>
 
       {/* Table */}
-      <div className="rounded-xl overflow-hidden shadow-md bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-700">
-            <tr className="text-left text-xs uppercase">
-              <th className="p-3">#</th>
-              <th className="p-3">ชื่อ - นามสกุล</th>
-              <th className="p-3">เบอร์โทร</th>
-              <th className="p-3">พื้นที่ทำงาน</th>
-              <th className="p-3">สถานะ</th>
-            </tr>
-          </thead>
+      <table className="w-full border-collapse rounded-lg overflow-hidden shadow mt-4">
+        <thead>
+          <tr className="bg-primary text-white">
+            <th className="px-4 py-3 text-left">รหัสพนักงาน</th>
+            <th className="px-4 py-3 text-left">ชื่อ-นามสกุล</th>
+            <th className="px-4 py-3 text-left">ตำแหน่ง</th>
+            <th className="px-4 py-3 text-left">แผนก</th>
+            <th className="px-4 py-3 text-left">อีเมล</th>
+            <th className="px-4 py-3 text-left">เบอร์โทร</th>
+          </tr>
+        </thead>
 
-          <tbody>
-            {pageItems.length > 0 ? (
-              pageItems.map((t, i) => (
-                <tr
-                  key={t.id}
-                  className="border-b last:border-none hover:bg-gray-100/60 transition cursor-pointer"
-                >
-                  <td className="p-3">{startIndex + i + 1}</td>
-                  <td className="p-3 font-medium">{t.name}</td>
-                  <td className="p-3">{t.phone}</td>
-                  <td className="p-3">{t.area}</td>
-                  <td className="p-3">
-                    <span className="inline-flex items-center gap-2 text-sm">
-                      <span
-                        className={`w-2.5 h-2.5 rounded-full ${
-                          t.status === "ว่าง"
-                            ? "bg-green-500"
-                            : t.status === "ทำงาน"
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        }`}
-                      />
-                      {t.status}
-                    </span>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center p-6 text-gray-500">
-                  ไม่พบข้อมูลช่างในแผนก
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+        <tbody>
+          {pageItems.map((p, index) => (
+            <tr
+              key={p.id || index}
+              className={`border-b border-gray-200 hover:bg-blue-50 transition ${
+                index % 2 === 0 ? "bg-white" : "bg-gray-50"
+              }`}
+            >
+              <td className="px-4 py-3">{p.employeeCode}</td>
+              <td className="px-4 py-3">
+                {p.id === myId ? `${p.name} (คุณ)` : p.name}
+              </td>
+              <td className="px-4 py-3">
+                {p.role === "supervisor" ? "หัวหน้าแผนก" : "ช่าง"}
+              </td>
+              <td className="px-4 py-3">{p.department}</td>
+              <td className="px-4 py-3">{p.email}</td>
+              <td className="px-4 py-3">{p.phone}</td>
+            </tr>
+          ))}
+
+          {pageItems.length === 0 && (
+            <tr>
+              <td colSpan={6} className="text-center py-6 text-gray-500">
+                <div className="flex flex-col items-center gap-4">
+                  <FileEdit className="w-6 h-6" />
+                  ไม่พบข้อมูลที่ค้นหา
+                </div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
 
       {/* Pagination */}
       <div className="flex justify-between items-center mt-4 text-sm">
@@ -142,18 +127,20 @@ export default function TableTechDepartment() {
 
         <div className="flex gap-2">
           <button
-            className="px-3 py-1.5 border border-primary text-primary rounded-lg disabled:opacity-40 disabled:cursor-default hover:bg-primary hover:text-white transition"
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage(currentPage - 1)}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-4 py-2 flex items-center gap-2 bg-primary text-white rounded-lg disabled:bg-gray-300"
           >
+            <ArrowLeft className="w-4 h-4" />
             ก่อนหน้า
           </button>
 
           <button
-            className="px-3 py-1.5 border border-primary text-primary rounded-lg disabled:opacity-40 disabled:cursor-default hover:bg-primary hover:text-white transition"
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(currentPage + 1)}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-4 py-2 flex items-center gap-2 bg-primary text-white rounded-lg disabled:bg-gray-300"
           >
+            <ArrowRight className="w-4 h-4" />
             ถัดไป
           </button>
         </div>

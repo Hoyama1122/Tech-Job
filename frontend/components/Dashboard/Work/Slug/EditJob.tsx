@@ -42,6 +42,7 @@ export default function EditWorkModal({
 }: EditWorkModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<string[]>([]);
+  
   useEffect(() => {
     try {
       const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");

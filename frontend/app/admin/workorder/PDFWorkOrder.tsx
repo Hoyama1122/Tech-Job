@@ -5,8 +5,6 @@ import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import DateFormatWork from "@/lib/Format/DateForWork";
 
 export const PDFWorkOrder = ({ job }) => {
-
-
   return (
     <div className="p-4">
       <div className="flex flex-col mt-4 px-4">
@@ -84,9 +82,7 @@ export const PDFWorkOrder = ({ job }) => {
               <div>พิมพ์เมื่อ: 13/11/2025</div>
             </div>
           </div>
-
           <hr style={{ borderColor: "#e5e7eb", margin: "12px 0 16px 0" }} />
-
           {/* title ใบงาน */}
           <div style={{ flex: 1 }}>
             <div style={{ textAlign: "center", marginBottom: "16px" }}>
@@ -101,8 +97,8 @@ export const PDFWorkOrder = ({ job }) => {
                 ใบรายละเอียดงาน (WORK ORDER)
               </div>
             </div>
-
             {/* ข้อมูลหลักของงาน */}
+            
             <div
               style={{
                 display: "flex",
@@ -125,16 +121,15 @@ export const PDFWorkOrder = ({ job }) => {
                 />
                 <Row
                   label="วันที่เริ่มทำงาน"
-                  value={DateFormatWork(job.dateRange?.startAt)}
+                  value={formatThaiDateTime(job.technicianReport?.startTime)}
                 />
                 <Row
                   label="วันที่สิ้นสุดงาน"
-                  value={DateFormatWork(job.dateRange?.endAt)}
+                  value={formatThaiDateTime(job.technicianReport?.endTime)}
                 />
                 <Row label="เบอร์โทรลูกค้า" value={job.customer?.phone} />
               </div>
             </div>
-
             {/* รายละเอียดอาการ / การดำเนินการ */}
             <Section title="รายละเอียดอาการ">
               <p
@@ -209,10 +204,12 @@ export const PDFWorkOrder = ({ job }) => {
                       <Td center>{index + 1}</Td>
                       <Td>{tech.name}</Td>
                       <Td>{tech.department}</Td>
-
-                    
-                      <Td>{formatThaiDateTime(job.dateRange.startAt)}</Td>
-                      <Td>{formatThaiDateTime(job.dateRange.endAt)}</Td>
+                      <Td>
+                        {formatThaiDateTime(job.technicianReport?.startTime)}
+                      </Td>
+                      <Td>
+                        {formatThaiDateTime(job.technicianReport?.endTime)}
+                      </Td>
                     </Tr>
                   ))}
                 </tbody>
