@@ -7,6 +7,7 @@ import { WorkFormValues, workSchema } from "@/lib/Validations/SchemaForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+
 import JobInfoSection from "./JobInfoSection";
 import DateRangeSection from "./DateRangeSection";
 import ImageUpload from "./ImageUpload";
@@ -28,10 +29,7 @@ const WorkForm = () => {
         startAt: "",
         endAt: "",
       },
-      location: {
-        lat: null,
-        lng: null,
-      },
+      location: { lat: null, lng: null },
     },
   });
 
@@ -49,6 +47,7 @@ const WorkForm = () => {
     setAvailableTechnicians(technicians);
   }, []);
 
+  // Convert file to Base64
   const convertToBase64 = (file: File) =>
     new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -60,19 +59,22 @@ const WorkForm = () => {
   const onSubmit = async (data: WorkFormValues) => {
     try {
       setLoading(true);
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 800));
 
       const users = JSON.parse(localStorage.getItem("Users") || "[]");
       const current = JSON.parse(localStorage.getItem("CardWork") || "[]");
 
+      // Convert uploaded images → base64
       const images = data.image?.length
         ? await Promise.all(Array.from(data.image).map(convertToBase64))
         : [];
 
+      // Map technicians
       const technicianObjects = users.filter((u) =>
         data.technicianId?.map(Number).includes(u.id)
       );
 
+      // Parse Thai Date → JS Date
       const parseThaiDate = (str: string) => {
         const months: Record<string, number> = {
           มกราคม: 0,
@@ -88,7 +90,6 @@ const WorkForm = () => {
           พฤศจิกายน: 10,
           ธันวาคม: 11,
         };
-
         const match = str.match(/(\d{1,2}) (\S+) (\d{4})/);
         if (!match) return null;
 
@@ -96,32 +97,33 @@ const WorkForm = () => {
         return new Date(Number(y) - 543, months[m], Number(d));
       };
 
-      const startDateObj = parseThaiDate(data.dateRange.startAt);
-      const endDateObj = parseThaiDate(data.dateRange.endAt);
+      const startObj = parseThaiDate(data.dateRange.startAt);
+      const endObj = parseThaiDate(data.dateRange.endAt);
 
-      const startISO = startDateObj
-        ? `${startDateObj.toISOString().split("T")[0]}T${
+      const startISO = startObj
+        ? `${startObj.toISOString().split("T")[0]}T${
             data.startTime || "00:00"
           }:00`
         : null;
 
-      const endISO = endDateObj
-        ? `${endDateObj.toISOString().split("T")[0]}T${
-            data.endTime || "00:00"
-          }:00`
+      const endISO = endObj
+        ? `${endObj.toISOString().split("T")[0]}T${data.endTime || "00:00"}:00`
         : null;
 
       const now = new Date();
+
+      // Generate imageKey สำหรับเก็บรูป admin
+      const imageKey = `JOB_${String(current.length + 1).padStart(
+        3,
+        "0"
+      )}_ADMIN`;
 
       const newWork = {
         id: current.length + 1,
         JobId: `JOB_${String(current.length + 1).padStart(3, "0")}`,
         title: data.title,
         description: data.description,
-        dateRange: {
-          startAt: startISO,
-          endAt: endISO,
-        },
+        dateRange: { startAt: startISO, endAt: endISO },
         status: "รอการดำเนินงาน",
         createdAt: now.toISOString(),
         assignedAt: null,
@@ -138,17 +140,27 @@ const WorkForm = () => {
           phone: data.customerPhone,
           address: data.address,
         },
-        image: images,
+
+        // รูปเก็บแบบ key
+        imageKey,
+        image: [],
+
         loc: loc,
       };
 
       localStorage.setItem("CardWork", JSON.stringify([...current, newWork]));
+
+      const imgStore = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
+      imgStore[imageKey] = images;
+      localStorage.setItem("ImagesStore", JSON.stringify(imgStore));
+
       sendNotificationToTechnicians(newWork.technicianId, newWork);
+
       reset();
       toast.success("เพิ่มใบงานสำเร็จ!");
       router.push("/admin");
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       toast.error("เพิ่มใบงานไม่สำเร็จ!");
     } finally {
       setLoading(false);
@@ -157,9 +169,9 @@ const WorkForm = () => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className=" mx-auto">
+      <form onSubmit={handleSubmit(onSubmit)} className="mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          {/* Left Column */}
+          {/* LEFT */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
             <JobInfoSection register={register} errors={errors} />
             <DateRangeSection
@@ -169,19 +181,21 @@ const WorkForm = () => {
             <ImageUpload setValue={setValue} register={register} />
           </div>
 
-          {/* Right Column */}
+          {/* RIGHT */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
             <LocationSection
               onLocationSelect={(pos) => setLoc(pos)}
               setLoc={setLoc}
               setValue={setValue}
             />
+
             {errors.location?.message && (
               <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
                 <AlertCircle className="w-4 h-4" />
                 {errors.location.message}
               </div>
             )}
+
             <CustomerSection register={register} errors={errors} />
           </div>
         </div>

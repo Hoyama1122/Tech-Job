@@ -3,8 +3,9 @@
 
 import { useRef } from "react";
 import React from "react";
-import { notFound, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+
 import NotFoundPage from "@/components/Dashboard/Work/Slug/NotFoundPage";
 import Header from "@/components/Dashboard/Work/Slug/Header";
 import BasicInfoCard from "@/components/Dashboard/Work/Slug/BasicInfo";
@@ -18,14 +19,17 @@ import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
+
 export default function WorkDetailPage({ params }: PageProps) {
   const router = useRouter();
-
   const { slug } = React.use(params);
+
   const pdfRef = useRef<HTMLDivElement>(null);
+
   const [job, setJob] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [showEditModal, setShowEditModal] = React.useState(false);
+
   React.useEffect(() => {
     setIsLoading(true);
 
@@ -67,12 +71,13 @@ export default function WorkDetailPage({ params }: PageProps) {
       setTimeout(() => setIsLoading(false), 300);
     }
   }, [slug]);
+
   const imgStore = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
 
   const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
 
   const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
-
+  const adminImages = imgStore[job?.imageKey] || [];
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
 
@@ -85,8 +90,11 @@ export default function WorkDetailPage({ params }: PageProps) {
           <div className="space-y-4">
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
+
+            {/* EvidenceCard */}
             <EvidenceCard
               job={job}
+              adminImages={adminImages}
               imagesBefore={imagesBefore}
               imagesAfter={imagesAfter}
             />
@@ -95,6 +103,7 @@ export default function WorkDetailPage({ params }: PageProps) {
           <Sidebar job={job} />
         </div>
       </div>
+
       {showEditModal && (
         <EditWorkModal
           job={job}

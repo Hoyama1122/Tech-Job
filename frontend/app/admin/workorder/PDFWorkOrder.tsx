@@ -4,7 +4,6 @@ import "./workorder.css";
 import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import DateFormatWork from "@/lib/Format/DateForWork";
 
-
 export const PDFWorkOrder = ({ job }) => {
   console.log(job);
 
@@ -24,6 +23,11 @@ export const PDFWorkOrder = ({ job }) => {
             padding: "24px",
             margin: "0 auto 40px auto",
             boxSizing: "border-box",
+
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            position: "relative",
           }}
         >
           {/* header บริษัท */}
@@ -84,89 +88,79 @@ export const PDFWorkOrder = ({ job }) => {
           <hr style={{ borderColor: "#e5e7eb", margin: "12px 0 16px 0" }} />
 
           {/* title ใบงาน */}
-          <div style={{ textAlign: "center", marginBottom: "16px" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ textAlign: "center", marginBottom: "16px" }}>
+              <div
+                style={{
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  color: "#111827",
+                  letterSpacing: "0.03em",
+                }}
+              >
+                ใบรายละเอียดงาน (WORK ORDER)
+              </div>
+            </div>
+
+            {/* ข้อมูลหลักของงาน */}
             <div
               style={{
-                fontSize: "20px",
-                fontWeight: 700,
-                color: "#111827",
-                letterSpacing: "0.03em",
-              }}
-            >
-              ใบรายละเอียดงาน (WORK ORDER)
-            </div>
-          </div>
-
-          {/* ข้อมูลหลักของงาน */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "24px",
-              fontSize: "13px",
-              marginBottom: "16px",
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <Row label="รหัสใบงาน" value={job.JobId} />
-              <Row label="ชื่องาน" value={job.title} />
-              <Row label="ลูกค้า" value={job.customer?.name} />
-              <Row label="สถานที่" value={job.customer?.address} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <Row
-                label="วันที่แจ้งงาน"
-                value={DateFormatWork(job.createdAt)}
-              />
-              <Row
-                label="วันที่เริ่มทำงาน"
-                value={DateFormatWork(job.dateRange?.startAt)}
-              />
-              <Row
-                label="วันที่สิ้นสุดงาน"
-                value={DateFormatWork(job.dateRange?.endAt)}
-              />
-              <Row label="เบอร์โทรลูกค้า" value={job.customer?.phone} />
-            </div>
-          </div>
-
-          {/* รายละเอียดอาการ / การดำเนินการ */}
-          <Section title="รายละเอียดอาการ">
-            <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
-              ไฟฟ้าบางส่วนของชั้น 5 ดับเป็นช่วง ๆ
-              ส่งผลให้เครื่องปรับอากาศและปลั๊กไฟบางจุดใช้งานไม่ได้
-              มีเสียงดังจากตู้เมนไฟฟ้าเป็นระยะ
-            </p>
-          </Section>
-
-          <Section title="ผลการตรวจสอบ">
-            <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
-              ตรวจสอบแล้วพบว่ามีจุดต่อสาย (terminal) หลวมภายในตู้เมน
-              ทำให้เกิดความร้อนสะสม และมีการอาร์คของกระแสไฟในบางช่วงเวลา
-              จำเป็นต้องทำการขันจุดต่อใหม่และทำความสะอาดจุดสัมผัส
-            </p>
-          </Section>
-
-          <Section title="การดำเนินการซ่อม">
-            <ul
-              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "24px",
                 fontSize: "13px",
-                color: "#374151",
-                lineHeight: 1.6,
-                paddingLeft: "18px",
-                margin: 0,
+                marginBottom: "16px",
               }}
             >
-              <li>
-                ตัดระบบไฟในตู้เมนหลัก และติดป้ายห้ามเปิดสวิตช์ (Lockout/Tagout)
-              </li>
-              <li>ถอดสายและทำความสะอาดจุดสัมผัสด้วย contact cleaner</li>
-              <li>ขันจุดต่อสายทุกจุดให้แน่นตามมาตรฐาน</li>
-              <li>ตรวจสอบกระแสและอุณหภูมิหลังเปิดระบบ พร้อมบันทึกค่า</li>
-            </ul>
-          </Section>
-          {/*  */}
-          {/* <Section title="อุปกรณ์ที่ใช้ในงาน">
+              <div style={{ flex: 1 }}>
+                <Row label="รหัสใบงาน" value={job.JobId} />
+                <Row label="ชื่องาน" value={job.title} />
+                <Row label="ลูกค้า" value={job.customer?.name} />
+                <Row label="สถานที่" value={job.customer?.address} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <Row
+                  label="วันที่แจ้งงาน"
+                  value={DateFormatWork(job.createdAt)}
+                />
+                <Row
+                  label="วันที่เริ่มทำงาน"
+                  value={DateFormatWork(job.dateRange?.startAt)}
+                />
+                <Row
+                  label="วันที่สิ้นสุดงาน"
+                  value={DateFormatWork(job.dateRange?.endAt)}
+                />
+                <Row label="เบอร์โทรลูกค้า" value={job.customer?.phone} />
+              </div>
+            </div>
+
+            {/* รายละเอียดอาการ / การดำเนินการ */}
+            <Section title="รายละเอียดอาการ">
+              <p
+                style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}
+              >
+                {job.technicianReport.detail}
+              </p>
+            </Section>
+
+            <Section title="ผลการตรวจสอบ">
+              <p
+                style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}
+              >
+                {job.technicianReport.inspectionResults}
+              </p>
+            </Section>
+
+            <Section title="การดำเนินการซ่อม">
+              <p
+                style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}
+              >
+                {job.technicianReport.repairOperations}
+              </p>
+            </Section>
+            {/*  */}
+            {/* <Section title="อุปกรณ์ที่ใช้ในงาน">
             <table
               style={{
                 width: "100%",
@@ -191,48 +185,49 @@ export const PDFWorkOrder = ({ job }) => {
             </table>
           </Section> */}
 
-          {/* ตารางทีมช่าง */}
-          <Section title="ทีมช่างที่เข้าดำเนินการ">
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "12px",
-              }}
-            >
-              <thead>
-                <tr>
-                  <Th>ลำดับ</Th>
-                  <Th>ชื่อช่าง</Th>
-                  <Th>ตำแหน่ง</Th>
-                  <Th>เวลาเริ่ม</Th>
-                  <Th>เวลาเสร็จ</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {job.technician?.map((tech, index) => (
-                  <Tr key={tech.id}>
-                    <Td center>{index + 1}</Td>
-                    <Td>{tech.name}</Td>
-                    <Td>{tech.department}</Td>
+            {/* ตารางทีมช่าง */}
+            <Section title="ทีมช่างที่เข้าดำเนินการ">
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: "12px",
+                }}
+              >
+                <thead>
+                  <tr>
+                    <Th>ลำดับ</Th>
+                    <Th>ชื่อช่าง</Th>
+                    <Th>ตำแหน่ง</Th>
+                    <Th>เวลาเริ่ม</Th>
+                    <Th>เวลาเสร็จ</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {job.technician?.map((tech, index) => (
+                    <Tr key={tech.id}>
+                      <Td center>{index + 1}</Td>
+                      <Td>{tech.name}</Td>
+                      <Td>{tech.department}</Td>
 
-                    {/* เอาเวลามาจาก job.dateRange */}
-                    <Td>{formatThaiDateTime(job.dateRange.startAt)}</Td>
-                    <Td>{formatThaiDateTime(job.dateRange.endAt)}</Td>
-                  </Tr>
-                ))}
-              </tbody>
-            </table>
-          </Section>
+                      {/* เอาเวลามาจาก job.dateRange */}
+                      <Td>{formatThaiDateTime(job.dateRange.startAt)}</Td>
+                      <Td>{formatThaiDateTime(job.dateRange.endAt)}</Td>
+                    </Tr>
+                  ))}
+                </tbody>
+              </table>
+            </Section>
 
-          {/* สรุปผล */}
-          <Section title="สรุปผลการดำเนินงาน">
-            <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}>
-              ระบบไฟฟ้ากลับมาทำงานเป็นปกติ
-              ตรวจสอบอุณหภูมิที่จุดต่อสายไม่พบความผิดปกติ
-              แนะนำให้ตรวจเช็คตู้เมนทุก 6 เดือน และบันทึกค่ากระแสในแต่ละเฟส
-            </p>
-          </Section>
+            {/* สรุปผล */}
+            <Section title="สรุปผลการดำเนินงาน">
+              <p
+                style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6 }}
+              >
+                {job.technicianReport.summaryOfOperatingResults}
+              </p>
+            </Section>
+          </div>
 
           {/* ลายเซ็น */}
           <div
@@ -247,6 +242,7 @@ export const PDFWorkOrder = ({ job }) => {
               title="ผู้ดำเนินการ"
               name="นายโฟล์ค เทสระบบ"
               position="หัวหน้าช่างไฟ"
+              signatureSrc={job?.technicianReport?.technicianSignature}
             />
             <SignatureBox
               title="ผู้ตรวจสอบ / หัวหน้า"
@@ -351,23 +347,68 @@ const SignatureBox = ({
   title,
   name,
   position,
+  signatureSrc,
 }: {
   title: string;
   name: string;
   position?: string;
+  signatureSrc?: string | null;
 }) => (
   <div
     style={{
       flex: 1,
-      borderTop: "1px solid #d1d5db",
       paddingTop: "8px",
-      marginTop: "50px",
+      marginTop: "100px",
+      textAlign: "center",
     }}
   >
-    <div style={{ marginBottom: "32px", fontSize: "12px", color: "#6b7280" }}>
+    {/* Signature Image */}
+    <div style={{ height: "60px", marginBottom: "8px" }}>
+      {signatureSrc ? (
+        <img
+          src={signatureSrc}
+          alt="signature"
+          style={{
+            width: "120px",
+            height: "60px",
+            objectFit: "contain",
+            margin: "0 auto",
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: "120px",
+            height: "60px",
+            margin: "0 auto",
+            backgroundColor: "#f3f4f6",
+            borderRadius: "6px",
+            border: "1px dashed #d1d5db",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#9ca3af",
+            fontSize: "12px",
+          }}
+        >
+          ไม่มีลายเซ็น
+        </div>
+      )}
+    </div>
+
+    <div
+      style={{
+        marginBottom: "12px",
+        fontSize: "12px",
+        color: "#6b7280",
+        borderTop: "1px solid #d1d5db",
+      }}
+    >
       ลายเซ็น {title}
     </div>
+
     <div style={{ fontSize: "12px", fontWeight: 500 }}>{name}</div>
+
     {position && (
       <div style={{ fontSize: "11px", color: "#6b7280" }}>{position}</div>
     )}
