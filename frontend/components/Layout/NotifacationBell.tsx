@@ -23,7 +23,6 @@ const NotificationBell = ({ Noti, setShowNotificationsBell }) => {
 
     localStorage.setItem("Users", JSON.stringify(users));
 
-    console.log(notifId);
 
     setShowNotificationsBell(false);
   };

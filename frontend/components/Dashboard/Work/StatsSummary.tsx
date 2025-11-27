@@ -80,8 +80,7 @@ const STATUS_ITEMS = [
 ];
 
 export default function StatsSummary({ stats }: Props) {
-  console.log(stats);
-  
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
       {STATUS_ITEMS.map(({ key, label, Icon, style }) => (

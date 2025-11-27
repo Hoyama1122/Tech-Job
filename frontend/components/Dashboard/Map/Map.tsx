@@ -44,7 +44,7 @@ export default function Map({
     },
     [onLocationSelect]
   );
-  console.log(markerPos);
+
   if (loadError) return <div>เกิดข้อผิดพลาดในการโหลดแผนที่</div>;
 
   if (!isLoaded)

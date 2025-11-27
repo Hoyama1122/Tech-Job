@@ -12,7 +12,7 @@ const TableTechDepartment = () => {
   const auth = localStorage.getItem("auth-storage");
   const parsedAuth = auth ? JSON.parse(auth) : [];
   const supervisorDepartment = parsedAuth.state.department;
-  console.log(supervisorDepartment);
+ 
 
 
   // 1. กรองข้อมูลช่างในแผนกของ Supervisor

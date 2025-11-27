@@ -5,7 +5,7 @@ import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import DateFormatWork from "@/lib/Format/DateForWork";
 
 export const PDFWorkOrder = ({ job }) => {
-  console.log(job);
+
 
   return (
     <div className="p-4">

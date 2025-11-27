@@ -71,7 +71,7 @@ export default function AllJobs() {
       setTimeout(() => setIsLoading(false), 400);
     }
   }, [setJobs]);
-  console.log(jobs);
+
 
   const filteredJobs = useMemo(() => {
     if (!jobs.length) return [];

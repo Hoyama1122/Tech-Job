@@ -66,7 +66,7 @@ export default function MainExecutive() {
       return acc;
     }, {});
 
-    console.log(departmentCounts);
+  
 
 
     // แปลงเป็น Array สำหรับ Recharts 
