@@ -35,6 +35,9 @@ const getStatusStyle = (status: string) => {
 };
 
 export default function JobWork({ job }: Props) {
+  const auth = localStorage.getItem("auth-storage");
+  const parsedAuth = auth ? JSON.parse(auth) : [];
+
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg  border border-gray-200 overflow-hidden group flex flex-col h-full">
       {/* Card Header */}
