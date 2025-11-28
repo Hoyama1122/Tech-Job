@@ -49,7 +49,7 @@ const FormLogin = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-sm space-y-6"
+      className="w-full max-w-md space-y-6"
     >
       <div className="flex justify-center">
         <Image
@@ -62,8 +62,8 @@ const FormLogin = () => {
       </div>
 
       <h2 className="text-center text-3xl font-bold text-white">
-        ยินดีต้อนรับกลับ!
-      </h2>
+        ยินดีต้อนรับเข้าสุ่ระบบ Tech Job
+      </h2> 
 
       <div className="space-y-5">
         {/* Email */}
