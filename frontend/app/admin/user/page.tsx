@@ -2,7 +2,7 @@ import React from "react";
 import TablePage from "./TablePage";
 import { Users } from "lucide-react";
 export const metadata = {
-  title: "Technician user",
+  title: "จัดการผู้ใช้งาน",
 };
 const page = () => {
   return (

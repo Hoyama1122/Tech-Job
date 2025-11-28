@@ -1,25 +1,31 @@
-// MainExecutive.jsx
 "use client";
 import React, { useEffect, useMemo, useState } from 'react';
-import { ClipboardList, Users, CheckCircle, Clock } from 'lucide-react';
+import { ClipboardList, Users, CheckCircle, Clock, Filter } from 'lucide-react';
 import Summary from '@/components/Dashboard/Summary/Summary';
 import DepartmentPerformanceChart from '@/components/Executive/DepartmentPerformanceChart';
 import JobStatusPieChart from '@/components/Executive/JobStatusPieChart';
+import JobGrowthLineChart from '@/components/Executive/JobGrowthLineChart'; // Import component ใหม่
 
 export default function MainExecutive() {
   const [card, setCard] = useState([]); 
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // --- State สำหรับตัวกรอง ---
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState<string>(String(currentYear + 543)); // ปีหลัก (พ.ศ.)
+  // const [compareYear, setCompareYear] = useState<string>("none"); // ปีที่ต้องการเปรียบเทียบ
+  const [selectedMonth, setSelectedMonth] = useState<string>("all"); // เดือน
+
+  const monthsTH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
   useEffect(() => {
     try {
         setIsLoading(true);
-
         const cardData = localStorage.getItem("CardWork");
         const usersData = localStorage.getItem("Users");
 
         if (!cardData || !usersData) {
-            console.warn("ไม่พบข้อมูลใน LocalStorage");
             setCard([]);
             setUsers([]);
             return;
@@ -27,88 +33,117 @@ export default function MainExecutive() {
 
         const parsedCardsData = JSON.parse(cardData);
         const parsedUsersData = JSON.parse(usersData);
-
-        const allJobs = parsedCardsData; 
-
         setUsers(parsedUsersData);
-
-        const joined = allJobs.map((job: any) => {
-            const supervisor = parsedUsersData.find(
-                (u: any) => u.role === "supervisor" && String(u.id) === String(job.supervisorId)
+        
+        // Join Users data
+        const joined = parsedCardsData.map((job: any) => {
+            const supervisor = parsedUsersData.find((u: any) => String(u.id) === String(job.supervisorId));
+            const technicians = parsedUsersData.filter((u: any) => 
+                Array.isArray(job.technicianId) && job.technicianId.some((tid: any) => String(tid) === String(u.id))
             );
-            
-            const technicians = parsedUsersData.filter(
-                (u: any) => u.role === "technician" &&
-                    Array.isArray(job.technicianId) &&
-                    job.technicianId.some((tid: any) => String(tid) === String(u.id))
-            );
-
-            return {
-                ...job,
-                supervisor: supervisor || null,
-                technicians: technicians || [],
-            };
+            return { ...job, supervisor, technicians };
         });
         
         setCard(joined); 
     } catch (error) {
-        console.error("โหลดข้อมูลล้มเหลว:", error);
+        console.error("Load failed:", error);
     } finally {
         setIsLoading(false);
     }
   }, []);
 
-  //  useMemo: เตรียมข้อมูลสำหรับกราฟแท่ง
+  // --- Helper: แปลงปี ค.ศ. เป็น พ.ศ. ---
+  const getThaiYear = (dateString: string) => {
+      const d = new Date(dateString);
+      return isNaN(d.getTime()) ? null : String(d.getFullYear() + 543);
+  };
+
+ 
+  const lineChartData = useMemo(() => {
+    
+    const data = monthsTH.map(m => ({ name: m, [selectedYear]: 0, }));
+
+    card.forEach((job: any) => {
+        const d = new Date(job.createdAt || job.date);
+        const jobYear = String(d.getFullYear() + 543);
+        const monthIndex = d.getMonth();
+
+        // นับจำนวนงานใส่ในปีที่เลือก
+        if (jobYear === selectedYear) {
+            data[monthIndex][selectedYear] = (data[monthIndex][selectedYear] || 0) + 1;
+        }
+    });
+    return data;
+  }, [card, selectedYear]);
+
   const departmentPerformance = useMemo(() => {
-    const departmentCounts = card.reduce((acc, job: any) => {
-      const department = job.category || 'ไม่ระบุ';
-      acc[department] = (acc[department] || 0) + 1;
-      return acc;
-    }, {});
+    const deptMap: Record<string, any> = {};
+
+    card.forEach((job: any) => {
+        const d = new Date(job.createdAt || job.date);
+        const jobYear = String(d.getFullYear() + 543);
+        const jobMonth = String(d.getMonth() + 1); // 1-12
+        const dept = job.category || 'ไม่ระบุ';
+
+
+        const isMonthMatch = selectedMonth === "all" || jobMonth === selectedMonth;
+
+        if (isMonthMatch) {
+            if (!deptMap[dept]) deptMap[dept] = { name: dept, [selectedYear]: 0,};
+
+            if (jobYear === selectedYear) {
+                deptMap[dept][selectedYear] += 1;
+            }
+        }
+    });
+
+    // แปลง Object เป็น Array
+    return Object.values(deptMap).filter(item => item[selectedYear] > 0 );
+  }, [card, selectedYear, selectedMonth]);
 
   
-
-
-    // แปลงเป็น Array สำหรับ Recharts 
-    return Object.keys(departmentCounts).map(deptName => ({
-        name: deptName,
-        "จำนวนใบงาน" : departmentCounts[deptName],
-    })).filter(item => item["จำนวนใบงาน"] > 0);
-  }, [card]);
-
-  // useMemo: เตรียมข้อมูลสำหรับแผนภูมิวงกลม 
   const statusProportion = useMemo(() => {
-    const statusCounts = card.reduce((acc, job: any) => {
-        const status = job.status;
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-    }, {});
+    const statusCounts: Record<string, number> = {};
+    card.forEach((job: any) => {
+        const jobYear = getThaiYear(job.createdAt || job.date);
+        
+        const d = new Date(job.createdAt || job.date);
+        const jobMonth = String(d.getMonth() + 1);
+        const isMonthMatch = selectedMonth === "all" || jobMonth === selectedMonth;
 
-    // แปลงเป็น Array สำหรับ Recharts
-    return Object.keys(statusCounts).map(statusName => ({
-        name: statusName,
-        value: statusCounts[statusName], 
-    }));
-  }, [card]);
+        if (jobYear === selectedYear && isMonthMatch) {
+            statusCounts[job.status] = (statusCounts[job.status] || 0) + 1;
+        }
+    });
+    return Object.keys(statusCounts).map(status => ({ name: status, value: statusCounts[status] }));
+  }, [card, selectedYear, selectedMonth]);
 
-  // 4. Summary Card 
+
   const executiveSummary = useMemo(() => {
+    const filteredJobs = card.filter((j: any) => {
+        const jobYear = getThaiYear(j.createdAt || j.date);
+        const d = new Date(j.createdAt || j.date);
+        const jobMonth = String(d.getMonth() + 1);
+        const isMonthMatch = selectedMonth === "all" || jobMonth === selectedMonth;
+        return jobYear === selectedYear && isMonthMatch;
+    });
+
     const totalTechnicians = users.filter((u:any) => u.role === "technician").length;
-    const completedJobs = card.filter((j: any) => j.status === "สำเร็จ").length;
-    const inProgressJobs = card.filter((j: any) => j.status === "กำลังทำงาน" || j.status === "รอการตรวจสอบ").length;
+    const completedJobs = filteredJobs.filter((j: any) => j.status === "สำเร็จ").length;
+    const inProgressJobs = filteredJobs.filter((j: any) => j.status === "กำลังทำงาน" || j.status === "รอการตรวจสอบ").length;
 
     return [
       {
         type: "total_jobs",
-        title: "ใบงานรวมทั้งหมด",
-        value: card.length,
+        title: `งานทั้งหมด (${selectedYear})`,
+        value: filteredJobs.length,
         icon: <ClipboardList className="w-8 h-8" />,
-        bg: "bg-emerald-50",
-        iconColor: "text-emerald-600",
+        bg: "bg-cyan-50",
+        iconColor: "text-cyan-600",
       },
       {
         type: "completed_jobs",
-        title: "งานที่เสร็จสิ้นแล้ว",
+        title: "งานที่เสร็จสิ้น",
         value: completedJobs,
         icon: <CheckCircle className="w-8 h-8" />,
         bg: "bg-green-50",
@@ -116,7 +151,7 @@ export default function MainExecutive() {
       },
       {
         type: "in_progress_jobs",
-        title: "งานที่ยังค้างอยู่",
+        title: "งานที่ค้างอยู่",
         value: inProgressJobs,
         icon: <Clock className="w-8 h-8" />,
         bg: "bg-yellow-50",
@@ -124,49 +159,70 @@ export default function MainExecutive() {
       },
       {
         type: "technicians",
-        title: "ช่างทั้งหมดในองค์กร",
+        title: "ช่างทั้งหมด",
         value: totalTechnicians,
         icon: <Users className="w-8 h-8" />,
         bg: "bg-blue-50",
         iconColor: "text-blue-600",
       },
     ];
-  }, [card, users]);
+  }, [card, users, selectedYear, selectedMonth]);
 
+  // รายการปีที่มีในข้อมูล
+  const availableYears = useMemo(() => {
+      const years = new Set(card.map((j: any) => getThaiYear(j.createdAt || j.date)).filter(Boolean));
+      return Array.from(years).sort().reverse();
+  }, [card]);
 
-  if (isLoading) {
-    return (
-      <div className="p-4 flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="p-4 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 
   return (
-    <div className='p-4'>
-        {/* Header */}
-        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
+    <div className='p-4 space-y-6'>
+        {/* Header & Filter */}
+        <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
             <div>
-                <h1 className='text-3xl font-bold text-primary'>ภาพรวมสำหรับผู้บริหาร</h1>
-                <p className='text-sm text-gray-500 mt-1' >แสดงประสิทธิภาพและสถานะงานขององค์กรทั้งหมด</p>
+                <h1 className='text-3xl font-bold text-primary'>Dashboard ผู้บริหาร</h1>
+                <p className='text-sm text-gray-500'>ภาพรวมและสถิติประจำปี {selectedYear}</p>
+            </div>
+            
+            {/* Filter Controls */}
+            <div className="flex flex-wrap gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm font-medium">เดือน:</span>
+                    <select 
+                        value={selectedMonth} 
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                        className="border rounded-lg px-2 py-1 text-sm outline-none focus:ring-2 ring-primary/20"
+                    >
+                        <option value="all">ทั้งหมด</option>
+                        {monthsTH.map((m, i) => <option key={i} value={String(i + 1)}>{m}</option>)}
+                    </select>
+                </div>
             </div>
         </div>
         
         {/* Summary Cards */}
-        <Summary summary={executiveSummary} />
+        <Summary summary={executiveSummary} onSelect={() => {}} />
         
-        <h2 className='text-2xl font-bold text-gray-800 mt-8 mb-4'>รายงานภาพรวมเชิงลึก</h2>
+        {/* Line Chart */}
+        <JobGrowthLineChart 
+            data={lineChartData} 
+            years={ [selectedYear]} 
+        />
 
-        {/* --- ส่วนแสดงกราฟ --- */}
+        {/* Charts Grid */}
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-            {/*  กราฟแท่ง  */}
-            <DepartmentPerformanceChart data={departmentPerformance} />
+            {/* Modified Bar Chart */}
+            <DepartmentPerformanceChart 
+                data={departmentPerformance} 
+                years={[selectedYear]}
+            />
             
-            {/*  แผนภูมิวงกลม */}
-            <JobStatusPieChart data={statusProportion} />
+            {/* Pie Chart */}
+            <JobStatusPieChart data={statusProportion}  />
         </div>
-ฃ
-        
     </div>
   );
 }

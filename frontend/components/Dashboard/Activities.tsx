@@ -14,6 +14,7 @@ import {
 import { ActivityLogs, LogIconMap } from "@/lib/Mock/Activity";
 import Link from "next/link";
 const Activities = ( ) => {
+  
   return (
     <div className="flex flex-col space-y-4">
       {/* Latest Activities Card */}
