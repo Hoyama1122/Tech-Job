@@ -160,7 +160,7 @@ export default function Page({ params }: PageProps) {
           job.loc?.lng
         );
 
-        if (distance > 100000) {
+        if (distance > 200) {
           toast.error(`คุณอยู่ห่างจากจุดงาน ${Math.floor(distance)} เมตร`);
           return;
         }

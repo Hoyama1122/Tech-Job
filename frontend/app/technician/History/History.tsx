@@ -119,7 +119,7 @@ export default function History() {
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 text-gray-500 text-sm">
                       <Users className="w-4 h-4" />
-                      {job.technicianId.length} ช่าง
+                      {job.technicianId.length || 0} ช่าง
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   </div>

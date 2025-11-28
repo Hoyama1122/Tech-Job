@@ -28,7 +28,7 @@ type CardWork = {
   status: string;
 };
 
-//  yyyy-mm-dd
+// yyyy-mm-dd
 const toDateString = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
     2,
@@ -82,7 +82,14 @@ export default function CalendarTechJob() {
     setTechId(userId);
 
     const cardWorks = JSON.parse(localStorage.getItem("CardWork") || "[]");
-    setJobs(cardWorks);
+
+    // safe default values
+    const safeJobs = cardWorks.map((j: any) => ({
+      ...j,
+      technicianId: Array.isArray(j.technicianId) ? j.technicianId : [],
+    }));
+
+    setJobs(safeJobs);
   }, []);
 
   const year = currentDate.getFullYear();
@@ -104,34 +111,34 @@ export default function CalendarTechJob() {
     setSelectedDate(null);
   };
 
-  /*  Event Checke  */
+  // event checker
   const isEventDay = (day: number | null) => {
     if (!day || !techId) return false;
 
     const dateStr = toDateString(new Date(year, month, day));
 
     return jobs.some((job) => {
+      if (!Array.isArray(job.technicianId)) return false;
       if (!job.technicianId.includes(techId)) return false;
 
       if (getJobDate(job) === dateStr) return true;
-
       if (isInRange(day, year, month, job)) return true;
 
       return false;
     });
   };
 
-  /*  Selected Day Jobs  */
+  // selected day jobs
   const jobsOfSelectedDay = useMemo(() => {
     if (!selectedDate || !techId) return [];
 
     const dateStr = toDateString(selectedDate);
 
     return jobs.filter((job) => {
+      if (!Array.isArray(job.technicianId)) return false;
       if (!job.technicianId.includes(techId)) return false;
 
       if (getJobDate(job) === dateStr) return true;
-
       if (selectedDate && isInRange(selectedDate.getDate(), year, month, job))
         return true;
 
@@ -223,7 +230,7 @@ export default function CalendarTechJob() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">
-                        ลูกค้า: {job.customer.name}
+                        ลูกค้า: {job.customer?.name}
                       </h3>
                       <p className="text-sm text-gray-600 line-clamp-2">
                         {job.description}
@@ -233,7 +240,7 @@ export default function CalendarTechJob() {
 
                   <p className="mt-2 text-sm text-gray-600 flex items-center gap-1">
                     <MapPin className="w-4 h-4 text-primary" />
-                    {job.customer.address}
+                    {job.customer?.address}
                   </p>
 
                   <p className="mt-1 text-sm text-gray-700">
@@ -249,7 +256,7 @@ export default function CalendarTechJob() {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center text-xs text-gray-500">
                     <Users className="w-4 h-4 mr-1" />
-                    {job.technicianId.length} ช่าง
+                    {job.technicianId?.length || 0} ช่าง
                   </div>
 
                   {getStatusBadge(job.status)}
