@@ -9,7 +9,6 @@ import {
 } from "@react-google-maps/api";
 import { CircleCheck, Loader2, Phone, User } from "lucide-react";
 
-
 const containerStyle = {
   width: "100%",
   height: "300px",
@@ -32,8 +31,7 @@ const getIconByStatus = (status: string) => {
   };
 };
 
-
-const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
+const TeamMap = ({ jobs, users }: { jobs: any[]; users: any[] }) => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -44,17 +42,24 @@ const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
 
   useEffect(() => {
     if (jobs && users) {
-      const jobsWithTechnician = jobs.map(job => {
-        // สมมติว่างานแต่ละงานมี technicianId แค่คนเดียวใน InfoWindow
-        const mainTechnicianId = job.technicianId?.[0];
-        const technician = users.find(u => u.id === mainTechnicianId);
+      const jobsWithTechnician = jobs.map((job) => {
+        // หาช่างทุกคนที่อยู่ใน technicianId
+        const technicians = Array.isArray(job.technicianId)
+          ? users.filter(
+              (u) => u.role === "technician" && job.technicianId.includes(u.id)
+            )
+          : [];
 
         return {
           ...job,
-          technicianName: technician ? technician.name : "ไม่ระบุ",
-          technicianPhone: technician ? technician.phone : "ไม่มีข้อมูล",
+          technicians,
+          technicianName: technicians[0]?.name ?? "ไม่ระบุ",
+          technicianPhone: technicians[0]?.phone ?? "ไม่มีข้อมูล",
+          lat: job.loc?.lat ?? null,
+          lng: job.loc?.lng ?? null,
         };
       });
+
       setMembers(jobsWithTechnician);
     }
   }, [jobs, users]);
@@ -62,7 +67,7 @@ const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
   const handleMarkerClick = (member: any) => {
     setSelectedMember(member);
   };
-
+console.log(jobs);
 
   if (!isLoaded)
     return (
@@ -84,16 +89,14 @@ const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
           fullscreenControl: false,
         }}
       >
-        {/* 🧭 แสดง Marker ทุกใบงาน */}
+        {/* แสดง Marker ทุกงาน */}
         {members.map((m: any) => {
-          const lat = m.loc?.lat ?? m.lat;
-          const lng = m.loc?.lng ?? m.lng;
-          if (!lat || !lng) return null;
+          if (!m.lat || !m.lng) return null;
 
           return (
             <Marker
               key={m.id}
-              position={{ lat, lng }}
+              position={{ lat: m.lat, lng: m.lng }}
               icon={getIconByStatus(m.status)}
               onClick={() => handleMarkerClick(m)}
               title={m.title}
@@ -101,12 +104,12 @@ const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
           );
         })}
 
-        {/* 💬 InfoWindow เมื่อกด Marker */}
+        {/* InfoWindow เมื่อคลิก Marker */}
         {selectedMember && (
           <InfoWindow
             position={{
-              lat: selectedMember.loc?.lat ?? selectedMember.lat,
-              lng: selectedMember.loc?.lng ?? selectedMember.lng,
+              lat: selectedMember.lat,
+              lng: selectedMember.lng,
             }}
             onCloseClick={() => setSelectedMember(null)}
           >
@@ -116,9 +119,10 @@ const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
               <span className="text-gray-600 text-xs">
                 {selectedMember.description}
               </span>
-              <br />
-              <span
-                className={` mt-1 flex  items-center gap-2 ${
+
+              {/* สถานะ */}
+              <div
+                className={`mt-1 flex items-center gap-2 ${
                   selectedMember.status === "สำเร็จ"
                     ? "text-emerald-700"
                     : selectedMember.status === "ตีกลับ"
@@ -127,26 +131,31 @@ const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
                     ? "text-blue-700"
                     : selectedMember.status === "กำลังทำงาน"
                     ? "text-yellow-700"
-                    : selectedMember.status === "รอการดำเนินงาน" 
-                    ? "text-orange-700" 
+                    : selectedMember.status === "รอการดำเนินงาน"
+                    ? "text-orange-700"
                     : "text-gray-500"
                 } font-semibold`}
               >
                 <CircleCheck size={16} /> สถานะใบงาน: {selectedMember.status}
-              </span>
+              </div>
 
-              <div className="mt-2 flex items-center  border-t pt-1 text-xs text-gray-700 gap-2">
-                <User size={16} className="text-accent" />{" "}
-                <strong>{selectedMember.technicianName}</strong>
-              </div>
-              <div className="mt-2 flex items-center pt-1 text-xs text-gray-700 gap-2">
-                <Phone size={16} className="text-accent" />{" "}
-                {selectedMember.technicianPhone}
-              </div>
+              {/* ทีมงาน */}
+              <div className="mt-2 text-xs font-medium">ทีมงาน:</div>
+              {selectedMember.technicians?.length > 0 ? (
+                <ul className="text-xs text-gray-700 mt-1">
+                  {selectedMember.technicians.map((t) => (
+                    <li key={t.id}>
+                      • {t.name} ({t.phone})
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-xs text-gray-500">ไม่พบช่าง</div>
+              )}
+
+              {/* ปุ่มนำทาง */}
               <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${
-                  selectedMember.loc?.lat ?? selectedMember.lat
-                },${selectedMember.loc?.lng ?? selectedMember.lng}`}
+                href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMember.lat},${selectedMember.lng}`}
                 target="_blank"
                 className="block mt-2 text-blue-600 underline text-xs"
               >

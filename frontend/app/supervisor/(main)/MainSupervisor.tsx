@@ -238,6 +238,7 @@ export default function MainSupervisor() {
                   <option value="สำเร็จ">สำเร็จ</option>
                   <option value="กำลังทำงาน">กำลังทำงาน</option>
                   <option value="รอการตรวจสอบ">รอการตรวจสอบ</option>
+                  <option value="รอการดำเนินงาน">รอการดำเนินงาน</option>
                   <option value="ตีกลับ">ตีกลับ</option>
 
                 </select>
