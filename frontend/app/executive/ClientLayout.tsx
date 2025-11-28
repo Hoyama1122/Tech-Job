@@ -2,11 +2,11 @@
 
 import React, { useEffect } from "react";
 import { AppLoader } from "@/store/AppLoader";
-import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 
 import { Users } from "@/lib/Mock/UserMock";
 import { CardWork } from "@/lib/Mock/Jobs";
-import SidebarWrapperSup from "@/components/Supervisor/SidebarWrapperSup";
+import NavbarExec from "@/components/Executive/NavbarExec";
+import SidebarWrapperExc from "@/components/Executive/SidebarWrapperExc";
 
 export default function ClientLayout({
   children,
@@ -46,7 +46,7 @@ export default function ClientLayout({
 
   return (
     <div className={`min-h-screen bg-primary`}>
-      <SidebarWrapperSup />
+      <SidebarWrapperExc />
       <div
         className="  flex flex-col 
           min-h-screen 
@@ -54,7 +54,7 @@ export default function ClientLayout({
           transition-all duration-300
           lg:ml-64  "
       >
-        <NavbarSuper />
+        <NavbarExec />
         <main className="flex-1 p-3 md:p-4 overflow-y-auto">{children}</main>
       </div>
     </div>
