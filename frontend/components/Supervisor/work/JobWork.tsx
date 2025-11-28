@@ -29,6 +29,8 @@ const getStatusStyle = (status: string) => {
       return "bg-blue-100 text-blue-700 border-blue-200";
     case "รอการมอบหมายงาน":
       return "bg-primary/80 text-white border-primary";
+    case "รอการดำเนินงาน":
+      return "bg-orange-100 text-orange-700 border-orange-200";
     default:
       return "bg-gray-100 text-gray-700 border-gray-200";
   }
