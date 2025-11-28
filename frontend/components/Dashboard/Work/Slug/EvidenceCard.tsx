@@ -5,7 +5,6 @@ interface EvidenceCardProps {
   adminImages: string[];
   imagesBefore: string[];
   imagesAfter: string[];
-
 }
 
 export default function EvidenceCard({
@@ -17,8 +16,6 @@ export default function EvidenceCard({
   const hasAdmin = adminImages.length > 0;
   const hasBefore = imagesBefore.length > 0;
   const hasAfter = imagesAfter.length > 0;
-
-  
 
   const hasSign =
     job?.technicianReport?.technicianSignature ||
