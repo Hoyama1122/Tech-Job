@@ -38,8 +38,6 @@ export default function History() {
     setJobs(workList);
   }, []);
 
-  
-
   const historyJobs = jobs.filter(
     (job) => job.status === "สำเร็จ" && job.technicianId.includes(techId)
   );
@@ -87,7 +85,7 @@ export default function History() {
             {group.list.map((job: CardWork) => (
               <div
                 key={job.JobId}
-                className="bg-white rounded-xl p-6 shadow-sm border hover:shadow-md transition cursor-pointer mb-3"
+                className="bg-white rounded-xl p-6 shadow-sm   transition cursor-pointer mb-3"
                 onClick={() => router.push(`/technician/${job.JobId}`)}
               >
                 <div className="flex flex-col md:flex-row justify-between gap-4">

@@ -3,11 +3,10 @@
 import React, { useEffect } from "react";
 import SidebarWrapper from "@/components/Dashboard/SidebarWrapper";
 import { AppLoader } from "@/store/AppLoader";
-import Navbar from "@/components/Dashboard/Navbar";
+import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 
 import { Users } from "@/lib/Mock/UserMock";
 import { CardWork } from "@/lib/Mock/Jobs";
-
 
 export default function ClientLayout({
   children,
@@ -55,7 +54,7 @@ export default function ClientLayout({
           transition-all duration-300
           lg:ml-64  "
       >
-        <Navbar />
+        <NavbarSuper />
         <main className="flex-1 p-3 md:p-4 overflow-y-auto">{children}</main>
       </div>
     </div>

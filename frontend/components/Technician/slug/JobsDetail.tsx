@@ -1,7 +1,8 @@
-import { FileText, ImageIcon } from "lucide-react";
+import { Clock, FileText, ImageIcon } from "lucide-react";
 import React from "react";
 import Location from "./Location";
 import Team from "./Team";
+import DateFormatWork from "@/lib/Format/DateForWork";
 
 const JobsDetail = ({ job, adminImages }) => {
   return (
@@ -14,7 +15,7 @@ const JobsDetail = ({ job, adminImages }) => {
             รายละเอียดงาน
           </h2>
 
-          <h2 className="text-base font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
             ชื่องาน: {job.title}
           </h2>
 
@@ -24,7 +25,17 @@ const JobsDetail = ({ job, adminImages }) => {
             </p>
           </div>
         </div>
-
+        <div className="mt-2">
+          <h1 className="text-xl flex items-center gap-1 font-semibold">
+            <Clock className="w-4 h-4 text-accent" />
+            ระยะเวลาการทำงาน
+          </h1>
+          <div className="flex space-x-2">
+            <p>{DateFormatWork(job.dateRange?.startAt)}</p>
+            <p>-</p>
+            <p>{DateFormatWork(job.dateRange?.endAt)}</p>
+          </div>
+        </div>
         {/* Admin Images */}
         {adminImages && adminImages.length > 0 && (
           <div className="space-y-2 mt-4">

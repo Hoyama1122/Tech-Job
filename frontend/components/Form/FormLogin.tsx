@@ -22,7 +22,6 @@ const FormLogin = () => {
   const onSubmit = (data: LoginFormInputs) => {
     const role = login(data.email, data.password);
 
-
     if (role) {
       toast.success("เข้าสู่ระบบสำเร็จ!");
       switch (role) {
@@ -110,14 +109,6 @@ const FormLogin = () => {
           เข้าสู่ระบบ
         </button>
       </div>
-
-      <div className="flex items-center justify-between mt-6">
-        <span className="w-full border-t border-gray-700"></span>
-        <span className="px-4 text-gray-400 text-sm flex-shrink-0">หรือ</span>
-        <span className="w-full border-t border-gray-700"></span>
-      </div>
-
-     
     </form>
   );
 };

@@ -6,6 +6,8 @@ import React, { useEffect, useRef, useState } from "react";
 const EditModal = ({ data, onClose, onSave }) => {
   const modalRef = useRef(null);
   const [formData, setFormData] = useState(data);
+  const isProtected =
+    data.role === "admin" || data.role === "ceo" || data.role === "executive";
 
   // ปิดด้วย ESC
   useEffect(() => {
@@ -62,7 +64,6 @@ const EditModal = ({ data, onClose, onSave }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-
           {/* ชื่อ-นามสกุล */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">
@@ -73,8 +74,12 @@ const EditModal = ({ data, onClose, onSave }) => {
               name="name"
               value={formData.name}
               onChange={handleInput}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-              required
+              disabled={isProtected}
+              className={`w-full px-4 py-2 border rounded-lg ${
+                isProtected
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                  : ""
+              }`}
             />
           </div>
 
@@ -85,40 +90,50 @@ const EditModal = ({ data, onClose, onSave }) => {
               type="email"
               name="email"
               value={formData.email}
+              disabled={isProtected}
               onChange={handleInput}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-              required
+              className={`w-full px-4 py-2 border rounded-lg ${
+                isProtected
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                  : ""
+              }`}
             />
           </div>
 
           {/* เบอร์โทร */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">เบอร์โทร</label>
+            <label className="text-sm font-medium text-slate-700">
+              เบอร์โทร
+            </label>
             <input
-              type="text"
+              type="tel"
               name="phone"
               value={formData.phone}
+              disabled={isProtected}
               onChange={handleInput}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+              className={`w-full px-4 py-2 border rounded-lg ${
+                isProtected
+                  ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                  : ""
+              }`}
             />
           </div>
 
           {/* แผนก */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">แผนก</label>
-            <select
-              name="department"
-              value={formData.department}
-              onChange={handleInput}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option value="ไฟฟ้า">ไฟฟ้า</option>
-              <option value="แอร์">แอร์</option>
-              <option value="ประปา">ประปา</option>
-              <option value="สื่อสาร">สื่อสาร</option>
-              <option value="ทั่วไป">ทั่วไป</option>
-            </select>
-          </div>
+          <select
+            name="department"
+            value={formData.department}
+            disabled={isProtected}
+            className={`w-full px-4 py-2 border rounded-lg ${
+              isProtected ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+            }`}
+          >
+            <option value="ไฟฟ้า">ไฟฟ้า</option>
+            <option value="แอร์">แอร์</option>
+            <option value="ประปา">ประปา</option>
+            <option value="ผู้บริหาร">ผู้บริหาร</option>
+            <option value="แอดมิน">แอดมิน</option>
+          </select>
 
           {/* Footer */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
@@ -137,7 +152,6 @@ const EditModal = ({ data, onClose, onSave }) => {
               <Save className="w-4 h-4" /> บันทึกข้อมูล
             </button>
           </div>
-
         </form>
       </div>
     </div>

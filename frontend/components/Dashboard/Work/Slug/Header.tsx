@@ -95,7 +95,7 @@ export default function Header({
               className={`px-4 py-2 rounded-md text-white 
                 ${
                   job.status === "รอการตรวจสอบ"
-                    ? "bg-red-600 hover:bg-red-700"
+                    ? "bg-red-500 hover:bg-red-600"
                     : "bg-gray-300 cursor-not-allowed"
                 }
               `}
@@ -125,7 +125,7 @@ export default function Header({
               className={`px-4 py-2 rounded-md text-white flex items-center gap-1
                 ${
                   job.status === "รอการดำเนินงาน"
-                    ? "bg-gray-600 hover:bg-gray-700"
+                    ? "bg-red-600 hover:bg-red-700"
                     : "bg-gray-300 cursor-not-allowed"
                 }
               `}
