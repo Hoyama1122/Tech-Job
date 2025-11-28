@@ -51,6 +51,6 @@ export const navLinkSupervisor: NavItem[] = [
 export const navLinkExecutive: NavItem[] = [
   { name: "ภาพรวม", path: "/", icon: LayoutDashboard },
   { name: "รายงานและสถิติ", path: "/reports", icon: BarChart3 },
-  { name: "ภาพรวมองค์กร", path: "/organization", icon: Users },
+  // { name: "ภาพรวมองค์กร", path: "/organization", icon: Users },
   { name: "ใบงานทั้งหมด", path: "/work", icon: Briefcase },
 ];
