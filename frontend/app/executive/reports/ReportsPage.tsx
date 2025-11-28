@@ -3,21 +3,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
-  Calendar,
-  Download,
   Filter,
   CheckCircle2,
   Clock,
-  AlertCircle,
   FileText,
-  DollarSign,
-  Printer,
   TrendingUp,
+  Briefcase,
 } from "lucide-react";
 import MonthlyTrendChart from "@/components/Executive/MonthlyTrendChart";
 import JobStatusPieChart from "@/components/Executive/JobStatusPieChart";
 import DepartmentChart from "@/components/Executive/DepartmentChart";
-
 
 const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
@@ -25,12 +20,12 @@ export default function ReportsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-
+  // --- Filters States ---
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
   );
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
-
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all"); // 1. เพิ่ม State แผนก
 
   useEffect(() => {
     try {
@@ -48,7 +43,7 @@ export default function ReportsPage() {
     }
   }, []);
 
-  // --- Data Processing Helpers ---
+  // --- Helpers ---
   const getThaiMonth = (index: number) => {
     const months = [
       "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
@@ -57,37 +52,53 @@ export default function ReportsPage() {
     return months[index];
   };
 
-  // 1. Filter Logic
+  // --- 2. เตรียมตัวเลือกสำหรับ Dropdown ---
+  const departments = useMemo(() => {
+    const uniqueDepts = new Set(jobs.map(j => j.category).filter(Boolean));
+    return Array.from(uniqueDepts);
+  }, [jobs]);
+
+  const years = useMemo(() => {
+    const uniqueYears = new Set(jobs.map(j => new Date(j.createdAt).getFullYear()));
+    return Array.from(uniqueYears).sort((a, b) => b - a);
+  }, [jobs]);
+
+  // --- 3. Filter Logic (เพิ่มเงื่อนไขแผนก) ---
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
       const date = new Date(job.createdAt || job.date);
+      
+      // เงื่อนไขปี
       const yearMatch = date.getFullYear().toString() === selectedYear;
+      
+      // เงื่อนไขเดือน
       const monthMatch =
         selectedMonth === "all" ||
         (date.getMonth() + 1).toString() === selectedMonth;
-      return yearMatch && monthMatch;
-    });
-  }, [jobs, selectedYear, selectedMonth]);
+      
+      // เงื่อนไขแผนก
+      const deptMatch = 
+        selectedDepartment === "all" || 
+        job.category === selectedDepartment;
 
-  
+      return yearMatch && monthMatch && deptMatch;
+    });
+  }, [jobs, selectedYear, selectedMonth, selectedDepartment]);
+
+  // --- Stats Calculation ---
   const stats = useMemo(() => {
     const total = filteredJobs.length;
     const completed = filteredJobs.filter((j) => j.status === "สำเร็จ").length;
     const pending = filteredJobs.filter(
       (j) => j.status === "รอการตรวจสอบ" || j.status === "กำลังทำงาน"
     ).length;
-    
-    const totalCost = filteredJobs.reduce(
-      (sum, job) => sum + (job.technicianReport?.cost || 1500), 
-      0
-    );
 
     const successRate = total > 0 ? ((completed / total) * 100).toFixed(1) : "0";
 
-    return { total, completed, pending, totalCost, successRate };
+    return { total, completed, pending, successRate };
   }, [filteredJobs]);
 
-  //  Chart Data: Monthly Performance
+  // --- Charts Data Preparation ---
   const monthlyData = useMemo(() => {
     const data = Array.from({ length: 12 }, (_, i) => ({
       name: getThaiMonth(i),
@@ -95,20 +106,25 @@ export default function ReportsPage() {
       งานสำเร็จ: 0,
     }));
 
-    jobs
-      .filter((j) => new Date(j.createdAt).getFullYear().toString() === selectedYear)
-      .forEach((job) => {
+    // ใช้ jobs ชุดที่กรอง "แผนก" และ "ปี" แล้ว แต่ "ไม่กรองเดือน" (เพื่อให้กราฟเส้นโชว์ทั้งปี)
+    const trendJobs = jobs.filter(job => {
+       const date = new Date(job.createdAt);
+       const yearMatch = date.getFullYear().toString() === selectedYear;
+       const deptMatch = selectedDepartment === "all" || job.category === selectedDepartment;
+       return yearMatch && deptMatch;
+    });
+
+    trendJobs.forEach((job) => {
         const monthIdx = new Date(job.createdAt).getMonth();
         data[monthIdx].งานทั้งหมด += 1;
         if (job.status === "สำเร็จ") {
           data[monthIdx].งานสำเร็จ += 1;
         }
-      });
+    });
 
     return data;
-  }, [jobs, selectedYear]);
+  }, [jobs, selectedYear, selectedDepartment]);
 
-  // Chart Data: Status Distribution
   const statusData = useMemo(() => {
     const counts: Record<string, number> = {};
     filteredJobs.forEach((j) => {
@@ -117,7 +133,6 @@ export default function ReportsPage() {
     return Object.keys(counts).map((key) => ({ name: key, value: counts[key] }));
   }, [filteredJobs]);
 
-  //  Chart Data: Department Performance
   const deptData = useMemo(() => {
     const depts: Record<string, number> = {};
     filteredJobs.forEach((j) => {
@@ -128,10 +143,6 @@ export default function ReportsPage() {
       .map((key) => ({ name: key, จำนวนงาน: depts[key] }))
       .sort((a, b) => b.จำนวนงาน - a.จำนวนงาน);
   }, [filteredJobs]);
-
-  const years = Array.from(
-    new Set(jobs.map((j) => new Date(j.createdAt).getFullYear()))
-  ).sort((a, b) => b - a);
 
   if (isLoading) return <LoadingScreen />;
 
@@ -148,17 +159,31 @@ export default function ReportsPage() {
             วิเคราะห์ข้อมูลเชิงลึกเพื่อการตัดสินใจของผู้บริหาร
           </p>
         </div>
-       
       </div>
 
-      {/* Filters */}
+      {/* --- Filters Bar --- */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2 text-slate-700 font-medium">
           <Filter size={20} className="text-primary" />
           ตัวกรองข้อมูล :
         </div>
-   
+        
+        {/* Year Filter */}
+        {/* <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+          <span className="text-sm text-slate-500">ปี:</span>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="bg-transparent outline-none text-sm font-semibold text-slate-700 cursor-pointer"
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>{y + 543}</option>
+            ))}
+            {!years.includes(Number(selectedYear)) && <option value={selectedYear}>{Number(selectedYear)+543}</option>}
+          </select>
+        </div> */}
 
+        {/* Month Filter */}
         <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
           <Clock size={16} className="text-slate-400" />
           <span className="text-sm text-slate-500">เดือน:</span>
@@ -170,6 +195,22 @@ export default function ReportsPage() {
             <option value="all">ทั้งหมด (ทั้งปี)</option>
             {Array.from({ length: 12 }, (_, i) => (
               <option key={i} value={i + 1}>{getThaiMonth(i)}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Department Filter (New) */}
+        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+          <Briefcase size={16} className="text-slate-400" />
+          <span className="text-sm text-slate-500">แผนก:</span>
+          <select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            className="bg-transparent outline-none text-sm font-semibold text-slate-700 cursor-pointer"
+          >
+            <option value="all">ทุกแผนก</option>
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>{dept}</option>
             ))}
           </select>
         </div>
@@ -188,7 +229,7 @@ export default function ReportsPage() {
           <MonthlyTrendChart data={monthlyData} year={selectedYear} />
         </div>
         <div>
-          <JobStatusPieChart data={statusData} totalJobs={stats.total} />
+          <JobStatusPieChart data={statusData} />
         </div>
       </div>
 
