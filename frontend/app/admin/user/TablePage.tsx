@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -55,10 +56,29 @@ const TablePage = () => {
     startIndex + ITEMS_PER_PAGE
   );
 
-  // Handle Edit
+  // เปิด Modal แก้ไข
   const handleEdit = (user) => {
     setSelectedUser(user);
     setShowModalEdit(true);
+  };
+  // on save
+  const handleSave = (updatedUser) => {
+    const updatedUsers = users.map((u) =>
+      u.id === updatedUser.id ? updatedUser : u
+    );
+    setUsers(updatedUsers);
+    localStorage.setItem("Users", JSON.stringify(updatedUsers));
+    toast.success("บันทึกข้อมูลเรียบร้อย");
+    setShowModalEdit(false);
+  };
+  // ลบผู้ใช้
+  const handleDelete = (user) => {
+    if (!window.confirm(`ต้องการลบผู้ใช้ "${user.name}" หรือไม่?`)) return;
+
+    const updated = users.filter((u) => u.id !== user.id);
+
+    setUsers(updated);
+    localStorage.setItem("Users", JSON.stringify(updated));
   };
 
   return (
@@ -70,7 +90,7 @@ const TablePage = () => {
           <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="ค้นหาด้วย รหัสพนักงาน, ชื่อ, อีเมล, เบอร์โทร..."
+            placeholder="ค้นหา รหัสพนักงาน, ชื่อ, อีเมล, เบอร์โทร..."
             className="w-full pl-10 pr-4 py-2.5 border text-sm border-gray-300 rounded-lg"
             value={searchTerm}
             onChange={(e) => {
@@ -119,7 +139,7 @@ const TablePage = () => {
           {paginatedData.map((item, index) => (
             <tr
               key={item.id || index}
-              className={`border-b border-gray-200 hover:bg-blue-50 transition${
+              className={`border-b border-gray-200 hover:bg-blue-50 transition ${
                 index % 2 === 0 ? "bg-white" : "bg-gray-50"
               }`}
             >
@@ -129,6 +149,7 @@ const TablePage = () => {
               <td className="px-4 py-3">{item.email}</td>
               <td className="px-4 py-3">{item.phone}</td>
               <td className="px-4 py-3">{item.team?.slice(-1) || "-"}</td>
+
               <td className="px-4 py-3 text-center">
                 <div className="flex items-center gap-2 justify-center">
                   <button
@@ -139,7 +160,10 @@ const TablePage = () => {
                     แก้ไข
                   </button>
 
-                  <button className="bg-red-500 text-white px-3 py-2 rounded-lg flex items-center gap-1">
+                  <button
+                    onClick={() => handleDelete(item)}
+                    className="bg-red-500 text-white px-3 py-2 rounded-lg flex items-center gap-1"
+                  >
                     <Trash2 className="w-4 h-4" />
                     ลบ
                   </button>
@@ -150,9 +174,10 @@ const TablePage = () => {
 
           {paginatedData.length === 0 && (
             <tr>
-              <td colSpan={6} className=" text-center py-6 text-gray-500">
+              <td colSpan={7} className="text-center py-6 text-gray-500">
                 <div className="flex items-center flex-col gap-4">
-                  <File className="w-6 h-6" /> ไม่พบข้อมูลที่ค้นหา
+                  <File className="w-6 h-6" />
+                  ไม่พบข้อมูลที่ค้นหา
                 </div>
               </td>
             </tr>
@@ -160,6 +185,7 @@ const TablePage = () => {
         </tbody>
       </table>
 
+      {/* Pagination */}
       <div className="flex justify-between items-center mt-4">
         <p className="text-sm text-gray-600">
           หน้า {currentPage} จาก {totalPages || 1}
@@ -186,11 +212,12 @@ const TablePage = () => {
         </div>
       </div>
 
+      {/* Edit Modal */}
       {showModalEdit && (
         <EditModal
-         
           data={selectedUser}
           onClose={() => setShowModalEdit(false)}
+          onSave={handleSave}
         />
       )}
     </div>
