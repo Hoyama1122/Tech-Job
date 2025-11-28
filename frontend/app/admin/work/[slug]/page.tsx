@@ -13,11 +13,11 @@ import DescriptionCard from "@/components/Dashboard/Work/Slug/DescriptionCard";
 import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
-import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import CancelModal from "@/components/Dashboard/Work/Slug/CancelModal";
 import { notifyTechnicians } from "@/lib/Noti/SendNoti";
 import RejectModal from "@/components/Modal/RejectModal";
+import { PDFWorkOrder } from "../../WorkOrder/PDFWorkOrder";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

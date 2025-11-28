@@ -5,6 +5,7 @@ import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import DateFormatWork from "@/lib/Format/DateForWork";
 
 export const PDFWorkOrder = ({ job }) => {
+  const date = Date.now();
   return (
     <div className="p-4">
       <div className="flex flex-col mt-4 px-4">
@@ -74,12 +75,11 @@ export const PDFWorkOrder = ({ job }) => {
               </div>
             </div>
 
-            {/* ช่อง QR / รหัสเอกสาร */}
             <div style={{ textAlign: "right", fontSize: "12px" }}>
               <div style={{ marginTop: "40px" }}>
-                เลขที่เอกสาร: <b>WO-2025-0001</b>
+                เลขที่เอกสาร: <b>{job.JobId}</b>
               </div>
-              <div>พิมพ์เมื่อ: 13/11/2025</div>
+              <div>พิมพ์เมื่อ: {DateFormatWork(date)}</div>
             </div>
           </div>
           <hr style={{ borderColor: "#e5e7eb", margin: "12px 0 16px 0" }} />
@@ -98,7 +98,7 @@ export const PDFWorkOrder = ({ job }) => {
               </div>
             </div>
             {/* ข้อมูลหลักของงาน */}
-            
+
             <div
               style={{
                 display: "flex",
