@@ -14,9 +14,9 @@ import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
-import { PDFWorkOrder } from "@/app/admin/workorder/PDFWorkOrder";
 import { notifyTechnicians } from "@/lib/Noti/SendNoti";
 import RejectModal from "@/components/Modal/RejectModal";
+import { PDFWorkOrder } from "@/app/admin/WorkOrder/PDFWorkOrder";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -106,8 +106,7 @@ export default function WorkDetailPage({ params }: PageProps) {
     }
     setShowRejectModal(true); // เปิด Modal แทนการใช้ prompt
   };
-
-  // 4. สร้างฟังก์ชันใหม่สำหรับรับเหตุผลและบันทึก (ย้าย logic จาก handleReject เดิมมาที่นี่)
+  // ตีกลับงาน
   const onConfirmReject = (reason: string) => {
     const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
 

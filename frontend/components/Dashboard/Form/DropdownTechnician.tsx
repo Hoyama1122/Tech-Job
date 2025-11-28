@@ -22,6 +22,8 @@ export default function DropdownTechnician({
   const [techList, setTechList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [search, setSearch] = useState(""); // search text
+
   const ref = useRef<HTMLDivElement>(null);
   const {
     register,
@@ -29,7 +31,7 @@ export default function DropdownTechnician({
     formState: { errors },
   } = useFormContext();
 
-  // รับ technicians จาก props ไม่โหลด localStorage อีกแล้ว
+  // รับ technicians จาก props
   useEffect(() => {
     setTechList(technicians);
     setIsLoading(false);
@@ -75,6 +77,16 @@ export default function DropdownTechnician({
     }
   };
 
+  // ฟิลเตอร์ตาม Search
+  const filteredTech = techList.filter((tech) => {
+    const keyword = search.toLowerCase();
+    return (
+      tech.name.toLowerCase().includes(keyword) ||
+      tech.department?.toLowerCase().includes(keyword) ||
+      tech.team?.toLowerCase().includes(keyword)
+    );
+  });
+
   const errorMessage = errors.technicianId?.message as string;
 
   return (
@@ -113,7 +125,7 @@ export default function DropdownTechnician({
         </div>
       )}
 
-      {/* Dropdown */}
+      {/* Dropdown button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -140,12 +152,24 @@ export default function DropdownTechnician({
         </div>
       )}
 
-      {/* Menu */}
+      {/* Dropdown Menu */}
       <div
         className={`absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 transition-all ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
+        {/* Search Bar */}
+        <div className="p-3 border-b border-gray-200 bg-gray-50">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ค้นหาช่างเทคนิค..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-gray-200 focus:ring focus:border-gray-200"
+          />
+        </div>
+
+        {/* Loading */}
         {isLoading && (
           <div className="px-4 py-6 text-center">
             <Loader2 className="w-4 h-4 animate-spin text-gray-400 mx-auto" />
@@ -153,15 +177,17 @@ export default function DropdownTechnician({
           </div>
         )}
 
-        {!isLoading && techList.length === 0 && (
+        {/* Not found */}
+        {!isLoading && filteredTech.length === 0 && (
           <div className="px-4 py-6 text-center text-gray-500">
-            ไม่พบช่างเทคนิค
+            ไม่พบช่างตามที่ค้นหา
           </div>
         )}
 
-        {!isLoading && techList.length > 0 && (
+        {/* List */}
+        {!isLoading && filteredTech.length > 0 && (
           <div className="max-h-64 overflow-y-auto">
-            {techList.map((tech) => {
+            {filteredTech.map((tech) => {
               const isSelected = selectedTechs.some((t) => t.id === tech.id);
               return (
                 <button
@@ -180,9 +206,13 @@ export default function DropdownTechnician({
                       {tech.name.charAt(0)}
                     </div>
                     <div className="text-left">
-                      <p className="text-sm font-medium text-gray-800">{tech.name}</p>
+                      <p className="text-sm font-medium text-gray-800">
+                        {tech.name}
+                      </p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-gray-500">{tech.department || "ไม่ระบุแผนก"}</span>
+                        <span className="text-xs text-gray-500">
+                          {tech.department || "ไม่ระบุแผนก"}
+                        </span>
                         {tech.team && (
                           <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
                             {tech.team}
@@ -191,6 +221,7 @@ export default function DropdownTechnician({
                       </div>
                     </div>
                   </div>
+
                   {isSelected && <Check className="w-4 h-4 text-primary" />}
                 </button>
               );

@@ -2,19 +2,19 @@
 
 import React, { useState } from "react";
 import Sidebar from "@/components/Layout/Sidebar";
-import {  navLinkAdmin } from "@/lib/Mock/NavSidebar";
+import { navLinkSupervisor } from "@/lib/Mock/NavSidebar";
 
-const SidebarWrapper = () => {
+const SidebarWrapperSup = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Sidebar
-      navLinks={navLinkAdmin}
-      basePath="/admin"
+      navLinks={navLinkSupervisor}
+      basePath="/supervisor"
       isOpen={isOpen}
       setIsOpen={setIsOpen}
     />
   );
 };
 
-export default SidebarWrapper;
+export default SidebarWrapperSup;

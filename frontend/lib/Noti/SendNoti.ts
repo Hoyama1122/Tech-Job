@@ -20,6 +20,7 @@ function sendNotificationToTechnicians(techIds: number[], job: any) {
   localStorage.setItem("Users", JSON.stringify(updated));
 }
 export { sendNotificationToTechnicians };
+
 const notifyTechnicians = (techIds: number[], message: string) => {
   const users = JSON.parse(localStorage.getItem("Users") || "[]");
 

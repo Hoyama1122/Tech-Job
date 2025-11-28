@@ -1,25 +1,20 @@
+import type { Metadata } from "next";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
 
+import ClientLayout from "./ClientLayout";
 
-import NavbarExec from "@/components/Executive/NavbarExec";
-import SidebarWrapper from "@/components/Executive/SidebarWrapper";
+export const metadata: Metadata = {
+  title: {
+    template: "%s | Admin",
+    default: APP_NAME,
+  },
+  description: APP_DESCRIPTION,
+};
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  
-  return (
-    <div className="min-h-screen bg-primary">
-      <SidebarWrapper />
-      <div
-        className="
-          flex flex-col 
-          min-h-screen 
-          bg-gradient-to-br from-[#e1e5ee] via-[#F4F6FB] to-[#DCE3F2]
-          transition-all duration-300
-          lg:ml-64 
-        "
-      >
-        <NavbarExec />
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">{children}</main>
-      </div>
-    </div>
-  );
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return <ClientLayout>{children}</ClientLayout>;
 }

@@ -158,11 +158,14 @@ const WorkForm = () => {
 
       // Save Jobs
       localStorage.setItem(LS.WORK, JSON.stringify([...jobs, newJob]));
+      // Save images
       const imgStore = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
       imgStore[imageKey] = images;
       localStorage.setItem(LS.IMAGES, JSON.stringify(imgStore));
+
       // send noti
       sendNotificationToTechnicians(newJob.technicianId, newJob);
+      
       reset();
       toast.success("เพิ่มใบงานสำเร็จ!");
       router.push("/admin");
