@@ -16,6 +16,7 @@ import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import { PDFWorkOrder } from "@/app/admin/workorder/PDFWorkOrder";
 import { notifyTechnicians } from "@/lib/Noti/SendNoti";
+import RejectModal from "@/components/Modal/RejectModal";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -30,6 +31,8 @@ export default function WorkDetailPage({ params }: PageProps) {
   const [showEditModal, setShowEditModal] = React.useState(false);
 
   const [imgStore, setImgStore] = useState<any>({});
+  const [ShowRejectModal, setShowRejectModal] = React.useState(false);
+
   React.useEffect(() => {
     setIsLoading(true);
 
@@ -95,20 +98,17 @@ export default function WorkDetailPage({ params }: PageProps) {
     setJob({ ...job, status: "สำเร็จ", approvedAt: new Date().toISOString() });
   };
 
-  const handleReject = () => {
-    // เช็คสถานะก่อนตีกลับ
+
+  const handleRejectClick = () => {
     if (job.status !== "รอการตรวจสอบ") {
       toast.error("ไม่สามารถตีกลับได้ เนื่องจากสถานะไม่ใช่ 'รอการตรวจสอบ'");
       return;
     }
+    setShowRejectModal(true); // เปิด Modal แทนการใช้ prompt
+  };
 
-    const reason = prompt("กรุณากรอกเหตุผลการตีกลับงาน");
-
-    if (!reason || reason.trim() === "") {
-      toast.error("ต้องใส่เหตุผลการตีกลับ");
-      return;
-    }
-
+  // 4. สร้างฟังก์ชันใหม่สำหรับรับเหตุผลและบันทึก (ย้าย logic จาก handleReject เดิมมาที่นี่)
+  const onConfirmReject = (reason: string) => {
     const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
 
     const updated = cardData.map((c: any) =>
@@ -129,7 +129,7 @@ export default function WorkDetailPage({ params }: PageProps) {
       `งาน ${job.JobId} ถูกตีกลับ: ${reason}`
     );
 
-    toast.success("ตีกลับงานสำเร็จ");
+    toast.success("ตีกลับงานเรียบร้อยแล้ว");
 
     setJob({
       ...job,
@@ -137,6 +137,8 @@ export default function WorkDetailPage({ params }: PageProps) {
       rejectReason: reason,
       rejectedAt: new Date().toISOString(),
     });
+    
+    setShowRejectModal(false); // ปิด Modal เมื่อเสร็จ
   };
 
   const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
@@ -155,7 +157,7 @@ export default function WorkDetailPage({ params }: PageProps) {
           pdfRef={pdfRef}
           setShowEditModal={setShowEditModal}
           onApprove={() => handleApprove()}
-          onReject={() => handleReject()}
+          onReject={() => handleRejectClick()}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
@@ -179,6 +181,13 @@ export default function WorkDetailPage({ params }: PageProps) {
           onClose={() => setShowEditModal(false)}
           onSave={(updated) => setJob(updated)}
         />
+      )}
+
+      {ShowRejectModal && (
+        <RejectModal
+          isOpen= {ShowRejectModal}
+          onClose={() => setShowRejectModal(false)}
+          onConfirm={onConfirmReject}/>
       )}
 
       <div

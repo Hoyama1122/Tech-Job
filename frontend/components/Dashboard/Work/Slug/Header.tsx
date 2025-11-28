@@ -43,7 +43,7 @@ export default function Header({
 
       {/* Buttons */}
       <div className="flex items-center gap-3">
-        {/* Supervisor: เห็นเฉพาะ ตีกลับ + อนุมัติ */}
+      
         {myRole === "supervisor" && (
           <>
             <button
