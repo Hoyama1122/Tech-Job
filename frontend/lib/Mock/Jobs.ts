@@ -21,7 +21,7 @@ export type CardWorkTypes = {
   supervisorId: number;
   technicianId: number[];
   image: StaticImageData;
-  loc: {
+  loc?: {
     lat: number;
     lng: number;
   };
@@ -41,455 +41,432 @@ export type CardWorkTypes = {
     summaryOfOperatingResults?: string;
     technicianSignature?: string | null;
     customerSignature?: string | null;
-    startTime?: string | null; 
-    endTime?: string | null;   
-    imagesBefore?: string[];   
-    imagesAfter?: string[];   
+    startTime?: string | null;
+    endTime?: string | null;
+    imagesBefore?: string[];
+    imagesAfter?: string[];
   } | null;
   rejectReason?: string | null;
- 
 };
 
 export const CardWork: CardWorkTypes[] = [
-  // {
-  //   id: 1,
-  //   JobId: "JOB_001",
-  //   title: "ตรวจเช็คระบบไฟฟ้า อาคาร A ชั้น 3",
-  //   description: "ตรวจสอบการทำงานของระบบไฟฟ้าและเปลี่ยนหลอดไฟที่ชำรุด",
-  //   category: "ไฟฟ้า",
-  //   priority: "high",
-  //   status: "รอการตรวจสอบ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-14T08:30:00",
-  //     endAt: "2025-01-15T18:00:00",
-  //   },
-
-  //   sla: "20m",
-  //   createdAt: "2025-01-14T08:30",
-  //   completedAt: null,
-
-  //   customer: { name: "ฝ่ายอาคาร A", phone: "0891234567", address: "ชั้น 3" },
-  //   technicianReport: null,
-  //   rejectReason: null,
-
-  //   userId: 1,
-  //   supervisorId: 2,
-  //   technicianId: [5, 6],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 2,
-  //   JobId: "JOB_002",
-  //   title: "ซ่อมแอร์ห้องประชุมใหญ่",
-  //   description: "แอร์ไม่เย็น ตรวจสอบระบบคอมเพรสเซอร์และน้ำยาแอร์",
-  //   category: "แอร์",
-  //   priority: "urgent",
-  //   status: "กำลังทำงาน",
-
-  //   dateRange: {
-  //     startAt: "2025-01-13T09:00:00",
-  //     endAt: "2025-01-14T18:00:00",
-  //   },
-
-  //   createdAt: "2025-01-13T09:00",
-  //   completedAt: null,
-  //   approvedAt: null,
-
-  //   customer: {
-  //     name: "ฝ่ายประชุม",
-  //     phone: "0819988776",
-  //     address: "อาคารประชุมใหญ่",
-  //   },
-
-  //   technicianReport: null,
-  //   rejectReason: null,
-
-  //   userId: 1,
-  //   supervisorId: 3,
-  //   technicianId: [12, 13],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 3,
-  //   JobId: "JOB_003",
-  //   title: "เปลี่ยนหลอดไฟโถงกลาง อาคาร B",
-  //   description: "หลอดไฟชั้น 2 ดับทั้งแถว ต้องเปลี่ยนใหม่ทั้งหมด",
-  //   category: "ไฟฟ้า",
-  //   priority: "medium",
-  //   status: "สำเร็จ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-12T10:30:00",
-  //     endAt: "2025-01-13T17:30:00",
-  //   },
-
-  //   createdAt: "2025-01-12T10:30",
-  //   completedAt: "2025-01-13T09:15",
-
-  //   customer: {
-  //     name: "นิติบุคคล อาคาร B",
-  //     phone: "0851122334",
-  //     address: "ชั้น 2",
-  //   },
-
-  //   technicianReport: {
-  //     detail: "หลอดไฟโถงกลางชั้น 2 ดับยกแถว ต้องเปลี่ยนใหม่ทั้งหมด",
-  //     inspectionResults:
-  //       "ตรวจสอบพบว่าหลอดไฟชุดเดิมหมดอายุการใช้งานและมีบางจุดขั้วหลวม ส่งผลให้ไฟตกและดับเป็นช่วง",
-  //     repairOperations:
-  //       "ถอดหลอดไฟชุดเดิม ตรวจสอบขั้วและสายไฟ ทำความสะอาดจุดสัมผัส และติดตั้งหลอดไฟใหม่ทุกจุด พร้อมทดสอบระบบ",
-  //     materialsUsed: ["หลอดไฟ LED 12 ดวง"],
-  //     cost: 0,
-  //     summaryOfOperatingResults:
-  //       "ไฟติดครบทุกจุด ความสว่างปกติ ไม่มีไฟกระพริบ แนะนำตรวจเช็คหลอดไฟทุก 6 เดือน",
-  //   },
-
-  //   rejectReason: null,
-  //   userId: 3,
-  //   supervisorId: 2,
-  //   technicianId: [7, 5],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 4,
-  //   JobId: "JOB_004",
-  //   title: "ตรวจสอบระบบน้ำรั่ว อาคาร C",
-  //   description: "น้ำหยดจากเพดาน คาดว่าท่อรั่ว ตรวจหาจุดรั่ว",
-  //   category: "ประปา",
-  //   priority: "high",
-  //   status: "ตีกลับ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-11T09:45:00",
-  //     endAt: "2025-01-12T18:00:00",
-  //   },
-
-  //   createdAt: "2025-01-11T09:45",
-  //   completedAt: "2025-01-12T16:00",
-
-  //   customer: {
-  //     name: "ฝ่ายอาคาร C",
-  //     phone: "0815552344",
-  //     address: "ชั้น 5",
-  //   },
-
-  //   technicianReport: {
-  //     detail: "ตรวจสอบปัญหาน้ำหยดจากเพดานบริเวณชั้น 5",
-  //     inspectionResults:
-  //       "พบว่าท่อน้ำดีมีรอยปริแตก ทำให้น้ำซึมลงฝ้าและหยดลงพื้นเป็นระยะ",
-  //     repairOperations:
-  //       "ตัดต่อท่อน้ำใหม่ ใช้ซีลกันรั่วอุดรอยปริ พร้อมทดสอบแรงดันน้ำอีกครั้ง",
-  //     materialsUsed: ["ซีลกันรั่ว", "ท่อน้ำดีสำรอง"],
-  //     cost: 0,
-  //     summaryOfOperatingResults:
-  //       "ท่อไม่รั่วแล้ว แต่ภาพถ่ายหลังซ่อมไม่ชัดเจน จึงถูกตีกลับให้ถ่ายใหม่",
-  //   },
-
-  //   rejectReason: "รูปหลังทำงานไม่ชัด ขอถ่ายใหม่",
-  //   userId: 4,
-  //   supervisorId: 4,
-  //   technicianId: [19, 20],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 5,
-  //   JobId: "JOB_005",
-  //   title: "ติดตั้งปลั๊กไฟห้องทำงานใหม่",
-  //   description: "เพิ่มปลั๊กไฟสำหรับอุปกรณ์ IT และเครื่องถ่ายเอกสาร",
-  //   category: "ไฟฟ้า",
-  //   priority: "medium",
-  //   status: "รอการตรวจสอบ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-10T14:00:00",
-  //     endAt: "2025-01-11T18:00:00",
-  //   },
-
-  //   createdAt: "2025-01-10T14:00",
-  //   completedAt: null,
-
-  //   customer: {
-  //     name: "ฝ่าย IT",
-  //     phone: "0895566778",
-  //     address: "ชั้น 4",
-  //   },
-
-  //   technicianReport: null,
-  //   rejectReason: null,
-  //   userId: 5,
-  //   supervisorId: 2,
-  //   technicianId: [5, 7],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 6,
-  //   JobId: "JOB_006",
-  //   title: "ตรวจสอบระบบระบายอากาศ ห้อง Server",
-  //   description: "พัดลมระบายอากาศไม่ทำงาน ตรวจสอบและซ่อมแซม",
-  //   category: "แอร์",
-  //   priority: "urgent",
-  //   status: "กำลังทำงาน",
-
-  //   dateRange: {
-  //     startAt: "2025-01-09T13:00:00",
-  //     endAt: "2025-01-10T18:00:00",
-  //   },
-
-  //   createdAt: "2025-01-09T13:00",
-  //   completedAt: null,
-
-  //   customer: {
-  //     name: "ระบบ Server",
-  //     phone: "0802223344",
-  //     address: "Server address",
-  //   },
-
-  //   technicianReport: null,
-  //   rejectReason: null,
-  //   userId: 6,
-  //   supervisorId: 3,
-  //   technicianId: [12],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 7,
-  //   JobId: "JOB_007",
-  //   title: "ซ่อมระบบ Wi-Fi อาคาร D",
-  //   description: "สัญญาณ Wi-Fi ชั้น 4 ขาด ๆ หาย ๆ ตรวจสอบ Access Point",
-  //   category: "ระบบสื่อสาร",
-  //   priority: "medium",
-  //   status: "รอการตรวจสอบ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-08T08:50:00",
-  //     endAt: "2025-01-09T18:00:00",
-  //   },
-
-  //   createdAt: "2025-01-08T08:50",
-  //   completedAt: null,
-
-  //   customer: {
-  //     name: "แผนกอาคาร D",
-  //     phone: "0823344556",
-  //     address: "ชั้น 4",
-  //   },
-
-  //   technicianReport: null,
-  //   rejectReason: null,
-  //   userId: 7,
-  //   supervisorId: 2,
-  //   technicianId: [40, 41],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 8,
-  //   JobId: "JOB_008",
-  //   title: "ทำความสะอาดระบบปรับอากาศ",
-  //   description: "ล้างแผงคอยล์เย็นและเปลี่ยนกรองอากาศใหม่",
-  //   category: "แอร์",
-  //   priority: "low",
-  //   status: "สำเร็จ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-07T09:00:00",
-  //     endAt: "2025-01-08T18:00:00",
-  //   },
-
-  //   createdAt: "2025-01-07T09:00",
-  //   completedAt: "2025-01-08T09:20",
-  //   approvedAt: "2025-01-08T10:00",
-
-  //   customer: {
-  //     name: "ฝ่ายอาคาร",
-  //     phone: "0856677889",
-  //     address: "ชั้น 1",
-  //   },
-
-  //   technicianReport: {
-  //     detail: "ล้างคอยล์เย็นและเปลี่ยนไส้กรองอากาศ",
-  //     inspectionResults:
-  //       "ตรวจสอบคอยล์เย็นพบฝุ่นสะสมหนา ทำให้ลมออกอ่อนและแอร์ทำงานหนักเกินปกติ",
-  //     repairOperations:
-  //       "ล้างคอยล์ด้วยน้ำแรงดันต่ำ ทำความสะอาดใบพัด เปลี่ยนไส้กรองใหม่ และตรวจเช็คแรงดันน้ำยา",
-  //     materialsUsed: ["ไส้กรองอากาศ 1 ชุด"],
-  //     cost: 150,
-  //     summaryOfOperatingResults:
-  //       "ความเย็นกลับมาปกติ ลมแรงขึ้น เสียงการทำงานลดลง แนะนำล้างทุก 3 เดือน",
-  //   },
-
-  //   rejectReason: null,
-  //   userId: 8,
-  //   supervisorId: 3,
-  //   technicianId: [14, 15],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 9,
-  //   JobId: "JOB_009",
-  //   title: "ตรวจสอบระบบแจ้งเตือนไฟไหม้",
-  //   description: "ทดสอบระบบสัญญาณไฟและเสียงแจ้งเตือน",
-  //   category: "ระบบสื่อสาร",
-  //   priority: "high",
-  //   status: "รอการตรวจสอบ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-06T14:30:00",
-  //     endAt: "2025-01-07T17:30:00",
-  //   },
-
-  //   createdAt: "2025-01-06T14:30",
-  //   completedAt: null,
-
-  //   customer: {
-  //     name: "ฝ่ายความปลอดภัย",
-  //     phone: "0839975888",
-  //     address: "ชั้น 1",
-  //   },
-
-  //   technicianReport: null,
-  //   rejectReason: null,
-  //   userId: 9,
-  //   supervisorId: 2,
-  //   technicianId: [40, 42],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-
-  // {
-  //   id: 10,
-  //   JobId: "JOB_010",
-  //   title: "ซ่อมบานประตูห้องน้ำหญิง",
-  //   description: "บานพับหลวมและกลอนประตูไม่ทำงาน",
-  //   category: "ทั่วไป",
-  //   priority: "low",
-  //   status: "ตีกลับ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-05T10:15:00",
-  //     endAt: "2025-01-06T18:00:00",
-  //   },
-
-  //   createdAt: "2025-01-05T10:15",
-  //   completedAt: "2025-01-06T11:45",
-
-  //   customer: {
-  //     name: "ฝ่ายแม่บ้าน",
-  //     phone: "0814455667",
-  //     address: "ชั้น 2",
-  //   },
-
-  //   technicianReport: {
-  //     detail: "บานประตูหลวม กลอนไม่ล็อก และมีเสียงดังเวลาเปิด/ปิด",
-  //     inspectionResults:
-  //       "ตรวจสอบพบว่าบานพับคลายตัวและสกรูบางจุดสึก ทำให้ประตูเอียง",
-  //     repairOperations: "ขันบานพับใหม่ เปลี่ยนสกรู และปรับระดับประตูให้ปิดสนิท",
-  //     materialsUsed: ["สกรูใหม่ 4 ตัว"],
-  //     cost: 25,
-  //     summaryOfOperatingResults:
-  //       "ประตูเปิดปิดได้สมูทขึ้น แต่ภาพหลังซ่อมไม่ครบทุกมุม จึงถูกตีกลับ",
-  //   },
-
-  //   rejectReason: "รูปหลังซ่อมไม่ครบ ขอถ่ายเพิ่ม",
-  //   userId: 10,
-  //   supervisorId: 4,
-  //   technicianId: [25, 26],
-  //   image: Image,
-  //   loc: randomLocation(),
-  // },
-  // {
-  //   id: 11,
-  //   JobId: "JOB_011",
-  //   title: "กระแสไฟตกเป็นช่วง ๆ อาคาร A ฝั่งสำนักงาน",
-  //   description:
-  //     "ไฟตกเป็นระยะ ส่งผลให้คอมพิวเตอร์รีสตาร์ท ต้องตรวจสอบโหลดของตู้เบรกเกอร์และจุดต่อสาย",
-  //   category: "ไฟฟ้า",
-  //   priority: "urgent",
-  //   status: "รอการตรวจสอบ",
-
-  //   dateRange: {
-  //     startAt: "2025-01-15T09:20:00",
-  //     endAt: "2025-01-15T18:00:00",
-  //   },
-
-  //   createdAt: "2025-01-15T09:20",
-  //   completedAt: null,
-  //   approvedAt: null,
-
-  //   customer: {
-  //     name: "แผนกสำนักงาน",
-  //     phone: "0891124578",
-  //     address: "อาคาร A ชั้น 2",
-  //   },
-
-  //   technicianReport: null,
-  //   rejectReason: null,
-
-  //   userId: 1,
-  //   supervisorId: 2,
-  //   technicianId: [5, 7, 25],
-  //   image: Image,
-  //   loc: randomLocation(),
-  //   logs: [
-  //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T09:20" },
-  //     { by: "supervisor", action: "รอการตรวจสอบ", time: "2025-01-15T09:30" },
-  //   ],
-  // },
-
-  // {
-  //   id: 12,
-  //   JobId: "JOB_012",
-  //   title: "ล้างและตรวจเช็คแอร์ห้อง Server สำรอง",
-  //   description:
-  //     "แอร์มีเสียงดังและความเย็นลดลง ต้องล้างแผงคอยล์และตรวจเช็คแรงดันน้ำยา",
-  //   category: "แอร์",
-  //   priority: "high",
-  //   status: "รอการดำเนินงาน",
-
-  //   dateRange: {
-  //     startAt: "2025-01-15T13:45:00",
-  //     endAt: "2025-01-16T17:00:00",
-  //   },
-
-  //   createdAt: "2025-01-15T13:45",
-  //   completedAt: null,
-  //   approvedAt: null,
-
-  //   customer: {
-  //     name: "ฝ่าย IT",
-  //     phone: "0823345566",
-  //     address: "Server address 2",
-  //   },
-
-  //   technicianReport: null,
-  //   rejectReason: null,
-
-  //   userId: 2,
-  //   supervisorId: 3,
-  //   technicianId: [12, 14, 30],
-  //   image: Image,
-  //   loc: randomLocation(),
-  //   logs: [
-  //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T13:45" },
-  //     { by: "admin", action: "รอการดำเนินงาน", time: "2025-01-15T13:46" },
-  //   ],
-  // },
+  {
+    id: 1,
+    JobId: "JOB_001",
+    title: "ตรวจเช็คระบบไฟฟ้า อาคาร A ชั้น 3",
+    description: "ตรวจสอบการทำงานของระบบไฟฟ้าและเปลี่ยนหลอดไฟที่ชำรุด",
+    category: "ไฟฟ้า",
+    priority: "high",
+    status: "รอการตรวจสอบ",
+
+    dateRange: {
+      startAt: "2025-01-14T08:30:00",
+      endAt: "2025-01-15T18:00:00",
+    },
+
+    sla: "20m",
+    createdAt: "2025-01-14T08:30",
+    completedAt: null,
+
+    customer: { name: "ฝ่ายอาคาร A", phone: "0891234567", address: "ชั้น 3" },
+    technicianReport: null,
+    rejectReason: null,
+
+    userId: 1,
+    supervisorId: 2,
+    technicianId: [5, 6],
+  },
+
+  {
+    id: 2,
+    JobId: "JOB_002",
+    title: "ซ่อมแอร์ห้องประชุมใหญ่",
+    description: "แอร์ไม่เย็น ตรวจสอบระบบคอมเพรสเซอร์และน้ำยาแอร์",
+    category: "แอร์",
+    priority: "urgent",
+    status: "กำลังทำงาน",
+
+    dateRange: {
+      startAt: "2025-01-13T09:00:00",
+      endAt: "2025-01-14T18:00:00",
+    },
+
+    createdAt: "2025-01-13T09:00",
+    completedAt: null,
+    approvedAt: null,
+
+    customer: {
+      name: "ฝ่ายประชุม",
+      phone: "0819988776",
+      address: "อาคารประชุมใหญ่",
+    },
+
+    technicianReport: null,
+    rejectReason: null,
+
+    userId: 1,
+    supervisorId: 3,
+    technicianId: [12, 13],
+  },
+
+  {
+    id: 3,
+    JobId: "JOB_003",
+    title: "เปลี่ยนหลอดไฟโถงกลาง อาคาร B",
+    description: "หลอดไฟชั้น 2 ดับทั้งแถว ต้องเปลี่ยนใหม่ทั้งหมด",
+    category: "ไฟฟ้า",
+    priority: "medium",
+    status: "สำเร็จ",
+
+    dateRange: {
+      startAt: "2025-01-12T10:30:00",
+      endAt: "2025-01-13T17:30:00",
+    },
+
+    createdAt: "2025-01-12T10:30",
+    completedAt: "2025-01-13T09:15",
+
+    customer: {
+      name: "นิติบุคคล อาคาร B",
+      phone: "0851122334",
+      address: "ชั้น 2",
+    },
+
+    technicianReport: {
+      detail: "หลอดไฟโถงกลางชั้น 2 ดับยกแถว ต้องเปลี่ยนใหม่ทั้งหมด",
+      inspectionResults:
+        "ตรวจสอบพบว่าหลอดไฟชุดเดิมหมดอายุการใช้งานและมีบางจุดขั้วหลวม ส่งผลให้ไฟตกและดับเป็นช่วง",
+      repairOperations:
+        "ถอดหลอดไฟชุดเดิม ตรวจสอบขั้วและสายไฟ ทำความสะอาดจุดสัมผัส และติดตั้งหลอดไฟใหม่ทุกจุด พร้อมทดสอบระบบ",
+      materialsUsed: ["หลอดไฟ LED 12 ดวง"],
+      cost: 0,
+      summaryOfOperatingResults:
+        "ไฟติดครบทุกจุด ความสว่างปกติ ไม่มีไฟกระพริบ แนะนำตรวจเช็คหลอดไฟทุก 6 เดือน",
+    },
+
+    rejectReason: null,
+    userId: 3,
+    supervisorId: 2,
+    technicianId: [7, 5],
+  },
+
+  {
+    id: 4,
+    JobId: "JOB_004",
+    title: "ตรวจสอบระบบน้ำรั่ว อาคาร C",
+    description: "น้ำหยดจากเพดาน คาดว่าท่อรั่ว ตรวจหาจุดรั่ว",
+    category: "ประปา",
+    priority: "high",
+    status: "ตีกลับ",
+
+    dateRange: {
+      startAt: "2025-01-11T09:45:00",
+      endAt: "2025-01-12T18:00:00",
+    },
+
+    createdAt: "2025-01-11T09:45",
+    completedAt: "2025-01-12T16:00",
+
+    customer: {
+      name: "ฝ่ายอาคาร C",
+      phone: "0815552344",
+      address: "ชั้น 5",
+    },
+
+    technicianReport: {
+      detail: "ตรวจสอบปัญหาน้ำหยดจากเพดานบริเวณชั้น 5",
+      inspectionResults:
+        "พบว่าท่อน้ำดีมีรอยปริแตก ทำให้น้ำซึมลงฝ้าและหยดลงพื้นเป็นระยะ",
+      repairOperations:
+        "ตัดต่อท่อน้ำใหม่ ใช้ซีลกันรั่วอุดรอยปริ พร้อมทดสอบแรงดันน้ำอีกครั้ง",
+      materialsUsed: ["ซีลกันรั่ว", "ท่อน้ำดีสำรอง"],
+      cost: 0,
+      summaryOfOperatingResults:
+        "ท่อไม่รั่วแล้ว แต่ภาพถ่ายหลังซ่อมไม่ชัดเจน จึงถูกตีกลับให้ถ่ายใหม่",
+    },
+
+    rejectReason: "รูปหลังทำงานไม่ชัด ขอถ่ายใหม่",
+    userId: 4,
+    supervisorId: 4,
+    technicianId: [19, 20],
+  },
+
+  {
+    id: 5,
+    JobId: "JOB_005",
+    title: "ติดตั้งปลั๊กไฟห้องทำงานใหม่",
+    description: "เพิ่มปลั๊กไฟสำหรับอุปกรณ์ IT และเครื่องถ่ายเอกสาร",
+    category: "ไฟฟ้า",
+    priority: "medium",
+    status: "รอการตรวจสอบ",
+
+    dateRange: {
+      startAt: "2025-01-10T14:00:00",
+      endAt: "2025-01-11T18:00:00",
+    },
+
+    createdAt: "2025-01-10T14:00",
+    completedAt: null,
+
+    customer: {
+      name: "ฝ่าย IT",
+      phone: "0895566778",
+      address: "ชั้น 4",
+    },
+
+    technicianReport: null,
+    rejectReason: null,
+    userId: 5,
+    supervisorId: 2,
+    technicianId: [5, 7],
+  },
+
+  {
+    id: 6,
+    JobId: "JOB_006",
+    title: "ตรวจสอบระบบระบายอากาศ ห้อง Server",
+    description: "พัดลมระบายอากาศไม่ทำงาน ตรวจสอบและซ่อมแซม",
+    category: "แอร์",
+    priority: "urgent",
+    status: "กำลังทำงาน",
+
+    dateRange: {
+      startAt: "2025-01-09T13:00:00",
+      endAt: "2025-01-10T18:00:00",
+    },
+
+    createdAt: "2025-01-09T13:00",
+    completedAt: null,
+
+    customer: {
+      name: "ระบบ Server",
+      phone: "0802223344",
+      address: "Server address",
+    },
+
+    technicianReport: null,
+    rejectReason: null,
+    userId: 6,
+    supervisorId: 3,
+    technicianId: [12],
+  },
+
+  {
+    id: 7,
+    JobId: "JOB_007",
+    title: "ซ่อมระบบ Wi-Fi อาคาร D",
+    description: "สัญญาณ Wi-Fi ชั้น 4 ขาด ๆ หาย ๆ ตรวจสอบ Access Point",
+    category: "ระบบสื่อสาร",
+    priority: "medium",
+    status: "รอการตรวจสอบ",
+
+    dateRange: {
+      startAt: "2025-01-08T08:50:00",
+      endAt: "2025-01-09T18:00:00",
+    },
+
+    createdAt: "2025-01-08T08:50",
+    completedAt: null,
+
+    customer: {
+      name: "แผนกอาคาร D",
+      phone: "0823344556",
+      address: "ชั้น 4",
+    },
+
+    technicianReport: null,
+    rejectReason: null,
+    userId: 7,
+    supervisorId: 2,
+    technicianId: [40, 41],
+  },
+
+  {
+    id: 8,
+    JobId: "JOB_008",
+    title: "ทำความสะอาดระบบปรับอากาศ",
+    description: "ล้างแผงคอยล์เย็นและเปลี่ยนกรองอากาศใหม่",
+    category: "แอร์",
+    priority: "low",
+    status: "สำเร็จ",
+
+    dateRange: {
+      startAt: "2025-01-07T09:00:00",
+      endAt: "2025-01-08T18:00:00",
+    },
+
+    createdAt: "2025-01-07T09:00",
+    completedAt: "2025-01-08T09:20",
+    approvedAt: "2025-01-08T10:00",
+
+    customer: {
+      name: "ฝ่ายอาคาร",
+      phone: "0856677889",
+      address: "ชั้น 1",
+    },
+
+    technicianReport: {
+      detail: "ล้างคอยล์เย็นและเปลี่ยนไส้กรองอากาศ",
+      inspectionResults:
+        "ตรวจสอบคอยล์เย็นพบฝุ่นสะสมหนา ทำให้ลมออกอ่อนและแอร์ทำงานหนักเกินปกติ",
+      repairOperations:
+        "ล้างคอยล์ด้วยน้ำแรงดันต่ำ ทำความสะอาดใบพัด เปลี่ยนไส้กรองใหม่ และตรวจเช็คแรงดันน้ำยา",
+      materialsUsed: ["ไส้กรองอากาศ 1 ชุด"],
+      cost: 150,
+      summaryOfOperatingResults:
+        "ความเย็นกลับมาปกติ ลมแรงขึ้น เสียงการทำงานลดลง แนะนำล้างทุก 3 เดือน",
+    },
+
+    rejectReason: null,
+    userId: 8,
+    supervisorId: 3,
+    technicianId: [14, 15],
+  },
+
+  {
+    id: 9,
+    JobId: "JOB_009",
+    title: "ตรวจสอบระบบแจ้งเตือนไฟไหม้",
+    description: "ทดสอบระบบสัญญาณไฟและเสียงแจ้งเตือน",
+    category: "ระบบสื่อสาร",
+    priority: "high",
+    status: "รอการตรวจสอบ",
+
+    dateRange: {
+      startAt: "2025-01-06T14:30:00",
+      endAt: "2025-01-07T17:30:00",
+    },
+
+    createdAt: "2025-01-06T14:30",
+    completedAt: null,
+
+    customer: {
+      name: "ฝ่ายความปลอดภัย",
+      phone: "0839975888",
+      address: "ชั้น 1",
+    },
+
+    technicianReport: null,
+    rejectReason: null,
+    userId: 9,
+    supervisorId: 2,
+    technicianId: [40, 42],
+  },
+
+  {
+    id: 10,
+    JobId: "JOB_010",
+    title: "ซ่อมบานประตูห้องน้ำหญิง",
+    description: "บานพับหลวมและกลอนประตูไม่ทำงาน",
+    category: "ทั่วไป",
+    priority: "low",
+    status: "ตีกลับ",
+
+    dateRange: {
+      startAt: "2025-01-05T10:15:00",
+      endAt: "2025-01-06T18:00:00",
+    },
+
+    createdAt: "2025-01-05T10:15",
+    completedAt: "2025-01-06T11:45",
+
+    customer: {
+      name: "ฝ่ายแม่บ้าน",
+      phone: "0814455667",
+      address: "ชั้น 2",
+    },
+
+    technicianReport: {
+      detail: "บานประตูหลวม กลอนไม่ล็อก และมีเสียงดังเวลาเปิด/ปิด",
+      inspectionResults:
+        "ตรวจสอบพบว่าบานพับคลายตัวและสกรูบางจุดสึก ทำให้ประตูเอียง",
+      repairOperations: "ขันบานพับใหม่ เปลี่ยนสกรู และปรับระดับประตูให้ปิดสนิท",
+      materialsUsed: ["สกรูใหม่ 4 ตัว"],
+      cost: 25,
+      summaryOfOperatingResults:
+        "ประตูเปิดปิดได้สมูทขึ้น แต่ภาพหลังซ่อมไม่ครบทุกมุม จึงถูกตีกลับ",
+    },
+
+    rejectReason: "รูปหลังซ่อมไม่ครบ ขอถ่ายเพิ่ม",
+    userId: 10,
+    supervisorId: 4,
+    technicianId: [25, 26],
+  },
+  {
+    id: 11,
+    JobId: "JOB_011",
+    title: "กระแสไฟตกเป็นช่วง ๆ อาคาร A ฝั่งสำนักงาน",
+    description:
+      "ไฟตกเป็นระยะ ส่งผลให้คอมพิวเตอร์รีสตาร์ท ต้องตรวจสอบโหลดของตู้เบรกเกอร์และจุดต่อสาย",
+    category: "ไฟฟ้า",
+    priority: "urgent",
+    status: "รอการตรวจสอบ",
+
+    dateRange: {
+      startAt: "2025-01-15T09:20:00",
+      endAt: "2025-01-15T18:00:00",
+    },
+
+    createdAt: "2025-01-15T09:20",
+    completedAt: null,
+    approvedAt: null,
+
+    customer: {
+      name: "แผนกสำนักงาน",
+      phone: "0891124578",
+      address: "อาคาร A ชั้น 2",
+    },
+
+    technicianReport: null,
+    rejectReason: null,
+
+    userId: 1,
+    supervisorId: 2,
+    technicianId: [5, 7, 25],
+
+    logs: [
+      { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T09:20" },
+      { by: "supervisor", action: "รอการตรวจสอบ", time: "2025-01-15T09:30" },
+    ],
+  },
+
+  {
+    id: 12,
+    JobId: "JOB_012",
+    title: "ล้างและตรวจเช็คแอร์ห้อง Server สำรอง",
+    description:
+      "แอร์มีเสียงดังและความเย็นลดลง ต้องล้างแผงคอยล์และตรวจเช็คแรงดันน้ำยา",
+    category: "แอร์",
+    priority: "high",
+    status: "รอการดำเนินงาน",
+
+    dateRange: {
+      startAt: "2025-01-15T13:45:00",
+      endAt: "2025-01-16T17:00:00",
+    },
+
+    createdAt: "2025-01-15T13:45",
+    completedAt: null,
+    approvedAt: null,
+
+    customer: {
+      name: "ฝ่าย IT",
+      phone: "0823345566",
+      address: "Server address 2",
+    },
+
+    technicianReport: null,
+    rejectReason: null,
+
+    userId: 2,
+    supervisorId: 3,
+    technicianId: [12, 14, 30],
+
+    logs: [
+      { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T13:45" },
+      { by: "admin", action: "รอการดำเนินงาน", time: "2025-01-15T13:46" },
+    ],
+  },
 
   // {
   //   id: 13,
@@ -521,8 +498,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 3,
   //   supervisorId: 4,
   //   technicianId: [19, 23, 36],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-14T16:10" },
   //     { by: "supervisor", action: "มอบหมายทีมประปา", time: "2025-01-14T16:30" },
@@ -561,8 +538,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 2,
   //   supervisorId: 2,
   //   technicianId: [40, 41, 42],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T11:05" },
   //     { by: "supervisor", action: "รอการตรวจสอบ", time: "2025-01-15T11:40" },
@@ -600,8 +577,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 5,
   //   supervisorId: 4,
   //   technicianId: [25, 26],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-14T15:25" },
   //     { by: "supervisor", action: "รอการตรวจสอบ", time: "2025-01-14T16:00" },
@@ -638,8 +615,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 1,
   //   supervisorId: 2,
   //   technicianId: [8, 9],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T08:10" },
   //     { by: "admin", action: "รอการดำเนินงาน", time: "2025-01-15T08:11" },
@@ -681,8 +658,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 2,
   //   supervisorId: 3,
   //   technicianId: [13, 16],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-13T13:00" },
   //     { by: "supervisor", action: "มอบหมายทีมแอร์", time: "2025-01-13T14:00" },
@@ -722,8 +699,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 3,
   //   supervisorId: 4,
   //   technicianId: [21, 22],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T10:30" },
   //     { by: "supervisor", action: "รอการตรวจสอบ", time: "2025-01-15T11:00" },
@@ -761,8 +738,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 4,
   //   supervisorId: 2,
   //   technicianId: [40, 42],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-15T09:50" },
   //     {
@@ -819,8 +796,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 2,
   //   supervisorId: 4,
   //   technicianId: [26],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-12T09:20" },
   //     {
@@ -862,8 +839,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 1,
   //   supervisorId: 2,
   //   technicianId: [9, 10, 27],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-16T09:15" },
   //     { by: "supervisor", action: "มอบหมายทีมไฟฟ้า", time: "2025-01-16T09:40" },
@@ -902,8 +879,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 2,
   //   supervisorId: 3,
   //   technicianId: [15, 31],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-16T11:20" },
   //     { by: "supervisor", action: "รอการตรวจสอบ", time: "2025-01-16T11:45" },
@@ -952,8 +929,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 3,
   //   supervisorId: 4,
   //   technicianId: [23],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
 
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-14T10:40" },
@@ -1009,8 +986,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 4,
   //   supervisorId: 2,
   //   technicianId: [40, 41],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
 
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-10T09:00" },
@@ -1055,8 +1032,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 2,
   //   supervisorId: 4,
   //   technicianId: [28],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
 
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-16T14:30" },
@@ -1094,8 +1071,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 1,
   //   supervisorId: 2,
   //   technicianId: [5, 11, 29],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
 
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-17T09:00" },
@@ -1138,8 +1115,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 2,
   //   supervisorId: 3,
   //   technicianId: [16, 17, 33],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
 
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-17T10:15" },
@@ -1179,8 +1156,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 3,
   //   supervisorId: 4,
   //   technicianId: [35, 37, 39],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
 
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-17T08:40" },
@@ -1219,8 +1196,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 4,
   //   supervisorId: 2,
   //   technicianId: [41],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
 
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-16T16:00" },
@@ -1259,8 +1236,8 @@ export const CardWork: CardWorkTypes[] = [
   //   userId: 2,
   //   supervisorId: 4,
   //   technicianId: [27, 28],
-  //   image: Image,
-  //   loc: randomLocation(),
+  //
+  //
 
   //   logs: [
   //     { by: "admin", action: "สร้างใบงาน", time: "2025-01-17T13:10" },

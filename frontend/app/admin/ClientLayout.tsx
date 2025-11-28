@@ -7,8 +7,7 @@ import Navbar from "@/components/Dashboard/Navbar";
 
 import { Users } from "@/lib/Mock/UserMock";
 import { CardWork } from "@/lib/Mock/Jobs";
-import { useAuthStore } from "@/store/useAuthStore";
-import { redirect } from "next/navigation";
+
 
 export default function ClientLayout({
   children,

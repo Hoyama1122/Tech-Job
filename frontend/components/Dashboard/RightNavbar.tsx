@@ -50,7 +50,7 @@ const RightNavbar = () => {
         />
         <div className=" leading-4">
           <p className="text-sm  text-primary-test font-semibold">{user.state?.name}</p>
-          <h1 className="text-md">
+          <h1 className="text-md font-semibold">
             ธุรการ
           </h1>
         </div>
