@@ -12,7 +12,6 @@ import {
   technicianReportSchema,
   TechnicianReportForm,
 } from "@/lib/Validations/technicianReportSchema";
-import { log } from "console";
 
 const LS = {
   WORK: "CardWork",

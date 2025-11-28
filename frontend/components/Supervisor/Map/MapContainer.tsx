@@ -21,7 +21,7 @@ const getIconByStatus = (status: string) => {
   if (status === "กำลังทำงาน") iconUrl = "/marker/yellow.svg";
   else if (status === "รอการดำเนินงาน") iconUrl = "/marker/orange.svg";
   else if (status === "รอการตรวจสอบ") iconUrl = "/marker/blue.svg";
-  else if (status === "สำเร็จ") iconUrl = "/marker/emerald.svg";
+  else if (status === "สำเร็จ") iconUrl = "/marker/green.svg";
   else if (status === "ตีกลับ") iconUrl = "/marker/red.svg";
 
   return {
