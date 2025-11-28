@@ -20,11 +20,11 @@ const LS = {
 };
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default function Page({ params }: PageProps) {
-  const { slug } = params;
+  const { slug } = React.use(params);
 
   //  STATES
   const [job, setJob] = useState<any>(null);

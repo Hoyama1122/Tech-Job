@@ -61,7 +61,7 @@ export default function MainExecutive() {
  
   const lineChartData = useMemo(() => {
     
-    const data = monthsTH.map(m => ({ name: m, [selectedYear]: 0, }));
+    const data : any[] = monthsTH.map(m => ({ name: m, [selectedYear]: 0, }));
 
     card.forEach((job: any) => {
         const d = new Date(job.createdAt || job.date);
@@ -70,7 +70,8 @@ export default function MainExecutive() {
 
         // นับจำนวนงานใส่ในปีที่เลือก
         if (jobYear === selectedYear) {
-            data[monthIndex][selectedYear] = (data[monthIndex][selectedYear] || 0) + 1;
+          const currentValue = data[monthIndex][selectedYear] as number ;
+            data[monthIndex][selectedYear] = (currentValue || 0) + 1;
         }
     });
     return data;
