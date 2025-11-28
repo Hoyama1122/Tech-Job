@@ -10,7 +10,7 @@ const SidebarWrapperSup = () => {
   return (
     <Sidebar
       navLinks={navLinkSupervisor}
-      basePath="/supervirsor"
+      basePath="/supervisor"
       isOpen={isOpen}
       setIsOpen={setIsOpen}
     />
