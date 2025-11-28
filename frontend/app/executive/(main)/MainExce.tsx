@@ -221,7 +221,7 @@ export default function MainExecutive() {
             />
             
             {/* Pie Chart */}
-            <JobStatusPieChart data={statusProportion} />
+            <JobStatusPieChart data={statusProportion}  />
         </div>
     </div>
   );

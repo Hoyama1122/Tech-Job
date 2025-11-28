@@ -16,6 +16,8 @@ import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import CancelModal from "@/components/Dashboard/Work/Slug/CancelModal";
+import { notifyTechnicians } from "@/lib/Noti/SendNoti";
+import RejectModal from "@/components/Modal/RejectModal";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -35,6 +37,8 @@ export default function WorkDetailPage({ params }: PageProps) {
 
   // เก็บ ImagesStore จาก localStorage
   const [imgStore, setImgStore] = useState<any>({});
+
+  const [ShowRejectModal, setShowRejectModal] = useState(false);
 
   // โหลดข้อมูลใบงาน + Users
   useEffect(() => {
@@ -90,6 +94,28 @@ export default function WorkDetailPage({ params }: PageProps) {
     }
   }, []);
 
+    const handleApprove = () => {
+      if (job.status !== "รอการตรวจสอบ") {
+        toast.error("ไม่สามารถอนุมัติได้ เนื่องจากสถานะไม่ใช่ 'รอการตรวจสอบ'");
+        return;
+      }
+      const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
+      const updated = cardData.map((c: any) =>
+        c.JobId === job.JobId
+          ? { ...c, status: "สำเร็จ", approvedAt: new Date().toISOString() }
+          : c
+      );
+      localStorage.setItem("CardWork", JSON.stringify(updated));
+  
+      notifyTechnicians(
+        job.technicianId,
+        `งาน ${job.JobId} ได้รับการอนุมัติแล้ว`
+      );
+  
+      toast.success("อนุมัติงานสำเร็จ");
+      setJob({ ...job, status: "สำเร็จ", approvedAt: new Date().toISOString() });
+    };
+
   // Cancel
   const handleCancelJob = () => {
     try {
@@ -105,6 +131,48 @@ export default function WorkDetailPage({ params }: PageProps) {
     } catch (e) {
       toast.error("ไม่สามารถลบงานได้");
     }
+  };
+
+  const handleRejectClick = () => {
+    if (job.status !== "รอการตรวจสอบ") {
+      toast.error("ไม่สามารถตีกลับได้ เนื่องจากสถานะไม่ใช่ 'รอการตรวจสอบ'")
+      return;
+    }
+    setShowRejectModal(true);
+  };
+
+  const onConfirmReject = (reason: string) => {
+    const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
+
+    const updated = cardData.map((c: any) =>
+      c.JobId === job.JobId
+        ? {
+          ...c,
+          status: "ตีกลับ",
+          rejectReason: reason,
+          rejectedAt: new Date().toISOString(),
+        }
+        : c
+    );
+    
+    localStorage.setItem("CardWork", JSON.stringify(updated));
+
+    notifyTechnicians(
+      job.technicianId,
+      `งาน ${job.JobId} ถูกตีกลับ: ${reason}`
+    );
+
+    toast.success("ตีกลับงานเรียบร้อยแล้ว");
+
+    setJob({
+      ...job,
+      status: "ตีกลับ",
+      rejectReason: reason,
+      rejectedAt: new Date().toISOString(),
+    
+    });
+
+    setShowRejectModal(false);
   };
 
   const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
@@ -124,7 +192,9 @@ export default function WorkDetailPage({ params }: PageProps) {
           pdfRef={pdfRef}
           setShowEditModal={setShowEditModal}
           onCancel={handleCancelJob}
+          onApprove={handleApprove}
           setShowCancelModal={setShowCancelModal}
+          onReject={handleRejectClick}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
@@ -160,6 +230,13 @@ export default function WorkDetailPage({ params }: PageProps) {
             setShowCancelModal(false);
             handleCancelJob();
           }}
+        />
+      )}
+      {ShowRejectModal && (
+        <RejectModal
+          isOpen = {ShowRejectModal}
+          onClose = {() => setShowRejectModal(false)}
+          onConfirm = {onConfirmReject}
         />
       )}
 
