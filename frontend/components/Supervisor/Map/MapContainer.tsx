@@ -19,11 +19,11 @@ const containerStyle = {
 // 📍 icon marker ตามสถานะ
 const getIconByStatus = (status: string) => {
   let iconUrl = "/marker/gray.svg";
-  if (status === "กำลังทำงาน") iconUrl = "/marker/red.svg";
-  else if (status === "ว่าง") iconUrl = "/marker/green.svg";
-  else if (status === "รอการตรวจสอบ") iconUrl = "/marker/yellow.svg";
-  else if (status === "สำเร็จ") iconUrl = "/marker/blue.svg";
-  else if (status === "ตีกลับ") iconUrl = "/marker/purple.svg";
+  if (status === "กำลังทำงาน") iconUrl = "/marker/yellow.svg";
+  else if (status === "รอการดำเนินงาน") iconUrl = "/marker/orange.svg";
+  else if (status === "รอการตรวจสอบ") iconUrl = "/marker/blue.svg";
+  else if (status === "สำเร็จ") iconUrl = "/marker/emerald.svg";
+  else if (status === "ตีกลับ") iconUrl = "/marker/red.svg";
 
   return {
     url: iconUrl,
@@ -120,13 +120,15 @@ const TeamMap = ({ jobs, users }: { jobs: any[], users: any[] }) => {
               <span
                 className={` mt-1 flex  items-center gap-2 ${
                   selectedMember.status === "สำเร็จ"
-                    ? "text-blue-500"
+                    ? "text-emerald-700"
                     : selectedMember.status === "ตีกลับ"
-                    ? "text-purple-500"
+                    ? "text-red-700"
                     : selectedMember.status === "รอการตรวจสอบ"
-                    ? "text-yellow-500"
+                    ? "text-blue-700"
                     : selectedMember.status === "กำลังทำงาน"
-                    ? "text-red-500"
+                    ? "text-yellow-700"
+                    : selectedMember.status === "รอการดำเนินงาน" 
+                    ? "text-orange-700" 
                     : "text-gray-500"
                 } font-semibold`}
               >

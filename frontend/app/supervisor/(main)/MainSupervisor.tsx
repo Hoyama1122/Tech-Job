@@ -281,7 +281,7 @@ export default function MainSupervisor() {
 
             {/* log */}
           <div>
-            <Activities/>
+            {/* <Activities/> */}
           </div>
         </div>
       </div>
