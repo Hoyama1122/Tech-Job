@@ -181,7 +181,7 @@ const MainDashboard = () => {
         onClose={() => setDetail(null)}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4">
         <div>
           <div className="bg-white/90 rounded-t-lg shadow-md px-4 pt-4">
             <h1 className="text-base md:text-lg font-bold flex items-center gap-2 mb-2">
