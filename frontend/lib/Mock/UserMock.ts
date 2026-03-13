@@ -75,7 +75,6 @@ export const Users: UserType[] = [
     email: "thawat@techjob.com",
     password: "thawat123",
     phone: "081-300-0002",
-
     gender: "male",
     birthday: "1990-11-12",
     citizenId: "1928374650123",
@@ -91,7 +90,6 @@ export const Users: UserType[] = [
     email: "phakin@techjob.com",
     password: "phakin123",
     phone: "081-300-0003",
-
     gender: "male",
     birthday: "1986-08-15",
     citizenId: "1238794056123",
