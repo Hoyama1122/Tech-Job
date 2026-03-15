@@ -14,8 +14,8 @@ import {
   UserCog,
   Users2,
   BarChart3,
-  Warehouse, 
-  Briefcase
+  Warehouse,
+  Briefcase,
 } from "lucide-react";
 
 type NavItem = {
@@ -39,13 +39,13 @@ export const navLinkTechnician: NavItem[] = [
 
 export const navLinkSupervisor: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
-  { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck }, 
-  // { name: "มอบหมายงาน", path: "/assign", icon: UserCog }, 
- // { name: "ตรวจงาน", path: "/review", icon: Wrench },   
-  { name: "สถิติทีม", path: "/review", icon: BarChart3 },  
+  { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck },
+  // { name: "มอบหมายงาน", path: "/assign", icon: UserCog },
+  // { name: "ตรวจงาน", path: "/review", icon: Wrench },
+  { name: "สถิติทีม", path: "/review", icon: BarChart3 },
   { name: "ทีมของฉัน", path: "/team", icon: Users2 },
 
-  // { name: "ตั้งค่า", path: "/settings", icon: Settings }, 
+  // { name: "ตั้งค่า", path: "/settings", icon: Settings },
 ];
 
 export const navLinkExecutive: NavItem[] = [
@@ -53,4 +53,7 @@ export const navLinkExecutive: NavItem[] = [
   { name: "รายงานและสถิติ", path: "/reports", icon: BarChart3 },
   // { name: "ภาพรวมองค์กร", path: "/organization", icon: Users },
   { name: "ใบงานทั้งหมด", path: "/work", icon: Briefcase },
+];
+export const navLinkSuperadmin: NavItem[] = [
+  { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
 ];

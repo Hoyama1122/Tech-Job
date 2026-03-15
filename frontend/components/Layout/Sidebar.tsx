@@ -16,6 +16,7 @@ import {
 import { toast } from "react-toastify";
 import ModalSerach from "../Modal/ModalSerach";
 import LogoutModal from "../Modal/LogoutModal";
+import api from "@/lib/axiosClient";
 
 const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
   const pathname = usePathname();
@@ -44,13 +45,9 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
     setShowLogoutModal(true);
   };
 
-  const confirmLogout = () => {
+  const confirmLogout = async () => {
     try {
-      localStorage.removeItem("auth-storage");
-      toast.success("ออกจากระบบสำเร็จ", {
-        autoClose: 1500,
-      });
-
+      await api.post("/api/auth/logout");
       setTimeout(() => {
         router.push("/");
       }, 500);
@@ -107,8 +104,6 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
 
         <div className="h-1 bg-gradient-to-r from-transparent via-white/80 to-transparent flex-shrink-0" />
 
-       
-
         <nav className="py-4 flex-1 overflow-y-auto relative">
           <div
             className="absolute left-0 w-1 bg-white rounded-r-full transition-all duration-200 ease-out"
@@ -164,10 +159,8 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
         </div>
       </aside>
 
-  
       {isSearchOpen && <ModalSerach setIsSearchOpen={setIsSearchOpen} />}
 
-   
       {showLogoutModal && (
         <LogoutModal
           isOpen={showLogoutModal}

@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import logo from "@/public/Logo/Logotechjob.png";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
+import api from "@/lib/axiosClient";
 
 type LoginFormInputs = {
   email: string;
@@ -15,37 +16,33 @@ type LoginFormInputs = {
 
 const FormLogin = () => {
   const [show, setShow] = useState(false);
-  const { login } = useAuthStore();
   const router = useRouter();
-  const { register, handleSubmit } = useForm<LoginFormInputs>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormInputs>();
 
-  const onSubmit = (data: LoginFormInputs) => {
-    const role = login(data.email, data.password);
+  const onSubmit = async (data: LoginFormInputs) => {
+    try {
+      const res = await api.post("/api/auth/login", data);
 
-    if (role) {
-      toast.success("เข้าสู่ระบบสำเร็จ!");
-      switch (role) {
-        case "admin":
-          router.push("/admin");
-          break;
-        case "supervisor":
-          router.push("/supervisor");
-          break;
-        case "technician":
-          router.push("/technician");
-          break;
-        case "executive":
-          router.push("/executive");
-          break;
-        default:
-          toast.error("ไม่สามารถเข้าสู่ระบบได้!");
-          router.push("/");
+      const role: string = res.data.role;
+
+      if (!role) {
+        toast.error("ไม่พบ role");
+        return;
       }
-    } else {
-      toast.error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!");
+
+      const path = role.toLowerCase();
+
+      toast.success("เข้าสู่ระบบสําเร็จ");
+
+      router.push(`/${path}`);
+    } catch (error) {
+      toast.error("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
     }
   };
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -63,7 +60,7 @@ const FormLogin = () => {
 
       <h2 className="text-center text-3xl font-bold text-white">
         ยินดีต้อนรับเข้าสุ่ระบบ Tech Job
-      </h2> 
+      </h2>
 
       <div className="space-y-5">
         {/* Email */}
