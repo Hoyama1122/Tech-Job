@@ -11,7 +11,7 @@ export const getJobs = async (req, res) => {
         },
       },
     });
-    res.json({message:"ดึงข้อมูลใบงานสําเร็จ",jobs});
+    res.json({ message: "ดึงข้อมูลใบงานสําเร็จ", jobs });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

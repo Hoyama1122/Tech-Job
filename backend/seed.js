@@ -5,11 +5,10 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      firstname: "สมชาย",
-      lastname: "รวยมาก",
       email: "superadmin@techjob.com",
       password: passHash,
       role: "SUPERADMIN",
+      empno: "00001",
     },
   });
   console.log("Superadmin created");

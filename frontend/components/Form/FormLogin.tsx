@@ -26,18 +26,13 @@ const FormLogin = () => {
   const onSubmit = async (data: LoginFormInputs) => {
     try {
       const res = await api.post("/api/auth/login", data);
-
       const role: string = res.data.role;
-
       if (!role) {
         toast.error("ไม่พบ role");
         return;
       }
-
       const path = role.toLowerCase();
-
       toast.success("เข้าสู่ระบบสําเร็จ");
-
       router.push(`/${path}`);
     } catch (error) {
       toast.error("อีเมลหรือรหัสผ่านไม่ถูกต้อง");

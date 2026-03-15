@@ -4,17 +4,13 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const role = req.cookies.get("role")?.value?.toLowerCase();
-
   const { pathname } = req.nextUrl;
-
   if (!token) {
     return NextResponse.redirect(new URL("/", req.url));
   }
-
   if (!role) {
     return NextResponse.redirect(new URL("/", req.url));
   }
-
   if (pathname.startsWith("/admin") && role !== "admin") {
     return NextResponse.redirect(new URL(`/${role}`, req.url));
   }
