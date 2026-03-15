@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { uploadToCloudinary } from "../util/cloudinaryUpload.js";
 
 export const getJobs = async (req, res) => {
   try {
@@ -20,6 +21,7 @@ export const getJobs = async (req, res) => {
 export const craeteJob = async (req, res) => {
   try {
     const { title, description, departmentId } = req.body;
+
     if (!title) return res.status(400).json({ message: "กรุณากรอกชื่องาน" });
     if (!departmentId)
       return res.status(400).json({ message: "กรุณาเลือกแผนก" });

@@ -15,7 +15,7 @@ async function main() {
           lastname: "ใจสด",
           phone: "0999999999",
           gender: "FEMALE",
-          birthday: new Date("2000-01-01") ,
+          birthday: new Date("2000-01-01"),
           address:
             "122/176 หมุ่2 ถนนสมเด็จ แขวงวังใหม่ เขตวังใหม่ กรุงเทพมหานคร 10120",
         },
