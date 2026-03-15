@@ -12,7 +12,7 @@ async function main() {
       role: "SUPERADMIN",
     },
   });
-  console.log("Superadmin created", superadmin);
+  console.log("Superadmin created");
 }
 main()
   .catch((e) => {

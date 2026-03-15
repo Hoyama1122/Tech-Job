@@ -28,13 +28,29 @@ model User {
 
 model Department {
   id    Int    @id @default(autoincrement())
-  name  String
+  name  String @unique
   users User[]
+  jobs  Job[]
+}
+
+model Job {
+  id           Int        @id @default(autoincrement())
+  title        String
+  description  String?
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 enum Role {
   SUPERADMIN
   ADMIN
+  SUPERVISOR
+  TECHNICIAN
+}
+
+enum AssignmentRole {
   SUPERVISOR
   TECHNICIAN
 }

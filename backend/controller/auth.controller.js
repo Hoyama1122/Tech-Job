@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+// Login User
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -28,6 +29,16 @@ export const login = async (req, res) => {
     res.json({
       message: "เข้าสู่ระบบ",
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Logout
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.json({ message: "ออกจากระบบ" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
