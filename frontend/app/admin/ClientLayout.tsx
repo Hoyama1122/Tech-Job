@@ -7,43 +7,18 @@ import Navbar from "@/components/Dashboard/Navbar";
 
 import { Users } from "@/lib/Mock/UserMock";
 import { CardWork } from "@/lib/Mock/Jobs";
-
+import { useAuthStore } from "@/store/authStore";
 
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { setCardWork, setUsers } = AppLoader();
-
-  // Loader CardWork
+  const fetchMe = useAuthStore((state) => state.fetchMe);
   useEffect(() => {
-    try {
-      const savedWork = localStorage.getItem("CardWork");
-      if (savedWork) {
-        setCardWork(JSON.parse(savedWork));
-      } else {
-        localStorage.setItem("CardWork", JSON.stringify(CardWork));
-        setCardWork(CardWork);
-      }
-    } catch (error) {
-      console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
-    }
-  }, [setCardWork]);
-  // Loader Users
-  useEffect(() => {
-    try {
-      const users = localStorage.getItem("Users");
-      if (users) {
-        setUsers(JSON.parse(users));
-      } else {
-        localStorage.setItem("Users", JSON.stringify(Users));
-        setUsers(Users);
-      }
-    } catch (error) {
-      console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
-    }
-  }, [setUsers]);
+    fetchMe();
+  }, [fetchMe]);
+ 
 
   return (
     <div className={`min-h-screen bg-primary`}>

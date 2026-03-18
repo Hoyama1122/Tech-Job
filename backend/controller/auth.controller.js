@@ -53,22 +53,48 @@ export const logout = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 // me
 export const me = async (req, res) => {
   try {
     const userId = req.user.id;
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
-        firstname: true,
-        lastname: true,
+        empno: true,
         email: true,
         role: true,
+        department: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        profile: {
+          select: {
+            firstname: true,
+            lastname: true,
+            phone: true,
+            avatar: true,
+            gender: true,
+            birthday: true,
+            address: true,
+          },
+        },
       },
     });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    if (!user) {
+      return res.status(404).json({ error: "ไม่พบผู้ใช้" });
+    }
+    res.json({
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
   }
 };
