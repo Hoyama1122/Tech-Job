@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/store/useAuthStore";
+
 import logo from "@/public/Logo/Logotechjob.png";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
@@ -25,7 +25,7 @@ const FormLogin = () => {
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      const res = await api.post("/api/auth/login", data);
+      const res = await api.post("/api/auth/login", data, {withCredentials: true});
       const role: string = res.data.role;
       if (!role) {
         toast.error("ไม่พบ role");

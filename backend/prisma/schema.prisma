@@ -8,18 +8,18 @@ datasource db {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  empno        String      @unique
-  email        String      @unique
+  id           Int             @id @default(autoincrement())
+  email        String          @unique
   password     String
   role         Role
   departmentId Int?
-  department   Department? @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  empno        String          @unique
+  createdJobs  Job[]           @relation("CreatedBy")
+  assignedJobs JobAssignment[]
   profile      Profile?
-  createdJobs  Job[]    @relation("CreatedBy")
-  assignedJobs JobAssignment[]   
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  department   Department?     @relation(fields: [departmentId], references: [id])
 }
 
 model Profile {
@@ -29,83 +29,84 @@ model Profile {
   lastname  String?
   phone     String?
   avatar    String?
-  gender    String?
   birthday  DateTime?
   address   String?
+  gender    String?
   user      User      @relation(fields: [userId], references: [id])
 }
 
 model Department {
   id    Int    @id @default(autoincrement())
   name  String @unique
-  users User[]
   jobs  Job[]
+  users User[]
 }
 
 model Job {
-  id                 Int         @id @default(autoincrement())
+  id                 Int             @id @default(autoincrement())
   title              String
   description        String?
-  latitude           Float?
-  longitude          Float?
-  location_name      String?
-  start_available_at DateTime?
-  end_available_at   DateTime?
-  images JobImage[]
-  status             JobStatus   @default(PENDING)
   departmentId       Int
-  department         Department  @relation(fields: [departmentId], references: [id])
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
   createdById        Int
-  createdBy          User        @relation("CreatedBy", fields: [createdById], references: [id])
-  assignment JobAssignment[]
+  end_available_at   DateTime?
+  latitude           Float?
+  location_name      String?
+  longitude          Float?
+  start_available_at DateTime?
+  status             JobStatus       @default(PENDING)
+  createdBy          User            @relation("CreatedBy", fields: [createdById], references: [id])
+  department         Department      @relation(fields: [departmentId], references: [id])
+  assignment         JobAssignment[]
+  images             JobImage[]
   reports            JobReport[]
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
 }
 
 model JobReport {
-  Id                 Int       @id @default(autoincrement())
-  status             JobStatus @default(COMPLETED)
+  Id                 Int           @id @default(autoincrement())
+  status             JobStatus     @default(COMPLETED)
   start_time         DateTime?
   end_time           DateTime?
   detail             String?
   repair_operations  String?
   inspection_results String?
   summary            String?
-  images             ReportImage[]
   cus_sign           String?
   jobId              Int
-  job                Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  job                Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  images             ReportImage[]
 }
 
-model JobImage{
-  Id Int @id @default(autoincrement())
-  url String?
-  publicId String?
-  jobId Int
-  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+model JobImage {
+  Id        Int      @id @default(autoincrement())
+  url       String?
+  publicId  String?
+  jobId     Int
   createdAt DateTime @default(now())
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
-model ReportImage{
-  id Int @id @default(autoincrement())
-  url String
-  reportId Int
-  report JobReport @relation(fields: [reportId], references: [Id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+model ReportImage {
+  id        Int       @id @default(autoincrement())
+  url       String
+  reportId  Int
+  createdAt DateTime  @default(now())
+  report    JobReport @relation(fields: [reportId], references: [Id], onDelete: Cascade)
 }
 
-model JobAssignment{
-  id Int @id @default(autoincrement())
-  jobId Int
-  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assignedAt DateTime @default(now())
-  role AssignmentRole
-  @@unique([jobId, userId,role])
+model JobAssignment {
+  id         Int            @id @default(autoincrement())
+  jobId      Int
+  userId     Int
+  assignedAt DateTime       @default(now())
+  role       AssignmentRole
+  job        Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, userId, role])
 }
 
 enum Role {
