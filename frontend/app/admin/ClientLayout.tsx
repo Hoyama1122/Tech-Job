@@ -2,11 +2,9 @@
 
 import React, { useEffect } from "react";
 import SidebarWrapper from "@/components/Dashboard/SidebarWrapper";
-import { AppLoader } from "@/store/AppLoader";
+
 import Navbar from "@/components/Dashboard/Navbar";
 
-import { Users } from "@/lib/Mock/UserMock";
-import { CardWork } from "@/lib/Mock/Jobs";
 import { useAuthStore } from "@/store/authStore";
 
 export default function ClientLayout({

@@ -1,52 +1,25 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { AppLoader } from "@/store/AppLoader";
-import NavbarSuper from "@/components/Supervisor/NavbarSuper";
 
-import { Users } from "@/lib/Mock/UserMock";
-import { CardWork } from "@/lib/Mock/Jobs";
-import SidebarWrapperSup from "@/components/Supervisor/SidebarWrapperSup";
+import Navbar from "@/components/Dashboard/Navbar";
+
+import { useAuthStore } from "@/store/authStore";
+import SidebarWrapper from "@/components/Supervisor/SidebarWrapper";
 
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { setCardWork, setUsers } = AppLoader();
-
-  // Loader CardWork
+  const fetchMe = useAuthStore((state) => state.fetchMe);
   useEffect(() => {
-    try {
-      const savedWork = localStorage.getItem("CardWork");
-      if (savedWork) {
-        setCardWork(JSON.parse(savedWork));
-      } else {
-        localStorage.setItem("CardWork", JSON.stringify(CardWork));
-        setCardWork(CardWork);
-      }
-    } catch (error) {
-      console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
-    }
-  }, [setCardWork]);
-  // Loader Users
-  useEffect(() => {
-    try {
-      const users = localStorage.getItem("Users");
-      if (users) {
-        setUsers(JSON.parse(users));
-      } else {
-        localStorage.setItem("Users", JSON.stringify(Users));
-        setUsers(Users);
-      }
-    } catch (error) {
-      console.error("โหลดข้อมูลใบงานไม่สำเร็จ", error);
-    }
-  }, [setUsers]);
+    fetchMe();
+  }, [fetchMe]);
 
   return (
     <div className={`min-h-screen bg-primary`}>
-      <SidebarWrapperSup />
+      <SidebarWrapper />
       <div
         className="  flex flex-col 
           min-h-screen 
@@ -54,7 +27,7 @@ export default function ClientLayout({
           transition-all duration-300
           lg:ml-64  "
       >
-        <NavbarSuper />
+        <Navbar />
         <main className="flex-1 p-3 md:p-4 overflow-y-auto">{children}</main>
       </div>
     </div>
