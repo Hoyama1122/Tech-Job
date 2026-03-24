@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavNotifacation } from "@/lib/Mock/NavNotifacation";
 import profile from "@/public/profile/profile.png";
 import Image from "next/image";
@@ -8,12 +8,23 @@ import NotifacationBell from "../Layout/NotifacationBell";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useRouter } from "next/navigation";
+
 
 const RightNavbar = () => {
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);
 
   const { fullName, roleLabel, loading } = useCurrentUser();
+
+  const router = useRouter();
+   
+    router.push("/technician/profile");
+  };
   
+  useEffect(() => {
+    
+  }, []);
+    
   return (
     <div className="flex items-center gap-3 px-4">
       <div className="relative">
@@ -39,7 +50,7 @@ const RightNavbar = () => {
 
       <div className="w-px h-8 bg-gray-200" />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" onClick={goToProfile}>
         <Image
           src={profile}
           alt="profile"
