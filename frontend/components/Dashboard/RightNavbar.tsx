@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavNotifacation } from "@/lib/Mock/NavNotifacation";
 import profile from "@/public/profile/profile.png";
 import Image from "next/image";
