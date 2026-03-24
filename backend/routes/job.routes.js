@@ -4,9 +4,13 @@ import { upload } from '../lib/upload.js';
 const jobRouter = Router();
 
 jobRouter.get('/',getJobs)
-jobRouter.post('/', upload.array("images", 5), createJob);
+jobRouter.post('/', upload.fields([
+    { name: "images", maxCount: 10 },
+  ]), createJob);
 jobRouter.get('/:id', getJobById)
-jobRouter.put('/:id', updateJob)
+jobRouter.put('/:id',upload.fields([
+    { name: "images", maxCount: 10 },
+  ]), updateJob)
 jobRouter.delete('/:id', deleteJob)
 
 export default jobRouter

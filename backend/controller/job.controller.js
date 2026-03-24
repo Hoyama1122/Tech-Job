@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { uploadToCloudinary } from "../util/cloudinaryUpload.js";
+import { uploadImages } from "../util/upload.helper.js";
 import { formatJobId, getFullName } from "../util/job.helper.js";
 
 export const getJobs = async (req, res) => {
@@ -223,21 +223,12 @@ export const createJob = async (req, res) => {
         message: "วันเวลาสิ้นสุดต้องมากกว่าหรือเท่ากับวันเวลาเริ่มต้น",
       });
     }
+    const imageFiles = req.files?.images || [];
 
-    let uploadedImage = [];
-
-    if (req.files && req.files.length > 0) {
-      uploadedImage = await Promise.all(
-        req.files.map(async (file) => {
-          const result = await uploadToCloudinary(file.buffer);
-          return {
-            url: result.secure_url,
-            publicId: result.public_Id,
-          };
-        })
-      );
-    }
-    console.log(req.files);
+    const uploadedImages = await uploadImages(
+          imageFiles,
+          "techjob/job-reports"
+    );
 
     const job = await prisma.job.create({
       data: {
@@ -283,8 +274,10 @@ export const createJob = async (req, res) => {
               : []),
           ],
         },
-        images: {
-          create: uploadedImage,
+          images: {
+          create: uploadedImages.map((img) => ({
+            url: img.url,
+          })),
         },
       },
       include: {
@@ -330,7 +323,7 @@ export const updateJob = async (req, res) => {
 
     const existingJob = await prisma.job.findUnique({
       where: { id },
-      select: { id: true },
+      include: { images: true },
     });
 
     if (!existingJob) {
@@ -348,6 +341,13 @@ export const updateJob = async (req, res) => {
         error: "วันเวลาสิ้นสุดต้องมากกว่าหรือเท่ากับวันเวลาเริ่มต้น",
       });
     }
+
+    const imageFiles = req.files?.images || [];
+
+    const uploadedImages = await uploadImages(
+      imageFiles,
+      "techjob/jobs"
+    );
 
     const data = {
       ...(title !== undefined && { title }),
@@ -379,6 +379,14 @@ export const updateJob = async (req, res) => {
             connect: { id: Number(departmentId) },
           },
         }),
+      ...(uploadedImages.length > 0 && {
+        images: {
+          create: uploadedImages.map((img) => ({
+            url: img.url,
+            publicId: img.publicId
+          })),
+        },
+      }),
     };
 
     const job = await prisma.job.update({
