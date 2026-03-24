@@ -4,15 +4,76 @@ import { uploadToCloudinary } from "../util/cloudinaryUpload.js";
 export const getJobs = async (req, res) => {
   try {
     const jobs = await prisma.job.findMany({
-      include: {
+   select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        createdAt: true,
+
         department: {
           select: {
+            id: true,
             name: true,
           },
         },
+
+        createdBy: {
+          select: {
+            id: true,
+            empno: true,
+            role: true,
+            department: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            profile: {
+              select: {
+                firstname: true,
+                lastname: true,
+              },
+            },
+          },
+        },
+
+        assignment: {
+          select: {
+            id: true,
+            role: true,
+            assignedAt: true,
+            user: {
+              select: {
+                id: true,
+                empno: true,
+                role: true,
+                department: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+                profile: {
+                  select: {
+                    firstname: true,
+                    lastname: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
-    res.json({ message: "ดึงข้อมูลใบงานสําเร็จ", jobs });
+
+    res.json({
+      message: "ดึงข้อมูลสำเร็จ",
+      jobs: jobs,
+    })
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
