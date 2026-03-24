@@ -8,7 +8,7 @@ async function main() {
       email: "superadmin@techjob.com",
       password: passHash,
       role: "SUPERADMIN",
-      empno: "00001",
+      empno: "AD001",
     },
   });
   console.log("Superadmin created");
