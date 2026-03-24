@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -13,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  empno String @unique
-
+  id           Int         @id @default(autoincrement())
+  empno        String      @unique
   email        String      @unique
   password     String
   role         Role
   departmentId Int?
   department   Department? @relation(fields: [departmentId], references: [id])
   profile      Profile?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdJobs  Job[]    @relation("CreatedBy")
+  assignedJobs Job[]    @relation("AssignedTo")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Profile {
@@ -47,13 +43,42 @@ model Department {
 }
 
 model Job {
-  id           Int        @id @default(autoincrement())
-  title        String
-  description  String?
-  departmentId Int
-  department   Department @relation(fields: [departmentId], references: [id])
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id                 Int         @id @default(autoincrement())
+  title              String
+  description        String?
+  latitude           Float?
+  longitude          Float?
+  location_name      String?
+  start_available_at DateTime?
+  end_available_at   DateTime?
+  Jobimage           String?
+  status             JobStatus   @default(PENDING)
+  departmentId       Int
+  department         Department  @relation(fields: [departmentId], references: [id])
+  createdById        Int
+  createdBy          User        @relation("CreatedBy", fields: [createdById], references: [id])
+  assignedToId       Int
+  AssignedTo         User        @relation("AssignedTo", fields: [assignedToId], references: [id])
+  reports            JobReport[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model JobReport {
+  Id                 Int       @id @default(autoincrement())
+  status             JobStatus @default(COMPLETED)
+  start_time         DateTime?
+  end_time           DateTime?
+  detail             String?
+  repair_operations  String?
+  inspection_results String?
+  summary            String?
+  images             String?
+  cus_sign           String?
+  jobId              Int
+  job                Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 enum Role {
@@ -61,6 +86,13 @@ enum Role {
   ADMIN
   SUPERVISOR
   TECHNICIAN
+}
+
+enum JobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
 }
 
 enum AssignmentRole {
