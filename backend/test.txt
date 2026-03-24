@@ -1,0 +1,9 @@
+{
+  "title": "ซ่อมแอร์ห้องประชุม",
+  "description": "แอร์ไม่เย็น มีน้ำหยัด",
+  "departmentId": 2,
+  "supervisorId": 4,
+    "technicianId": 5
+}
+create job
+

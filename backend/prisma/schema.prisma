@@ -52,8 +52,8 @@ model Job {
   createdById        Int
   end_available_at   DateTime?
   latitude           Float?
-  location_name      String?
   longitude          Float?
+  location_name      String?
   start_available_at DateTime?
   status             JobStatus       @default(PENDING)
   createdBy          User            @relation("CreatedBy", fields: [createdById], references: [id])
@@ -64,7 +64,7 @@ model Job {
 }
 
 model JobReport {
-  Id                 Int           @id @default(autoincrement())
+  id                 Int           @id @default(autoincrement())
   status             JobStatus     @default(COMPLETED)
   start_time         DateTime?
   end_time           DateTime?
@@ -81,7 +81,7 @@ model JobReport {
 }
 
 model JobImage {
-  Id        Int      @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   url       String?
   publicId  String?
   jobId     Int
@@ -94,7 +94,7 @@ model ReportImage {
   url       String
   reportId  Int
   createdAt DateTime  @default(now())
-  report    JobReport @relation(fields: [reportId], references: [Id], onDelete: Cascade)
+  report    JobReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
 }
 
 model JobAssignment {

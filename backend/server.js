@@ -6,6 +6,8 @@ import authRouter from "./routes/auth.routes.js";
 import cookieParser from "cookie-parser";
 import departmentRoute from "./routes/department.routes.js";
 import jobRouter from "./routes/job.routes.js";
+import jobReportRouter from "./routes/jobreport.routes.js";
+
 const PORT = process.env.PORT || 8000;
 
 
@@ -32,6 +34,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/department", departmentRoute);
 app.use("/api/jobs", jobRouter);
+app.use("/api/job-report", jobReportRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -106,7 +106,7 @@ async function main() {
     data: {
       title: "ซ่อมระบบไฟฟ้าและประปา ห้องประชุมใหญ่",
       description: "ไฟเพดานดับ 3 ดวง และมีน้ำหยดจากฝ้า",
-      status: "IN_PROGRESS",
+      status: "PENDING",
       departmentId: deptMaint.id,
       createdById: admin.id,
       images: {
@@ -145,7 +145,7 @@ async function main() {
   await prisma.jobReport.create({
     data: {
       jobId: job.id,
-      status: "COMPLETED",
+      status: "PENDING",
       detail: "เปลี่ยนหลอดไฟ LED ใหม่ และซ่อมรอยรั่วของท่อ PVC เรียบร้อย",
       summary: "งานเสร็จสิ้น ระบบกลับมาใช้งานได้ปกติ",
       images: {
