@@ -47,7 +47,7 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
 
   const confirmLogout = async () => {
     try {
-      await api.post("/api/auth/logout");
+      await api.post("/auth/logout");
       setTimeout(() => {
         router.push("/");
       }, 500);

@@ -4,7 +4,8 @@ import { Search } from "lucide-react";
 import RightNavbar from "./RightNavbar";
 import { useEffect, useState } from "react";
 
-const Navbar = () => {
+const Navbar = ({user}) => {
+ 
   
   return (
     <div className="bg-[#F5F5F5] shadow-lg px-6 py-4 sticky top-0">
@@ -14,7 +15,7 @@ const Navbar = () => {
           <div className=""></div>
         </div>
         {/* Right Side */}
-        <RightNavbar />
+        <RightNavbar user={user} />
       </div>
     </div>
   );

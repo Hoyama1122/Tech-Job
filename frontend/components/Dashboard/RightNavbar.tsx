@@ -7,23 +7,45 @@ import Image from "next/image";
 import NotifacationBell from "../Layout/NotifacationBell";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useRouter } from "next/navigation";
 
-const RightNavbar = () => {
+type User = {
+  role?: string;
+  profile?: {
+    firstname?: string | null;
+    lastname?: string | null;
+    avatar?: string | null;
+  } | null;
+};
+
+type RightNavbarProps = {
+  user?: User | null;
+};
+
+const RightNavbar = ({ user }: RightNavbarProps) => {
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);
 
-  const { fullName, roleLabel, loading } = useCurrentUser();
-  
+  const fullName =
+    `${user?.profile?.firstname || ""} ${
+      user?.profile?.lastname || ""
+    }`.trim() || "ผู้ใช้งาน";
+
+  const router = useRouter();
+  const goprolfile = async () => {
+    await router.push(`/${user?.role?.toLocaleLowerCase()}/profile`);
+  };
   return (
-    <div className="flex items-center gap-3 px-4">
-      <div className="relative">
+    <div className="flex items-center gap-2 px-2 sm:gap-3 sm:px-4">
+      <div className="relative shrink-0">
         <button
-          className="btn-noti group cursor-pointer"
-          onClick={() => setShowNotificationsBell(!showNotificationsBell)}
+          type="button"
+          className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition hover:bg-black/5 sm:h-10 sm:w-10"
+          onClick={() => setShowNotificationsBell((prev) => !prev)}
         >
-          <FontAwesomeIcon icon={faBell} size="lg" />
+          <FontAwesomeIcon icon={faBell} className="text-sm sm:text-base" />
+
           {NavNotifacation.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white sm:h-5 sm:min-w-5 sm:text-xs">
               {NavNotifacation.length}
             </span>
           )}
@@ -37,24 +59,27 @@ const RightNavbar = () => {
         )}
       </div>
 
-      <div className="w-px h-8 bg-gray-200" />
+      <div className="hidden h-8 w-px bg-gray-200 sm:block" />
 
-      <div className="flex items-center gap-2">
+      <div
+        className="flex min-w-0 items-center gap-2 sm:gap-3 cursor-pointer"
+        onClick={goprolfile}
+      >
         <Image
           src={profile}
           alt="profile"
-          className="w-10 h-10 rounded-full bg-cover bg-no-repeat"
+          width={40}
+          height={40}
+          className="h-9 w-9 shrink-0 rounded-full object-cover sm:h-10 sm:w-10"
         />
 
-        <div className="leading-4">
-          <p className="text-sm text-primary-test font-semibold">
-            {loading ? (
-              <span className="animate-pulse">Loading...</span>
-            ) : (
-              fullName
-            )}
+        <div className="min-w-0 leading-tight ">
+          <p className="truncate text-[11px] font-semibold text-primary sm:text-[12px] md:text-[13px]">
+            {fullName}
           </p>
-          <h1 className="text-md font-semibold">{roleLabel}</h1>
+          <h1 className="truncate text-[10px] font-medium text-gray-500 sm:text-[11px] md:text-[12px]">
+            {user?.role || "-"}
+          </h1>
         </div>
       </div>
     </div>
