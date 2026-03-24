@@ -17,7 +17,7 @@ model User {
   department   Department? @relation(fields: [departmentId], references: [id])
   profile      Profile?
   createdJobs  Job[]    @relation("CreatedBy")
-  assignedJobs Job[]    @relation("AssignedTo")
+  assignedJobs JobAssignment[]   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -51,14 +51,13 @@ model Job {
   location_name      String?
   start_available_at DateTime?
   end_available_at   DateTime?
-  Jobimage           String?
+  images JobImage[]
   status             JobStatus   @default(PENDING)
   departmentId       Int
   department         Department  @relation(fields: [departmentId], references: [id])
   createdById        Int
   createdBy          User        @relation("CreatedBy", fields: [createdById], references: [id])
-  assignedToId       Int
-  AssignedTo         User        @relation("AssignedTo", fields: [assignedToId], references: [id])
+  assignment JobAssignment[]
   reports            JobReport[]
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
@@ -73,12 +72,40 @@ model JobReport {
   repair_operations  String?
   inspection_results String?
   summary            String?
-  images             String?
+  images             ReportImage[]
   cus_sign           String?
   jobId              Int
   job                Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+}
+
+model JobImage{
+  Id Int @id @default(autoincrement())
+  url String?
+  publicId String?
+  jobId Int
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model ReportImage{
+  id Int @id @default(autoincrement())
+  url String
+  reportId Int
+  report JobReport @relation(fields: [reportId], references: [Id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model JobAssignment{
+  id Int @id @default(autoincrement())
+  jobId Int
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+  role AssignmentRole
+  @@unique([jobId, userId,role])
 }
 
 enum Role {
