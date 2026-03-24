@@ -20,7 +20,7 @@ export const getJobs = async (req, res) => {
 
 export const createJob = async (req, res) => {
   try {
-    const { title, description, supervisorId, technicianId } = req.body;
+    const { title, description, supervisorId, technicianId, departmentId } = req.body;
 
     // validation
     if (!title) return res.status(400).json({ message: "กรุณากรอกชื่องาน" });
@@ -35,16 +35,32 @@ export const createJob = async (req, res) => {
           connect: { id: Number(departmentId) } // เชื่อมโยงกับ ID แผนกที่มีอยู่แล้ว
         },
         createdBy: {
-          connect: {id: 2}
+          connect: {id: 3}
         },
         assignment:{
           create: [
-            
+            // ถ้ามี supervisorId ส่งมา ให้สร้าง record ใน JobAssignment
+            ...(supervisorId ? [{
+              userId: Number(supervisorId),
+              role: "SUPERVISOR"
+            }] : []),
+            // ถ้ามี technicianId ส่งมา ให้สร้าง record ใน JobAssignment
+            ...(technicianId ? [{
+              userId: Number(technicianId),
+              role: "TECHNICIAN"
+            }] : [])
           ]
         }
       },
       include: {
-        department:true
+        department: true,
+        assignment: {
+          include: { 
+            user: {
+              select: { empno: true, profile: true}
+            }
+          }
+        }
       }
     });
 
