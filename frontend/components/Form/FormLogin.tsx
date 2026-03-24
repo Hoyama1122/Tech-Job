@@ -25,7 +25,7 @@ const FormLogin = () => {
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      const res = await api.post("/api/auth/login", data);
+      const res = await api.post("/api/auth/login", data, {withCredentials: true});
       const role: string = res.data.role;
       if (!role) {
         toast.error("ไม่พบ role");
