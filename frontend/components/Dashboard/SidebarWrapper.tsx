@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Sidebar from "@/components/Layout/Sidebar";
-import {  navLinkAdmin } from "@/lib/Mock/NavSidebar";
+import { navLinkAdmin } from "@/lib/Mock/NavSidebar";
 
 const SidebarWrapper = () => {
   const [isOpen, setIsOpen] = useState(false);
