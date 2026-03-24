@@ -2,7 +2,6 @@ import { prisma } from "../lib/prisma.js";
 import { uploadToCloudinary } from "../util/cloudinaryUpload.js";
 import { formatJobId, getFullName } from "../util/job.helper.js";
 
-
 export const getJobs = async (req, res) => {
   try {
     const jobs = await prisma.job.findMany({
@@ -27,7 +26,6 @@ export const getJobs = async (req, res) => {
             },
           },
         },
-
 
         assignment: {
           select: {
@@ -65,17 +63,17 @@ export const getJobs = async (req, res) => {
         status: job.status,
         start_available_at: job.start_available_at,
         end_available_at: job.end_available_at,
-
+        createdAt: job.createdAt,
         supervisor: supervisor
           ? {
               id: supervisor.user.id,
-             name: getFullName(supervisor.user),
+              name: getFullName(supervisor.user),
             }
           : null,
 
         technicians: technicians.map((tech) => ({
           id: tech.user.id,
-          name: getFullName(technicians.user),
+          name: getFullName(tech.user),
         })),
       };
     });
@@ -86,10 +84,10 @@ export const getJobs = async (req, res) => {
     });
   } catch (error) {
     console.error("getJobs error:", error);
-  res.status(500).json({
-    error: error.message,
-    stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
-  });
+    res.status(500).json({
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 
@@ -166,7 +164,7 @@ export const getJobById = async (req, res) => {
       supervisor: supervisor
         ? {
             id: supervisor.user.id,
-            name:getFullName(supervisor.user),
+            name: getFullName(supervisor.user),
             department: supervisor.user.department?.name,
           }
         : null,
@@ -177,7 +175,6 @@ export const getJobById = async (req, res) => {
         department: tech.user.department?.name,
       })),
 
-      
       images: job.images.map((image) => ({
         id: image.Id,
         url: image.url,
@@ -237,7 +234,7 @@ export const createJob = async (req, res) => {
             url: result.secure_url,
             publicId: result.public_Id,
           };
-        }),
+        })
       );
     }
     console.log(req.files);
@@ -373,9 +370,7 @@ export const updateJob = async (req, res) => {
       }),
 
       ...(end_available_at !== undefined && {
-        end_available_at: end_available_at
-          ? new Date(end_available_at)
-          : null,
+        end_available_at: end_available_at ? new Date(end_available_at) : null,
       }),
 
       ...(departmentId !== undefined &&

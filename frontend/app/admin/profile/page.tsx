@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getMyProfile, updateMyProfile } from "@/services/profile";
+import { getMyProfile, updateMyProfile } from "@/services/profile.service";
 
 type ProfileForm = {
   firstname: string;

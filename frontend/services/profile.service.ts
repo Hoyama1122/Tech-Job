@@ -1,6 +1,4 @@
-// คานนท์ทำเพิ่ม
 
-import api from "@/lib/api";
 
 export const getMyProfile = async () => {
   const res = await api.get("/profile");

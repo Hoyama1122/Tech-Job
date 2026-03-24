@@ -121,7 +121,7 @@ export default function Sidebar({ job }: any) {
       <div className="bg-white rounded-xl shadow-md p-4">
           {/* Map */}
            <div className="w-full h-64 bg-gray-200 flex items-center justify-center text-gray-500">
-            <MapForAdmin lat={job.loc.lat} lng={job.loc.lng} />
+            {/* <MapForAdmin lat={job.loc.lat} lng={job.loc.lng} /> */}
           </div>
         </div>
     </div>

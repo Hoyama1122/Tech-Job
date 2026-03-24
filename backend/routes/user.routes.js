@@ -1,21 +1,53 @@
-// คานนท์ทำเพิ่ม
-
 import express from "express";
+import { verifyToken, authCheck, allowRoles } from "../lib/middleware.js";
 import {
-  getUsers,
-  getUserById,
   createUser,
-  updateUser,
   deleteUser,
-} from "../controllers/user.controller.js";
-import { authCheck, allowRoles } from "../middlewares/auth.middleware.js";
+  getUserById,
+  getUsers,
+  updateUser,
+} from "../controller/user.controller.js";
 
-const router = express.Router();
+const userRouter = express.Router();
 
-router.get("/", authCheck, allowRoles("SUPERADMIN", "ADMIN"), getUsers);
-router.get("/:id", authCheck, allowRoles("SUPERADMIN", "ADMIN"), getUserById);
-router.post("/", authCheck, allowRoles("SUPERADMIN", "ADMIN"), createUser);
-router.put("/", authCheck, allowRoles("SUPERADMIN", "ADMIN"), updateUser);
-router.delete("/:id", authCheck, allowRoles("SUPERADMIN", "ADMIN"), deleteUser);
+userRouter.get(
+  "/",
+  verifyToken,
+  authCheck,
+  allowRoles("SUPERADMIN", "ADMIN"),
+  getUsers
+);
 
-export default router;
+userRouter.get(
+  "/:id",
+  verifyToken,
+  authCheck,
+  allowRoles("SUPERADMIN", "ADMIN"),
+  getUserById
+);
+
+userRouter.post(
+  "/",
+  verifyToken,
+  authCheck,
+  allowRoles("SUPERADMIN", "ADMIN"),
+  createUser
+);
+
+userRouter.put(
+  "/",
+  verifyToken,
+  authCheck,
+  allowRoles("SUPERADMIN", "ADMIN"),
+  updateUser
+);
+
+userRouter.delete(
+  "/:id",
+  verifyToken,
+  authCheck,
+  allowRoles("SUPERADMIN", "ADMIN"),
+  deleteUser
+);
+
+export default userRouter;

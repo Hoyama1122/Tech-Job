@@ -37,8 +37,9 @@ const getStatusStyle = (status: string) => {
 };
 
 export default function JobWork({ job }: Props) {
-  const auth = localStorage.getItem("auth-storage");
-  const parsedAuth = auth ? JSON.parse(auth) : [];
+
+
+
 
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg  border border-gray-200 overflow-hidden group flex flex-col h-full">
@@ -83,11 +84,8 @@ export default function JobWork({ job }: Props) {
               <span>หัวหน้างาน:</span>
             </div>
             <span className="font-medium text-gray-900">
-             
-              {typeof job.supervisorName === "object"
-                ? job.supervisorName.name
-                : job.supervisorName || "ไม่ระบุ"}
-                ({job.supervisorName?.department})
+             {job.supervisor.name}
+              
             </span>
           </div>
 
@@ -104,7 +102,7 @@ export default function JobWork({ job }: Props) {
 
         {/* Action Button - อยู่ล่างสุดเสมอ */}
         <Link
-          href={`/supervisor/work/${job.JobId}`}
+          href={`/supervisor/work/${job.id}`}
           className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-md hover:shadow-lg mt-auto"
         >
           ดูรายละเอียด

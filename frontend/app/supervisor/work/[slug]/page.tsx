@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, use } from "react";
 import React from "react";
-import { notFound, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import NotFoundPage from "@/components/Dashboard/Work/Slug/NotFoundPage";
 import Header from "@/components/Dashboard/Work/Slug/Header";
@@ -12,122 +11,93 @@ import DescriptionCard from "@/components/Dashboard/Work/Slug/DescriptionCard";
 import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
-
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
-import { notifyTechnicians } from "@/lib/Noti/SendNoti";
 import RejectModal from "@/components/Modal/RejectModal";
 import { PDFWorkOrder } from "@/app/admin/WorkOrder/PDFWorkOrder";
+import { jobService } from "@/services/job.service";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
+
+const mapStatus = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return "รอการดำเนินงาน";
+    case "IN_PROGRESS":
+      return "กำลังทำงาน";
+    case "COMPLETED":
+      return "สำเร็จ";
+    case "REJECTED":
+      return "ตีกลับ";
+    default:
+      return "รอการตรวจสอบ";
+  }
+};
+
 export default function WorkDetailPage({ params }: PageProps) {
   const router = useRouter();
+  const { slug } = use(params);
 
-  const { slug } = React.use(params);
   const pdfRef = useRef<HTMLDivElement>(null);
-  const [job, setJob] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [showEditModal, setShowEditModal] = React.useState(false);
-
+  const [job, setJob] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [imgStore, setImgStore] = useState<any>({});
-  const [ShowRejectModal, setShowRejectModal] = React.useState(false);
+  const [ShowRejectModal, setShowRejectModal] = useState(false);
 
-  React.useEffect(() => {
-    setIsLoading(true);
+  useEffect(() => {
+    const fetchJob = async () => {
+      setIsLoading(true);
 
-    try {
-      const cardData = localStorage.getItem("CardWork");
-      const usersData = localStorage.getItem("Users");
+      try {
+        const res = await jobService.getJobById(slug);
+        const found = res.job;
 
-      if (cardData) {
-        const jobs = JSON.parse(cardData);
-        const users = usersData ? JSON.parse(usersData) : [];
-
-        const found = jobs.find((j: any) => j.JobId === slug);
-
-        if (found) {
-          const supervisor = users.find(
-            (u: any) =>
-              u.role === "supervisor" &&
-              String(u.id) === String(found.supervisorId)
-          );
-
-          const technicians = users.filter(
-            (u: any) =>
-              u.role === "technician" && found.technicianId?.includes(u.id)
-          );
-
-          setJob({
-            ...found,
-            supervisor: supervisor || null,
-            technician: technicians || [],
-          });
-        } else {
+        if (!found) {
           setJob(null);
+          return;
         }
+
+        setJob({
+          ...found,
+          status: mapStatus(found.status),
+          technician: found.technicians || [],
+          technicianId: (found.technicians || []).map((t: any) => t.id),
+          date: found.start_available_at || found.createdAt,
+        });
+      } catch (err: any) {
+        console.error(err.response?.data || err.message);
+        setJob(null);
+        toast.error("โหลดข้อมูลล้มเหลว");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("โหลดข้อมูลล้มเหลว");
-    } finally {
-      setTimeout(() => setIsLoading(false), 300);
-    }
+    };
+
+    fetchJob();
   }, [slug]);
-  
-  // อนุมัติงาน
+console.log(job);
+
   const handleApprove = () => {
     if (job.status !== "รอการตรวจสอบ") {
       toast.error("ไม่สามารถอนุมัติได้ เนื่องจากสถานะไม่ใช่ 'รอการตรวจสอบ'");
       return;
     }
-    const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
-    const updated = cardData.map((c: any) =>
-      c.JobId === job.JobId
-        ? { ...c, status: "สำเร็จ", approvedAt: new Date().toISOString() }
-        : c
-    );
-    localStorage.setItem("CardWork", JSON.stringify(updated));
-
-    notifyTechnicians(
-      job.technicianId,
-      `งาน ${job.JobId} ได้รับการอนุมัติแล้ว`
-    );
 
     toast.success("อนุมัติงานสำเร็จ");
     setJob({ ...job, status: "สำเร็จ", approvedAt: new Date().toISOString() });
   };
-
 
   const handleRejectClick = () => {
     if (job.status !== "รอการตรวจสอบ") {
       toast.error("ไม่สามารถตีกลับได้ เนื่องจากสถานะไม่ใช่ 'รอการตรวจสอบ'");
       return;
     }
-    setShowRejectModal(true); // เปิด Modal แทนการใช้ prompt
+    setShowRejectModal(true);
   };
-  // ตีกลับงาน
+
   const onConfirmReject = (reason: string) => {
-    const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
-
-    const updated = cardData.map((c: any) =>
-      c.JobId === job.JobId
-        ? {
-            ...c,
-            status: "ตีกลับ",
-            rejectReason: reason,
-            rejectedAt: new Date().toISOString(),
-          }
-        : c
-    );
-
-    localStorage.setItem("CardWork", JSON.stringify(updated));
-
-    notifyTechnicians(
-      job.technicianId,
-      `งาน ${job.JobId} ถูกตีกลับ: ${reason}`
-    );
-
     toast.success("ตีกลับงานเรียบร้อยแล้ว");
 
     setJob({
@@ -136,15 +106,14 @@ export default function WorkDetailPage({ params }: PageProps) {
       rejectReason: reason,
       rejectedAt: new Date().toISOString(),
     });
-    
-    setShowRejectModal(false); // ปิด Modal เมื่อเสร็จ
+
+    setShowRejectModal(false);
   };
 
   const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
-
   const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
-
   const adminImages = imgStore[job?.imageKey] || [];
+
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
 
@@ -174,6 +143,7 @@ export default function WorkDetailPage({ params }: PageProps) {
           <Sidebar job={job} />
         </div>
       </div>
+
       {showEditModal && (
         <EditWorkModal
           job={job}
@@ -184,9 +154,10 @@ export default function WorkDetailPage({ params }: PageProps) {
 
       {ShowRejectModal && (
         <RejectModal
-          isOpen= {ShowRejectModal}
+          isOpen={ShowRejectModal}
           onClose={() => setShowRejectModal(false)}
-          onConfirm={onConfirmReject}/>
+          onConfirm={onConfirmReject}
+        />
       )}
 
       <div

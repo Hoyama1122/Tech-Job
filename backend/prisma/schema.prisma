@@ -55,7 +55,7 @@ model Job {
   longitude          Float?
   location_name      String?
   start_available_at DateTime?
-  status             JobStatus       @default(PENDING)
+  status             JobStatus?       @default(PENDING)
   createdBy          User            @relation("CreatedBy", fields: [createdById], references: [id])
   department         Department      @relation(fields: [departmentId], references: [id])
   assignment         JobAssignment[]
@@ -73,9 +73,9 @@ model JobReport {
   inspection_results String?
   summary            String?
   cus_sign           String?
-  jobId              Int
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
+  jobId              Int
   job                Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
   images             ReportImage[]
 }

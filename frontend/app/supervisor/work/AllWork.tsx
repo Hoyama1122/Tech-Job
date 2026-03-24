@@ -8,7 +8,7 @@ import DateFormat from "@/lib/Format/DateFormat";
 import { Calendar, ClipboardList } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import JobWork from "@/components/Supervisor/work/JobWork";
-
+import { jobService } from "@/services/job.service";
 interface Job {
   id: string;
   JobId: string;
@@ -24,57 +24,43 @@ export default function Work() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setIsLoading(true);
-
-    try {
-      const cardData = localStorage.getItem("CardWork");
-      const userData = localStorage.getItem("Users");
-      const auth = localStorage.getItem("auth-storage");
-
-      if (cardData) {
-        const parsedCards = JSON.parse(cardData);
-        const parsedUsers = userData ? JSON.parse(userData) : [];
-        const parsedAuth = auth ? JSON.parse(auth) : [];
-
-        const supervisorJobs = parsedCards.filter(
-          (job: any) =>
-            String(job.supervisorId) === String(parsedAuth.state.userId)
-        );
-
-        const joinedJobs = supervisorJobs.map((job: any) => {
-          const supervisor = parsedUsers.find(
-            (user: any) =>
-              user.role === "supervisor" &&
-              String(user.id) === String(job.supervisorId)
-          );
-
-          const jobDate = job.date || job.createdAt || job.dueDate || null;
-          const formattedDate = jobDate
-            ? new Date(jobDate).toLocaleString("th-TH", {
-                dateStyle: "short",
-                timeStyle: "short",
-              })
-            : "ไม่ระบุวันที่";
-
-          return {
-            ...job,
-            supervisorName: supervisor
-              ? { name: supervisor.name, department: supervisor.department }
-              : { name: "ไม่ระบุ", department: "-" },
-            formattedDate,
-          };
-        });
-
-        setJobs(joinedJobs);
-      }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
-    } finally {
-      setTimeout(() => setIsLoading(false), 400);
+  const mapStatus = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "รอการดำเนินงาน";
+      case "IN_PROGRESS":
+        return "กำลังทำงาน";
+      case "COMPLETED":
+        return "สำเร็จ";
+      case "REJECTED":
+        return "ตีกลับ";
+      default:
+        return "รอการตรวจสอบ";
     }
-  }, [setJobs]);
+  };
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setIsLoading(true);
+
+      try {
+        const res = await jobService.getJobs();
+
+        const data = res.jobs || [];
+
+        setJobs(data);
+      } catch (error: any) {
+        console.error(
+          "โหลด job ไม่สำเร็จ:",
+          error.response?.data || error.message
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+console.log(jobs);
 
   const filteredJobs = useMemo(() => {
     if (!jobs.length) return [];
@@ -103,7 +89,8 @@ export default function Work() {
       รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
         .length,
       กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
-      รอการดำเนินงาน: jobs.filter((j) => j.status?.trim() === "รอการดำเนินงาน").length,
+      รอการดำเนินงาน: jobs.filter((j) => j.status?.trim() === "รอการดำเนินงาน")
+        .length,
       สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
       ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
     }),

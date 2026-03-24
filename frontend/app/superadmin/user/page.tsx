@@ -9,89 +9,78 @@ import {
   File,
   Filter,
   Home,
-  Plus,
   Search,
   Trash2,
   Users,
+  X,
 } from "lucide-react";
+import {
+  userService,
+  type UserItem,
+  type CreateUserPayload,
+  type UpdateUserPayload,
+} from "@/services/user.service";
 
 const ITEMS_PER_PAGE = 10;
 
-type UserItem = {
-  id: number;
+type FormState = {
+  id?: number;
   empno: string;
   email: string;
+  password: string;
   role: string;
-  department?: {
-    id: number;
-    name: string;
-  } | null;
-  profile?: {
-    firstname?: string | null;
-    lastname?: string | null;
-    phone?: string | null;
-  } | null;
+  departmentId: string;
+  firstname: string;
+  lastname: string;
+  phone: string;
+  address: string;
+  avatar: string;
+  gender: string;
+  birthday: string;
 };
 
-const mockUsers: UserItem[] = [
-  {
-    id: 1,
-    empno: "ADM001",
-    email: "admin@techjob.com",
-    role: "ADMIN",
-    department: { id: 1, name: "Admin" },
-    profile: {
-      firstname: "สมชาย",
-      lastname: "แอดมิน",
-      phone: "0811111111",
-    },
-  },
-  {
-    id: 2,
-    empno: "SPV001",
-    email: "supervisor@techjob.com",
-    role: "SUPERVISOR",
-    department: { id: 2, name: "Maintenance" },
-    profile: {
-      firstname: "มานะ",
-      lastname: "คุมงาน",
-      phone: "0822222222",
-    },
-  },
-  {
-    id: 3,
-    empno: "TCH001",
-    email: "tech1@techjob.com",
-    role: "TECHNICIAN",
-    department: { id: 2, name: "Maintenance" },
-    profile: {
-      firstname: "วิชัย",
-      lastname: "ช่างไฟ",
-      phone: "0830003333",
-    },
-  },
-  {
-    id: 4,
-    empno: "EXE001",
-    email: "executive@techjob.com",
-    role: "EXECUTIVE",
-    department: { id: 3, name: "Management" },
-    profile: {
-      firstname: "ศิริพร",
-      lastname: "ผู้บริหาร",
-      phone: "0844444444",
-    },
-  },
-];
+const initialForm: FormState = {
+  empno: "",
+  email: "",
+  password: "",
+  role: "TECHNICIAN",
+  departmentId: "",
+  firstname: "",
+  lastname: "",
+  phone: "",
+  address: "",
+  avatar: "",
+  gender: "",
+  birthday: "",
+};
 
 const Page = () => {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const res = await userService.getUsers();
+      setUsers(res?.data || []);
+    } catch (error: any) {
+      console.error("โหลด users ไม่สำเร็จ:", error?.response?.data || error.message);
+      alert(error?.response?.data?.message || "โหลดข้อมูลผู้ใช้ไม่สำเร็จ");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setUsers(mockUsers);
+    fetchUsers();
   }, []);
 
   const departmentOptions = useMemo(() => {
@@ -143,14 +132,34 @@ const Page = () => {
   }, [currentPage, totalPages]);
 
   const handleAddUser = () => {
-    console.log("add user");
+    setMode("create");
+    setForm(initialForm);
+    setOpenModal(true);
   };
 
   const handleEdit = (user: UserItem) => {
-    console.log("edit user", user);
+    setMode("edit");
+    setForm({
+      id: user.id,
+      empno: user.empno || "",
+      email: user.email || "",
+      password: "",
+      role: user.role || "TECHNICIAN",
+      departmentId: user.department?.id ? String(user.department.id) : "",
+      firstname: user.profile?.firstname || "",
+      lastname: user.profile?.lastname || "",
+      phone: user.profile?.phone || "",
+      address: user.profile?.address || "",
+      avatar: user.profile?.avatar || "",
+      gender: user.profile?.gender || "",
+      birthday: user.profile?.birthday
+        ? String(user.profile.birthday).slice(0, 10)
+        : "",
+    });
+    setOpenModal(true);
   };
 
-  const handleDelete = (user: UserItem) => {
+  const handleDelete = async (user: UserItem) => {
     const confirmed = window.confirm(
       `ต้องการลบผู้ใช้ "${user.profile?.firstname || ""} ${
         user.profile?.lastname || ""
@@ -159,24 +168,88 @@ const Page = () => {
 
     if (!confirmed) return;
 
-    setUsers((prev) => prev.filter((u) => u.id !== user.id));
+    try {
+      await userService.deleteUser(user.id);
+      await fetchUsers();
+    } catch (error: any) {
+      console.error("ลบ user ไม่สำเร็จ:", error?.response?.data || error.message);
+      alert(error?.response?.data?.message || "ลบผู้ใช้ไม่สำเร็จ");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      setIsSaving(true);
+
+      if (mode === "create") {
+        const payload: CreateUserPayload = {
+          empno: form.empno,
+          email: form.email,
+          password: form.password,
+          role: form.role,
+          departmentId: form.departmentId ? Number(form.departmentId) : null,
+          firstname: form.firstname,
+          lastname: form.lastname,
+          phone: form.phone,
+          address: form.address,
+          avatar: form.avatar,
+          gender: form.gender,
+          birthday: form.birthday || undefined,
+        };
+
+        await userService.createUser(payload);
+      } else {
+        const payload: UpdateUserPayload = {
+          id: Number(form.id),
+          empno: form.empno,
+          email: form.email,
+          role: form.role,
+          departmentId: form.departmentId ? Number(form.departmentId) : null,
+          firstname: form.firstname,
+          lastname: form.lastname,
+          phone: form.phone,
+          address: form.address,
+          avatar: form.avatar,
+          gender: form.gender,
+          birthday: form.birthday || undefined,
+          ...(form.password ? { password: form.password } : {}),
+        };
+
+        await userService.updateUser(payload);
+      }
+
+      setOpenModal(false);
+      setForm(initialForm);
+      await fetchUsers();
+    } catch (error: any) {
+      console.error("บันทึก user ไม่สำเร็จ:", error?.response?.data || error.message);
+      alert(error?.response?.data?.message || "บันทึกข้อมูลไม่สำเร็จ");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="space-y-6 px-4 pt-4 pb-0"> 
+    <div className="space-y-6 px-4 pt-4 pb-0">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <div>
           <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
             <Home className="w-8 h-8" />
-            หน้าหลัก
+            จัดการผู้ใช้งาน
           </h1>
           <p className="text-sm text-text-secondary mt-1">
-            ภาพรวมระบบจัดการงานช่าง
+            เพิ่ม แก้ไข ลบ และค้นหาผู้ใช้งานในระบบ
           </p>
         </div>
-        <button className="button-create flex items-center gap-2 bg-accent hover:bg-accent/80 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md">
+
+        <button
+          onClick={handleAddUser}
+          className="flex items-center gap-2 bg-accent hover:bg-accent/80 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md"
+        >
           <CirclePlus className="w-5 h-5" />
-          สร้างงานใหม่
+          เพิ่มผู้ใช้
         </button>
       </div>
 
@@ -239,52 +312,13 @@ const Page = () => {
             </thead>
 
             <tbody>
-              {paginatedData.map((item, index) => {
-                const fullName =
-                  `${item.profile?.firstname || ""} ${
-                    item.profile?.lastname || ""
-                  }`.trim() || "-";
-
-                return (
-                  <tr
-                    key={item.id}
-                    className={`border-b border-gray-200 transition hover:bg-blue-50 ${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }`}
-                  >
-                    <td className="px-4 py-3">{item.empno}</td>
-                    <td className="px-4 py-3">{fullName}</td>
-                    <td className="px-4 py-3">
-                      {item.department?.name || "-"}
-                    </td>
-                    <td className="px-4 py-3">{item.email}</td>
-                    <td className="px-4 py-3">{item.profile?.phone || "-"}</td>
-                    <td className="px-4 py-3">{item.role}</td>
-
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-white"
-                        >
-                          <Edit className="h-4 w-4" />
-                          แก้ไข
-                        </button>
-
-                        <button
-                          onClick={() => handleDelete(item)}
-                          className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-2 text-white"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          ลบ
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-
-              {paginatedData.length === 0 && (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="py-10 text-center text-gray-500">
+                    กำลังโหลดข้อมูล...
+                  </td>
+                </tr>
+              ) : paginatedData.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-10 text-center text-gray-500">
                     <div className="flex flex-col items-center gap-3">
@@ -293,6 +327,48 @@ const Page = () => {
                     </div>
                   </td>
                 </tr>
+              ) : (
+                paginatedData.map((item, index) => {
+                  const fullName =
+                    `${item.profile?.firstname || ""} ${
+                      item.profile?.lastname || ""
+                    }`.trim() || "-";
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className={`border-b border-gray-200 transition hover:bg-blue-50 ${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      }`}
+                    >
+                      <td className="px-4 py-3">{item.empno}</td>
+                      <td className="px-4 py-3">{fullName}</td>
+                      <td className="px-4 py-3">{item.department?.name || "-"}</td>
+                      <td className="px-4 py-3">{item.email}</td>
+                      <td className="px-4 py-3">{item.profile?.phone || "-"}</td>
+                      <td className="px-4 py-3">{item.role}</td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-white"
+                          >
+                            <Edit className="h-4 w-4" />
+                            แก้ไข
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(item)}
+                            className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-2 text-white"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            ลบ
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -324,6 +400,154 @@ const Page = () => {
           </div>
         </div>
       </div>
+
+      {openModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b px-5 py-4">
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">
+                  {mode === "create" ? "เพิ่มผู้ใช้งาน" : "แก้ไขผู้ใช้งาน"}
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  กรอกข้อมูลผู้ใช้งานให้ครบถ้วน
+                </p>
+              </div>
+
+              <button
+                onClick={() => setOpenModal(false)}
+                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="px-5 py-5">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder="รหัสพนักงาน"
+                  value={form.empno}
+                  onChange={(e) => setForm({ ...form, empno: e.target.value })}
+                  required
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder="อีเมล"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder={
+                    mode === "create" ? "รหัสผ่าน" : "รหัสผ่านใหม่ (ถ้ามี)"
+                  }
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required={mode === "create"}
+                />
+
+                <select
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                >
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="SUPERVISOR">SUPERVISOR</option>
+                  <option value="TECHNICIAN">TECHNICIAN</option>
+                  <option value="EXECUTIVE">EXECUTIVE</option>
+                </select>
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder="ชื่อ"
+                  value={form.firstname}
+                  onChange={(e) => setForm({ ...form, firstname: e.target.value })}
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder="นามสกุล"
+                  value={form.lastname}
+                  onChange={(e) => setForm({ ...form, lastname: e.target.value })}
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder="เบอร์โทร"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder="Department ID"
+                  value={form.departmentId}
+                  onChange={(e) =>
+                    setForm({ ...form, departmentId: e.target.value })
+                  }
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder="เพศ"
+                  value={form.gender}
+                  onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
+                  placeholder="วันเกิด"
+                  type="date"
+                  value={form.birthday}
+                  onChange={(e) => setForm({ ...form, birthday: e.target.value })}
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary md:col-span-2"
+                  placeholder="Avatar URL"
+                  value={form.avatar}
+                  onChange={(e) => setForm({ ...form, avatar: e.target.value })}
+                />
+
+                <input
+                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary md:col-span-2"
+                  placeholder="ที่อยู่"
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setOpenModal(false)}
+                  className="rounded-lg border px-4 py-2.5 text-slate-600 hover:bg-slate-50"
+                >
+                  ยกเลิก
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="rounded-lg bg-primary px-4 py-2.5 text-white disabled:opacity-70"
+                >
+                  {isSaving
+                    ? "กำลังบันทึก..."
+                    : mode === "create"
+                    ? "เพิ่มผู้ใช้"
+                    : "บันทึกการแก้ไข"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
