@@ -106,11 +106,7 @@ async function main() {
     data: {
       title: "ซ่อมระบบไฟฟ้าและประปา ห้องประชุมใหญ่",
       description: "ไฟเพดานดับ 3 ดวง และมีน้ำหยดจากฝ้า",
-<<<<<<< HEAD
       status: "PENDING",
-=======
-      status: "IN_PROGRESS",
->>>>>>> main-folk
       departmentId: deptMaint.id,
       createdById: admin.id,
       images: {
