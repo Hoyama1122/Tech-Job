@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 async function main() {
   const passHash = await bcrypt.hash("superadmin", 10);
 
+  
   await prisma.user.create({
     data: {
       email: "superadmin@techjob.com",
