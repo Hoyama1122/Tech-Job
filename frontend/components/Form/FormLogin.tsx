@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useAuthStore } from "@/store/useAuthStore";
+
 import logo from "@/public/Logo/Logotechjob.png";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
