@@ -4,76 +4,15 @@ import { uploadToCloudinary } from "../util/cloudinaryUpload.js";
 export const getJobs = async (req, res) => {
   try {
     const jobs = await prisma.job.findMany({
-   select: {
-        id: true,
-        title: true,
-        description: true,
-        status: true,
-        createdAt: true,
-
+      include: {
         department: {
           select: {
-            id: true,
             name: true,
           },
         },
-
-        createdBy: {
-          select: {
-            id: true,
-            empno: true,
-            role: true,
-            department: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-            profile: {
-              select: {
-                firstname: true,
-                lastname: true,
-              },
-            },
-          },
-        },
-
-        assignment: {
-          select: {
-            id: true,
-            role: true,
-            assignedAt: true,
-            user: {
-              select: {
-                id: true,
-                empno: true,
-                role: true,
-                department: {
-                  select: {
-                    id: true,
-                    name: true,
-                  },
-                },
-                profile: {
-                  select: {
-                    firstname: true,
-                    lastname: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
       },
     });
-
-    res.json({
-      message: "ดึงข้อมูลสำเร็จ",
-      jobs: jobs,
-    })
+    res.json({ message: "ดึงข้อมูลใบงานสําเร็จ", jobs });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -81,7 +20,7 @@ export const getJobs = async (req, res) => {
 
 export const createJob = async (req, res) => {
   try {
-    const { title, description, supervisorId, technicianId, departmentId } = req.body;
+    const { title, description, supervisorId, technicianId } = req.body;
 
     // validation
     if (!title) return res.status(400).json({ message: "กรุณากรอกชื่องาน" });
@@ -96,32 +35,16 @@ export const createJob = async (req, res) => {
           connect: { id: Number(departmentId) } // เชื่อมโยงกับ ID แผนกที่มีอยู่แล้ว
         },
         createdBy: {
-          connect: {id: 3}
+          connect: {id: 2}
         },
         assignment:{
           create: [
-            // ถ้ามี supervisorId ส่งมา ให้สร้าง record ใน JobAssignment
-            ...(supervisorId ? [{
-              userId: Number(supervisorId),
-              role: "SUPERVISOR"
-            }] : []),
-            // ถ้ามี technicianId ส่งมา ให้สร้าง record ใน JobAssignment
-            ...(technicianId ? [{
-              userId: Number(technicianId),
-              role: "TECHNICIAN"
-            }] : [])
+            
           ]
         }
       },
       include: {
-        department: true,
-        assignment: {
-          include: { 
-            user: {
-              select: { empno: true, profile: true}
-            }
-          }
-        }
+        department:true
       }
     });
 
