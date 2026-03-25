@@ -1,11 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useState, useEffect, use } from "react";
 import React from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-
 import NotFoundPage from "@/components/Dashboard/Work/Slug/NotFoundPage";
 import Header from "@/components/Dashboard/Work/Slug/Header";
 import BasicInfoCard from "@/components/Dashboard/Work/Slug/BasicInfo";
@@ -14,195 +11,145 @@ import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
-import CancelModal from "@/components/Dashboard/Work/Slug/CancelModal";
-import { notifyTechnicians } from "@/lib/Noti/SendNoti";
 import RejectModal from "@/components/Modal/RejectModal";
-import { PDFWorkOrder } from "../../WorkOrder/PDFWorkOrder";
+import { PDFWorkOrder } from "@/app/admin/WorkOrder/PDFWorkOrder";
+import { jobService } from "@/services/job.service";
+import { authService } from "@/services/auth.service";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export default function WorkDetailPage({ params }: PageProps) {
-  const router = useRouter();
-  const { slug } = React.use(params);
+  const { slug } = use(params);
+  const [role, setRole] = useState("");
 
   const pdfRef = useRef<HTMLDivElement>(null);
-
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // Modal
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
-
-  // เก็บ ImagesStore จาก localStorage
   const [imgStore, setImgStore] = useState<any>({});
+  const [showRejectModal, setShowRejectModal] = useState(false);
 
-  const [ShowRejectModal, setShowRejectModal] = useState(false);
-
-  // โหลดข้อมูลใบงาน + Users
   useEffect(() => {
-    setIsLoading(true);
+    const fetchMe = async () => {
+      try {
+        const res = await authService.me();
+        setRole(res.user.role);
+      } catch {
+        setRole("");
+      }
+    };
 
-    try {
-      const cardData =
-        typeof window !== "undefined" ? localStorage.getItem("CardWork") : null;
-      const usersData =
-        typeof window !== "undefined" ? localStorage.getItem("Users") : null;
+    fetchMe();
+  }, []);
+  useEffect(() => {
+    const fetchJob = async () => {
+      setIsLoading(true);
 
-      if (cardData) {
-        const jobs = JSON.parse(cardData);
-        const users = usersData ? JSON.parse(usersData) : [];
+      try {
+        const res = await jobService.getJobById(slug);
+        const found = res.job;
 
-        const found = jobs.find((j: any) => j.JobId === slug);
+        console.log("FOUND:", found);
 
         if (!found) {
           setJob(null);
-        } else {
-          const supervisor = users.find(
-            (u: any) =>
-              u.role === "supervisor" &&
-              String(u.id) === String(found.supervisorId)
-          );
-
-          const technicians = users.filter(
-            (u: any) =>
-              u.role === "technician" && found.technicianId?.includes(u.id)
-          );
-
-          setJob({
-            ...found,
-            supervisor: supervisor || null,
-            technician: technicians || [],
-          });
+          return;
         }
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("โหลดข้อมูลล้มเหลว");
-    } finally {
-      setTimeout(() => setIsLoading(false), 300);
-    }
-  }, [slug]);
 
-  useEffect(() => {
-    try {
-      const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
-      setImgStore(store);
-    } catch {
-      setImgStore({});
-    }
-  }, []);
-
-    const handleApprove = () => {
-      if (job.status !== "รอการตรวจสอบ") {
-        toast.error("ไม่สามารถอนุมัติได้ เนื่องจากสถานะไม่ใช่ 'รอการตรวจสอบ'");
-        return;
+        setJob({
+          ...found,
+          technician: found.technicians || [],
+          technicianId: (found.technicians || []).map((t: any) => t.id),
+          date: found.start_available_at || found.createdAt,
+          status: found.status,
+        });
+      } catch (err: any) {
+        console.error(err.response?.data || err.message);
+        setJob(null);
+        toast.error("Load job failed");
+      } finally {
+        setIsLoading(false);
       }
-      const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
-      const updated = cardData.map((c: any) =>
-        c.JobId === job.JobId
-          ? { ...c, status: "สำเร็จ", approvedAt: new Date().toISOString() }
-          : c
-      );
-      localStorage.setItem("CardWork", JSON.stringify(updated));
-  
-      notifyTechnicians(
-        job.technicianId,
-        `งาน ${job.JobId} ได้รับการอนุมัติแล้ว`
-      );
-  
-      toast.success("อนุมัติงานสำเร็จ");
-      setJob({ ...job, status: "สำเร็จ", approvedAt: new Date().toISOString() });
     };
 
-  // Cancel
-  const handleCancelJob = () => {
+    fetchJob();
+  }, [slug]);
+
+ 
+
+  const canApproveOrReject = job?.status === "PENDING";
+
+  const handleApprove = async () => {
+    if (!canApproveOrReject) {
+      toast.error("This job cannot be approved");
+      return;
+    }
+
     try {
-      const allJobs = JSON.parse(localStorage.getItem("CardWork") || "[]");
+      setJob((prev: any) => ({
+        ...prev,
+        status: "COMPLETED",
+        approvedAt: new Date().toISOString(),
+      }));
 
-      const updated = allJobs.filter((j: any) => j.JobId !== job.JobId);
-
-      localStorage.setItem("CardWork", JSON.stringify(updated));
-
-      toast.success("ลบงานเรียบร้อยแล้ว");
-
-      router.back();
-    } catch (e) {
-      toast.error("ไม่สามารถลบงานได้");
+      toast.success("Job approved successfully");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Approve failed");
     }
   };
 
   const handleRejectClick = () => {
-    if (job.status !== "รอการตรวจสอบ") {
-      toast.error("ไม่สามารถตีกลับได้ เนื่องจากสถานะไม่ใช่ 'รอการตรวจสอบ'")
+    if (!canApproveOrReject) {
+      toast.error("This job cannot be rejected");
       return;
     }
+
     setShowRejectModal(true);
   };
 
-  const onConfirmReject = (reason: string) => {
-    const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
+  const onConfirmReject = async (reason: string) => {
+    try {
+      setJob((prev: any) => ({
+        ...prev,
+        status: "REJECTED",
+        rejectReason: reason,
+        rejectedAt: new Date().toISOString(),
+      }));
 
-    const updated = cardData.map((c: any) =>
-      c.JobId === job.JobId
-        ? {
-          ...c,
-          status: "ตีกลับ",
-          rejectReason: reason,
-          rejectedAt: new Date().toISOString(),
-        }
-        : c
-    );
-    
-    localStorage.setItem("CardWork", JSON.stringify(updated));
-
-    notifyTechnicians(
-      job.technicianId,
-      `งาน ${job.JobId} ถูกตีกลับ: ${reason}`
-    );
-
-    toast.success("ตีกลับงานเรียบร้อยแล้ว");
-
-    setJob({
-      ...job,
-      status: "ตีกลับ",
-      rejectReason: reason,
-      rejectedAt: new Date().toISOString(),
-    
-    });
-
-    setShowRejectModal(false);
+      setShowRejectModal(false);
+      toast.success("Job rejected successfully");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Reject failed");
+    }
   };
 
   const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
-
   const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
-
   const adminImages = imgStore[job?.imageKey] || [];
 
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
+
 
   return (
     <div>
       <div className="p-4 h-[calc(100vh-64px)] overflow-y-auto">
         <Header
           job={job}
+          role={role}
           pdfRef={pdfRef}
           setShowEditModal={setShowEditModal}
-          onCancel={handleCancelJob}
           onApprove={handleApprove}
-          setShowCancelModal={setShowCancelModal}
           onReject={handleRejectClick}
+          canApproveOrReject={canApproveOrReject}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
           <div className="space-y-4">
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
-
-            {/* Evidence Card */}
             <EvidenceCard
               job={job}
               adminImages={adminImages}
@@ -215,7 +162,6 @@ export default function WorkDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Modal */}
       {showEditModal && (
         <EditWorkModal
           job={job}
@@ -223,20 +169,12 @@ export default function WorkDetailPage({ params }: PageProps) {
           onSave={(updated) => setJob(updated)}
         />
       )}
-      {showCancelModal && (
-        <CancelModal
-          onClose={() => setShowCancelModal(false)}
-          onConfirm={() => {
-            setShowCancelModal(false);
-            handleCancelJob();
-          }}
-        />
-      )}
-      {ShowRejectModal && (
+
+      {showRejectModal && (
         <RejectModal
-          isOpen = {ShowRejectModal}
-          onClose = {() => setShowRejectModal(false)}
-          onConfirm = {onConfirmReject}
+          isOpen={showRejectModal}
+          onClose={() => setShowRejectModal(false)}
+          onConfirm={onConfirmReject}
         />
       )}
 

@@ -422,7 +422,7 @@ export const approveJobReport = async (req, res) => {
     const updatedReport = await prisma.jobReport.update({
       where: { id },
       data: {
-        status: "APPROVED",
+        status: "COMPLETED",
       },
     });
 
@@ -446,7 +446,6 @@ export const approveJobReport = async (req, res) => {
 export const rejectJobReport = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { reason } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: "Invalid report id" });
@@ -464,11 +463,9 @@ export const rejectJobReport = async (req, res) => {
       where: { id },
       data: {
         status: "REJECTED",
-        rejectReason: reason || null, 
       },
     });
 
-   
     await prisma.job.update({
       where: { id: report.jobId },
       data: {

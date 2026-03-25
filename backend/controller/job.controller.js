@@ -453,3 +453,29 @@ export const deleteJob = async (req, res) => {
     res.status(500).json({ error: error });
   }
 };
+export const getMyJobs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const jobs = await prisma.job.findMany({
+      where: {
+        assignment: {
+          some: {
+            userId: userId,
+          },
+        },
+      },
+      include: {
+        assignment: true,
+        department: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

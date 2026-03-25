@@ -7,9 +7,9 @@ import FilterJobs from "./Filter";
 import { useRouter } from "next/navigation";
 import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import Jobs from "./Jobs";
+import { jobService } from "@/services/job.service";
 
 const Dashboard = () => {
-  const [technicianId, setTechnicianId] = useState<number | null>(null);
   const [myJobs, setMyJobs] = useState([]);
   const [jobs, setjobs] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
@@ -18,36 +18,18 @@ const Dashboard = () => {
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("auth-storage");
-      if (!saved) return;
-      const parsed = JSON.parse(saved);
-      if (parsed?.state) {
-        setTechnicianId(parsed.state);
+    const fetchMyJobs = async () => {
+      try {
+        const data = await jobService.getMyJobs();
+        setMyJobs(data);
+        setjobs(data);
+      } catch (err) {
+        console.error("โหลดงานของ technician ไม่สำเร็จ", err);
       }
-    } catch (err) {
-      console.error("โหลด user จาก auth-storage fail", err);
-    }
+    };
+
+    fetchMyJobs();
   }, []);
-
-  useEffect(() => {
-    const cardData = localStorage.getItem("CardWork");
-    if (!cardData) return;
-
-    const parsed = JSON.parse(cardData);
-    setjobs(parsed);
-  }, []);
-
-  
-  useEffect(() => {
-    if (technicianId == null) return;
-
-    const my = jobs.filter((job: any) =>
-      job.technicianId?.includes(technicianId?.userId)
-    );
-
-    setMyJobs(my);
-  }, [technicianId, jobs]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -65,35 +47,20 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  
-
   const todayJobs = myJobs.filter((job: any) => {
     const jobDate = new Date(job.createdAt).toDateString();
     const today = new Date().toDateString();
     return jobDate === today;
   });
+
   const displayJobs = activeTab === "today" ? todayJobs : myJobs;
+
   return (
     <div className="max-w-6xl mx-auto p-2">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 ">
-        {/* Header */}
-        {/* <div className="bg-white rounded-2xl p-6 shadow-lg">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-bold">คุณ{technicianId?.name}</h2>
-              <p className=" text-sm">รหัสพนักงาน: {technicianId?.employeeCode}</p>
-            </div>
-            <div className="bg-white/20 rounded-full p-3">
-              <User className="w-6 h-6" />
-            </div>
-          </div>
-        </div> */}
-        {/* Date */}
         <DateTime time={time} />
 
-        {/* Summary */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
-          {/* Today */}
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
             <div className="flex items-center gap-3">
               <div className="bg-yellow-100 rounded-lg p-2">
@@ -107,7 +74,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          {/* All Jobs */}
+
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
             <div className="flex items-center gap-3">
               <div className="bg-blue-100 rounded-lg p-2">
@@ -121,7 +88,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          {/*  Success */}
+
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
             <div className="flex items-center gap-3">
               <div className="bg-green-100 rounded-lg p-2">
@@ -129,13 +96,18 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">
-                  {myJobs.filter((j: any) => j.status === "สำเร็จ").length}
+                  {
+                    myJobs.filter(
+                      (j: any) =>
+                        j.status === "สำเร็จ" || j.status === "COMPLETED"
+                    ).length
+                  }
                 </p>
                 <p className="text-xs text-gray-500">เสร็จสิ้น</p>
               </div>
             </div>
           </div>
-          {/* Pending */}
+
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
             <div className="flex items-center gap-3">
               <div className="bg-red-100 rounded-lg p-2">
@@ -144,8 +116,10 @@ const Dashboard = () => {
               <div>
                 <p className="text-2xl font-bold text-gray-900">
                   {
-                    myJobs.filter((j: any) => j.status === "รอการตรวจสอบ")
-                      .length
+                    myJobs.filter(
+                      (j: any) =>
+                        j.status === "รอการตรวจสอบ" || j.status === "PENDING"
+                    ).length
                   }
                 </p>
                 <p className="text-xs text-gray-500">รอการตรวจสอบ</p>
@@ -153,7 +127,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        {/* Tabs and Filter */}
+
         <FilterJobs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -161,7 +135,7 @@ const Dashboard = () => {
           setShowFilter={setShowFilter}
         />
       </div>
-      {/* Jobs List */}
+
       <Jobs displayJobs={displayJobs} activeTab={activeTab} />
     </div>
   );

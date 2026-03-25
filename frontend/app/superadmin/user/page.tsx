@@ -20,6 +20,7 @@ import {
   type CreateUserPayload,
   type UpdateUserPayload,
 } from "@/services/user.service";
+import { toast } from "react-toastify";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -72,7 +73,10 @@ const Page = () => {
       const res = await userService.getUsers();
       setUsers(res?.data || []);
     } catch (error: any) {
-      console.error("โหลด users ไม่สำเร็จ:", error?.response?.data || error.message);
+      console.error(
+        "โหลด users ไม่สำเร็จ:",
+        error?.response?.data || error.message
+      );
       alert(error?.response?.data?.message || "โหลดข้อมูลผู้ใช้ไม่สำเร็จ");
     } finally {
       setIsLoading(false);
@@ -171,8 +175,12 @@ const Page = () => {
     try {
       await userService.deleteUser(user.id);
       await fetchUsers();
+      toast.success("ลบผู้ใช้สําเร็จ");
     } catch (error: any) {
-      console.error("ลบ user ไม่สำเร็จ:", error?.response?.data || error.message);
+      console.error(
+        "ลบ user ไม่สำเร็จ:",
+        error?.response?.data || error.message
+      );
       alert(error?.response?.data?.message || "ลบผู้ใช้ไม่สำเร็จ");
     }
   };
@@ -223,8 +231,12 @@ const Page = () => {
       setOpenModal(false);
       setForm(initialForm);
       await fetchUsers();
+      toast.success("บันทึกข้อมูลสําเร็จ");
     } catch (error: any) {
-      console.error("บันทึก user ไม่สำเร็จ:", error?.response?.data || error.message);
+      console.error(
+        "บันทึก user ไม่สำเร็จ:",
+        error?.response?.data || error.message
+      );
       alert(error?.response?.data?.message || "บันทึกข้อมูลไม่สำเร็จ");
     } finally {
       setIsSaving(false);
@@ -343,9 +355,13 @@ const Page = () => {
                     >
                       <td className="px-4 py-3">{item.empno}</td>
                       <td className="px-4 py-3">{fullName}</td>
-                      <td className="px-4 py-3">{item.department?.name || "-"}</td>
+                      <td className="px-4 py-3">
+                        {item.department?.name || "-"}
+                      </td>
                       <td className="px-4 py-3">{item.email}</td>
-                      <td className="px-4 py-3">{item.profile?.phone || "-"}</td>
+                      <td className="px-4 py-3">
+                        {item.profile?.phone || "-"}
+                      </td>
                       <td className="px-4 py-3">{item.role}</td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2">
@@ -402,132 +418,220 @@ const Page = () => {
       </div>
 
       {openModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b px-5 py-4">
-              <div>
-                <h2 className="text-xl font-bold text-slate-800">
-                  {mode === "create" ? "เพิ่มผู้ใช้งาน" : "แก้ไขผู้ใช้งาน"}
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  กรอกข้อมูลผู้ใช้งานให้ครบถ้วน
-                </p>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_20px_70px_rgba(15,23,42,0.18)]">
+            <div className="border-b border-slate-200 bg-gradient-to-r from-white to-slate-50 px-6 py-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="mb-2 inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500">
+                    {mode === "create" ? "Create user" : "Edit user"}
+                  </div>
 
-              <button
-                onClick={() => setOpenModal(false)}
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                    {mode === "create" ? "เพิ่มผู้ใช้งาน" : "แก้ไขผู้ใช้งาน"}
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    กรอกข้อมูลผู้ใช้งานให้ครบถ้วนและตรวจสอบความถูกต้องก่อนบันทึก
+                  </p>
+                </div>
 
-            <form onSubmit={handleSubmit} className="px-5 py-5">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder="รหัสพนักงาน"
-                  value={form.empno}
-                  onChange={(e) => setForm({ ...form, empno: e.target.value })}
-                  required
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder="อีเมล"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder={
-                    mode === "create" ? "รหัสผ่าน" : "รหัสผ่านใหม่ (ถ้ามี)"
-                  }
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  required={mode === "create"}
-                />
-
-                <select
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
-                >
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="SUPERVISOR">SUPERVISOR</option>
-                  <option value="TECHNICIAN">TECHNICIAN</option>
-                  <option value="EXECUTIVE">EXECUTIVE</option>
-                </select>
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder="ชื่อ"
-                  value={form.firstname}
-                  onChange={(e) => setForm({ ...form, firstname: e.target.value })}
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder="นามสกุล"
-                  value={form.lastname}
-                  onChange={(e) => setForm({ ...form, lastname: e.target.value })}
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder="เบอร์โทร"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder="Department ID"
-                  value={form.departmentId}
-                  onChange={(e) =>
-                    setForm({ ...form, departmentId: e.target.value })
-                  }
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder="เพศ"
-                  value={form.gender}
-                  onChange={(e) => setForm({ ...form, gender: e.target.value })}
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary"
-                  placeholder="วันเกิด"
-                  type="date"
-                  value={form.birthday}
-                  onChange={(e) => setForm({ ...form, birthday: e.target.value })}
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary md:col-span-2"
-                  placeholder="Avatar URL"
-                  value={form.avatar}
-                  onChange={(e) => setForm({ ...form, avatar: e.target.value })}
-                />
-
-                <input
-                  className="rounded-lg border px-4 py-3 outline-none focus:border-primary md:col-span-2"
-                  placeholder="ที่อยู่"
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                />
-              </div>
-
-              <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setOpenModal(false)}
-                  className="rounded-lg border px-4 py-2.5 text-slate-600 hover:bg-slate-50"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="px-6 py-6">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    รหัสพนักงาน
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="เช่น EMP001"
+                    value={form.empno}
+                    onChange={(e) =>
+                      setForm({ ...form, empno: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    อีเมล
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="example@email.com"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) =>
+                      setForm({ ...form, email: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    {mode === "create" ? "รหัสผ่าน" : "รหัสผ่านใหม่"}
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder={
+                      mode === "create"
+                        ? "กรอกรหัสผ่าน"
+                        : "เว้นว่างได้หากไม่เปลี่ยน"
+                    }
+                    type="password"
+                    value={form.password}
+                    onChange={(e) =>
+                      setForm({ ...form, password: e.target.value })
+                    }
+                    required={mode === "create"}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    สิทธิ์ผู้ใช้งาน
+                  </label>
+                  <select
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    value={form.role}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  >
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="SUPERVISOR">SUPERVISOR</option>
+                    <option value="TECHNICIAN">TECHNICIAN</option>
+                    <option value="EXECUTIVE">EXECUTIVE</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    ชื่อ
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="ชื่อ"
+                    value={form.firstname}
+                    onChange={(e) =>
+                      setForm({ ...form, firstname: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    นามสกุล
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="นามสกุล"
+                    value={form.lastname}
+                    onChange={(e) =>
+                      setForm({ ...form, lastname: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    เบอร์โทร
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="08x-xxx-xxxx"
+                    value={form.phone}
+                    onChange={(e) =>
+                      setForm({ ...form, phone: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    Department ID
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="เช่น 1"
+                    value={form.departmentId}
+                    onChange={(e) =>
+                      setForm({ ...form, departmentId: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    เพศ
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="เพศ"
+                    value={form.gender}
+                    onChange={(e) =>
+                      setForm({ ...form, gender: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    วันเกิด
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    type="date"
+                    value={form.birthday}
+                    onChange={(e) =>
+                      setForm({ ...form, birthday: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    Avatar URL
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="https://example.com/avatar.jpg"
+                    value={form.avatar}
+                    onChange={(e) =>
+                      setForm({ ...form, avatar: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    ที่อยู่
+                  </label>
+                  <input
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    placeholder="กรอกที่อยู่"
+                    value={form.address}
+                    onChange={(e) =>
+                      setForm({ ...form, address: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setOpenModal(false)}
+                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-800"
                 >
                   ยกเลิก
                 </button>
@@ -535,7 +639,7 @@ const Page = () => {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="rounded-lg bg-primary px-4 py-2.5 text-white disabled:opacity-70"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-primary px-5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isSaving
                     ? "กำลังบันทึก..."

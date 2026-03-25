@@ -107,4 +107,10 @@ export const jobService = {
     const res = await api.delete(`/jobs/${id}`);
     return res.data;
   },
+  async getMyJobs() {
+    const res = await api.get("/jobs/my", {
+      withCredentials: true, 
+    });
+    return res.data;
+  },
 };

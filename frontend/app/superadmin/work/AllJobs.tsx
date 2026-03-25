@@ -1,126 +1,104 @@
-// app/admin/work/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { ClipboardList, Calendar } from "lucide-react";
-import DateFormat from "@/lib/Format/DateFormat";
-import SearchBar from "@/components/Dashboard/Work/SearchBar";
-import StatsSummary from "@/components/Dashboard/Work/StatsSummary";
 import LoadingSkeleton from "@/components/Dashboard/Work/LoadingSkeleton";
 import EmptyState from "@/components/Dashboard/Work/EmptyState";
-import JobCard from "@/components/Dashboard/Work/JobCard";
+import SearchBar from "@/components/Supervisor/work/SearchBar";
+import StatsSummary from "@/components/Supervisor/work/StatsSum";
+import DateFormat from "@/lib/Format/DateFormat";
+import { Calendar, ClipboardList } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import JobWork from "@/components/Supervisor/work/JobWork";
+import { jobService } from "@/services/job.service";
+
+interface Job {
+  id: string;
+  JobId: string;
+  title: string;
+  description: string;
+  status: string;
+  technician?: any[];
+  date: string;
+  createdAt: string;
+}
 
 export default function Work() {
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
+  const [filterStatus, setFilterStatus] = useState("ALL");
   const [isLoading, setIsLoading] = useState(true);
 
-  const [currentPage, setCurrentPage] = useState(1);
-
   useEffect(() => {
-    setIsLoading(true);
+    const fetchJobs = async () => {
+      setIsLoading(true);
 
-    try {
-      const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
-      const userData = JSON.parse(localStorage.getItem("Users") || "[]");
-
-      const joined = cardData.map((job) => {
-        const sp = userData.find(
-          (u) =>
-            u.role === "supervisor" && String(u.id) === String(job.supervisorId)
+      try {
+        const res = await jobService.getJobs();
+        const data = res.jobs || [];
+        setJobs(data);
+      } catch (error: any) {
+        console.error(
+          "โหลด job ไม่สำเร็จ:",
+          error.response?.data || error.message
         );
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        const dateSource = job.date || job.createdAt || job.dueDate || null;
-        const formattedDate = dateSource
-          ? new Date(dateSource).toLocaleString("th-TH", {
-              dateStyle: "short",
-              timeStyle: "short",
-            })
-          : "ไม่ระบุวันที่";
-
-        return {
-          ...job,
-          supervisorName: sp
-            ? { name: sp.name, department: sp.department }
-            : { name: "ไม่ระบุ", department: "-" },
-          formattedDate,
-        };
-      });
-
-      setJobs(joined);
-    } catch (e) {
-      console.error("Error loading jobs:", e);
-    }
-
-    setTimeout(() => setIsLoading(false), 300);
+    fetchJobs();
   }, []);
 
-  // Filter + Search
-  const filteredJobs = jobs.filter((job) => {
-    const searchTerm = search.toLowerCase().trim();
+  const filteredJobs = useMemo(() => {
+    if (!jobs.length) return [];
 
-    const title = job.title?.toLowerCase() || "";
-    const jobId = job.JobId?.toLowerCase() || "";
-    const desc = job.description?.toLowerCase() || "";
+    return jobs.filter((job) => {
+      const title = job.title?.toLowerCase() || "";
+      const jobId = job.JobId?.toLowerCase() || "";
+      const desc = job.description?.toLowerCase() || "";
+      const searchTerm = search.toLowerCase().trim();
 
-    const matchSearch =
-      searchTerm === "" ||
-      title.includes(searchTerm) ||
-      jobId.includes(searchTerm) ||
-      desc.includes(searchTerm);
+      const matchSearch =
+        searchTerm === "" ||
+        title.includes(searchTerm) ||
+        jobId.includes(searchTerm) ||
+        desc.includes(searchTerm);
 
-    const matchStatus =
-      filterStatus === "ทั้งหมด" || job.status?.trim() === filterStatus;
+      const matchStatus =
+        filterStatus === "ALL" || job.status === filterStatus;
 
-    return matchSearch && matchStatus;
-  });
+      return matchSearch && matchStatus;
+    });
+  }, [jobs, search, filterStatus]);
 
-  // Pagination
-  const jobsPerPage = 12;
-  const startIndex = (currentPage - 1) * jobsPerPage;
-  const endIndex = startIndex + jobsPerPage;
-  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
-  const paginatedJobs = filteredJobs.slice(startIndex, endIndex);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, filterStatus]);
-
-  // Stats summary
-  const stats = {
-    รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
-      .length,
-    รอการดำเนินงาน: jobs.filter((j) => j.status?.trim() === "รอการดำเนินงาน")
-      .length,
-    กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
-    สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
-    ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
-  };
+  const stats = useMemo(
+    () => ({
+      PENDING: jobs.filter((j) => j.status === "PENDING").length,
+      IN_PROGRESS: jobs.filter((j) => j.status === "IN_PROGRESS").length,
+      COMPLETED: jobs.filter((j) => j.status === "COMPLETED").length,
+      REJECTED: jobs.filter((j) => j.status === "REJECTED").length,
+    }),
+    [jobs]
+  );
 
   return (
     <div className="p-4">
-      {/* Header */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
               <ClipboardList className="w-8 h-8" />
-              ใบงานทั้งหมด
+              All Jobs
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              จัดการและติดตามใบงานทั้งระบบ
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Track all jobs in system</p>
           </div>
 
-          <div className="flex items-center gap-3  bg-white rounded-xl px-4 py-2 shadow-sm">
+          <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm">
             <Calendar className="w-5 h-5 text-primary" />
             <DateFormat />
           </div>
         </div>
       </div>
 
-      {/* Search + Filter */}
       <SearchBar
         search={search}
         setSearch={setSearch}
@@ -128,42 +106,23 @@ export default function Work() {
         setFilterStatus={setFilterStatus}
       />
 
-      {/* Stats Summary */}
       <StatsSummary stats={stats} />
 
-      {/* Jobs List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
         {isLoading ? (
           <LoadingSkeleton count={6} />
-        ) : paginatedJobs.length === 0 ? (
+        ) : filteredJobs.length === 0 ? (
           <EmptyState />
         ) : (
-          paginatedJobs.map((job) => <JobCard key={job.JobId} job={job} />)
+          filteredJobs.map((job) => <JobWork key={job.JobId} job={job} />)
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center gap-2 mt-4">
-        <button
-          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          disabled={currentPage === 1}
-          className="px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
-        >
-          ก่อนหน้า
-        </button>
-
-        <span className="text-sm text-gray-600">
-          หน้า {currentPage} / {totalPages || 1}
-        </span>
-
-        <button
-          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          disabled={currentPage === totalPages || totalPages === 0}
-          className="px-4 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
-        >
-          ถัดไป
-        </button>
-      </div>
+      {!isLoading && filteredJobs.length > 0 && (
+        <div className="mt-6 text-center text-sm text-gray-500">
+          Showing {filteredJobs.length} of {jobs.length} jobs
+        </div>
+      )}
     </div>
   );
 }
