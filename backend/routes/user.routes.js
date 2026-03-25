@@ -14,7 +14,7 @@ userRouter.get(
   "/",
   verifyToken,
   authCheck,
-  allowRoles("SUPERADMIN", "ADMIN"),
+  allowRoles("SUPERADMIN", "ADMIN","SUPERVISOR"),
   getUsers
 );
 

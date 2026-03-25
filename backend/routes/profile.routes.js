@@ -4,13 +4,12 @@ import express from "express";
 import {
   getMyProfile,
   updateMyProfile,
-} from "../controllers/profile.controller.js";
-import { authCheck } from "../lib/middleware.js";
+} from "../controller/profile.controller.js";
+import { authCheck, verifyToken } from "../lib/middleware.js";
 
+const routerProfile = express.Router();
 
-const router = express.Router();
+routerProfile.get("/", verifyToken, authCheck, getMyProfile);
+routerProfile.put("/", verifyToken, authCheck, updateMyProfile);
 
-router.get("/", authCheck, getMyProfile);
-router.put("/", authCheck, updateMyProfile);
-
-export default router;
+export default routerProfile;

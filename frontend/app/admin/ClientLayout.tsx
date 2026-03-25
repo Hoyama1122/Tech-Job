@@ -5,6 +5,7 @@ import Navbar from "@/components/Dashboard/Navbar";
 
 import { authService } from "@/services/auth.service";
 import SidebarWrapper from "@/components/Dashboard/SidebarWrapper";
+import { profileService } from "@/services/profile.service";
 
 type UserRole =
   | "ADMIN"
@@ -38,8 +39,16 @@ export default function ClientLayout({
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const res = await authService.me();
-        setUser(res.user);
+        const authRes = await authService.me();
+
+        setUser(authRes.user);
+
+        const profileRes = await profileService.getMyProfile();
+
+        setUser((prev: any) => ({
+          ...prev,
+          ...profileRes.data,
+        }));
       } catch (error) {
         setUser(null);
       } finally {
@@ -49,6 +58,7 @@ export default function ClientLayout({
 
     fetchMe();
   }, []);
+console.log(user);
 
   return (
     <div className="min-h-screen bg-primary">

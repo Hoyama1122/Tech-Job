@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, useEffect, use } from "react";
+import React from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { jobService } from "@/services/job.service";
-
 import NotFoundPage from "@/components/Dashboard/Work/Slug/NotFoundPage";
 import Header from "@/components/Dashboard/Work/Slug/Header";
 import BasicInfoCard from "@/components/Dashboard/Work/Slug/BasicInfo";
@@ -14,11 +14,10 @@ import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
 import { PDFWorkOrder } from "@/app/admin/WorkOrder/PDFWorkOrder";
+import { jobService } from "@/services/job.service";
 
 interface PageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
 const mapStatus = (status: string) => {
@@ -37,26 +36,23 @@ const mapStatus = (status: string) => {
 };
 
 export default function WorkDetailPage({ params }: PageProps) {
-  const slug = params.slug;
+  const router = useRouter();
+  const { slug } = use(params);
 
   const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [imgStore, setImgStore] = useState<any>({});
-  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [ShowRejectModal, setShowRejectModal] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
       setIsLoading(true);
 
       try {
-        console.log("slug:", slug);
-
         const res = await jobService.getJobById(slug);
-        console.log("job detail response:", res);
-
-        const found = res?.job || res;
+        const found = res.job;
 
         if (!found) {
           setJob(null);
@@ -71,18 +67,17 @@ export default function WorkDetailPage({ params }: PageProps) {
           date: found.start_available_at || found.createdAt,
         });
       } catch (err: any) {
-        console.error("โหลด job detail ไม่สำเร็จ:", err?.response?.data || err.message);
-        toast.error("โหลดข้อมูลล้มเหลว");
+        console.error(err.response?.data || err.message);
         setJob(null);
+        toast.error("โหลดข้อมูลล้มเหลว");
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (slug) {
-      fetchJob();
-    }
+    fetchJob();
   }, [slug]);
+console.log(job);
 
   const handleApprove = () => {
     if (job.status !== "รอการตรวจสอบ") {
@@ -129,8 +124,8 @@ export default function WorkDetailPage({ params }: PageProps) {
           job={job}
           pdfRef={pdfRef}
           setShowEditModal={setShowEditModal}
-          onApprove={handleApprove}
-          onReject={handleRejectClick}
+          onApprove={() => handleApprove()}
+          onReject={() => handleRejectClick()}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
@@ -153,13 +148,13 @@ export default function WorkDetailPage({ params }: PageProps) {
         <EditWorkModal
           job={job}
           onClose={() => setShowEditModal(false)}
-          onSave={(updated: any) => setJob(updated)}
+          onSave={(updated) => setJob(updated)}
         />
       )}
 
-      {showRejectModal && (
+      {ShowRejectModal && (
         <RejectModal
-          isOpen={showRejectModal}
+          isOpen={ShowRejectModal}
           onClose={() => setShowRejectModal(false)}
           onConfirm={onConfirmReject}
         />

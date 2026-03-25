@@ -11,6 +11,7 @@ import {
   BadgeInfo,
   Users,
   Building2,
+  Pencil,
 } from "lucide-react";
 
 type ProfileUser = {
@@ -37,6 +38,7 @@ type ProfileCardProps = {
   user: ProfileUser;
   title?: string;
   subtitle?: string;
+  onEdit?: () => void;
 };
 
 const roleLabelMap: Record<string, string> = {
@@ -57,19 +59,19 @@ export default function ProfileCard({
   user,
   title = "ข้อมูลโปรไฟล์",
   subtitle = "ข้อมูลส่วนตัวและรายละเอียดการติดต่อ",
+  onEdit,
 }: ProfileCardProps) {
   const fullName =
-    `${user?.profile?.firstname || ""} ${user?.profile?.lastname || ""}`.trim() ||
-    "ไม่ระบุชื่อ";
+    `${user?.profile?.firstname || ""} ${
+      user?.profile?.lastname || ""
+    }`.trim() || "ไม่ระบุชื่อ";
 
   const firstChar =
     user?.profile?.firstname?.charAt(0) ||
     user?.email?.charAt(0)?.toUpperCase() ||
     "U";
 
-  const roleLabel = user?.role
-    ? roleLabelMap[user.role] || user.role
-    : "-";
+  const roleLabel = user?.role ? roleLabelMap[user.role] || user.role : "-";
 
   const genderText = user?.profile?.gender
     ? genderLabelMap[user.profile.gender] || user.profile.gender
@@ -87,9 +89,22 @@ export default function ProfileCard({
 
   return (
     <div className="mx-auto max-w-4xl p-4 md:p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-primary md:text-4xl">{title}</h1>
-        <p className="mt-1 font-medium text-gray-500">{subtitle}</p>
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-primary md:text-4xl">{title}</h1>
+          <p className="mt-1 font-medium text-gray-500">{subtitle}</p>
+        </div>
+
+        {onEdit && (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-medium text-white shadow transition hover:opacity-90"
+          >
+            <Pencil className="h-4 w-4" />
+            แก้ไขโปรไฟล์
+          </button>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.06)]">
@@ -115,7 +130,10 @@ export default function ProfileCard({
         </div>
 
         <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2 md:p-8">
-          <InfoCard icon={<BadgeInfo className="h-5 w-5" />} label="รหัสพนักงาน">
+          <InfoCard
+            icon={<BadgeInfo className="h-5 w-5" />}
+            label="รหัสพนักงาน"
+          >
             {user?.empno || "-"}
           </InfoCard>
 

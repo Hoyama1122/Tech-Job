@@ -9,7 +9,6 @@ import { Calendar, ClipboardList } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import JobWork from "@/components/Supervisor/work/JobWork";
 import { jobService } from "@/services/job.service";
-
 interface Job {
   id: string;
   JobId: string;
@@ -20,20 +19,21 @@ interface Job {
   date: string;
   createdAt: string;
 }
-
 export default function Work() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
   const [isLoading, setIsLoading] = useState(true);
-
+ 
   useEffect(() => {
     const fetchJobs = async () => {
       setIsLoading(true);
 
       try {
         const res = await jobService.getJobs();
+
         const data = res.jobs || [];
+
         setJobs(data);
       } catch (error: any) {
         console.error(
@@ -47,6 +47,7 @@ export default function Work() {
 
     fetchJobs();
   }, []);
+console.log(jobs);
 
   const filteredJobs = useMemo(() => {
     if (!jobs.length) return [];
@@ -55,6 +56,7 @@ export default function Work() {
       const title = job.title?.toLowerCase() || "";
       const jobId = job.JobId?.toLowerCase() || "";
       const desc = job.description?.toLowerCase() || "";
+      const status = job.status?.trim() || "";
       const searchTerm = search.toLowerCase().trim();
 
       const matchSearch =
@@ -63,8 +65,7 @@ export default function Work() {
         jobId.includes(searchTerm) ||
         desc.includes(searchTerm);
 
-      const matchStatus =
-        filterStatus === "ALL" || job.status === filterStatus;
+      const matchStatus = filterStatus === "ทั้งหมด" || status === filterStatus;
 
       return matchSearch && matchStatus;
     });
@@ -72,24 +73,27 @@ export default function Work() {
 
   const stats = useMemo(
     () => ({
-      PENDING: jobs.filter((j) => j.status === "PENDING").length,
-      IN_PROGRESS: jobs.filter((j) => j.status === "IN_PROGRESS").length,
-      COMPLETED: jobs.filter((j) => j.status === "COMPLETED").length,
-      REJECTED: jobs.filter((j) => j.status === "REJECTED").length,
+      รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
+        .length,
+      กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
+      รอการดำเนินงาน: jobs.filter((j) => j.status?.trim() === "รอการดำเนินงาน")
+        .length,
+      สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
+      ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
     }),
     [jobs]
   );
-
   return (
     <div className="p-4">
+      {/* Header Section */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
               <ClipboardList className="w-8 h-8" />
-              All Jobs
+              ใบงานทั้งหมด
             </h1>
-            <p className="text-sm text-gray-500 mt-1">Track all jobs in system</p>
+            <p className="text-sm text-gray-500 mt-1">ติดตามใบงานทั้งระบบ</p>
           </div>
 
           <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm">
@@ -99,6 +103,7 @@ export default function Work() {
         </div>
       </div>
 
+      {/* Action Bar */}
       <SearchBar
         search={search}
         setSearch={setSearch}
@@ -106,8 +111,10 @@ export default function Work() {
         setFilterStatus={setFilterStatus}
       />
 
+      {/* Stats Summary */}
       <StatsSummary stats={stats} />
 
+      {/* Job Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-6">
         {isLoading ? (
           <LoadingSkeleton count={6} />
@@ -118,9 +125,10 @@ export default function Work() {
         )}
       </div>
 
+      {/* Results Count */}
       {!isLoading && filteredJobs.length > 0 && (
         <div className="mt-6 text-center text-sm text-gray-500">
-          Showing {filteredJobs.length} of {jobs.length} jobs
+          กำลังแสดง {filteredJobs.length} จาก {jobs.length} ใบงาน
         </div>
       )}
     </div>

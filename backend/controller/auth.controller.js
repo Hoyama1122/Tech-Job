@@ -68,35 +68,16 @@ export const me = async (req, res) => {
         empno: true,
         email: true,
         role: true,
-        department: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        profile: {
-          select: {
-            firstname: true,
-            lastname: true,
-            phone: true,
-            avatar: true,
-            gender: true,
-            birthday: true,
-            address: true,
-          },
-        },
+        departmentId: true, 
       },
     });
 
     if (!user) {
       return res.status(404).json({ error: "ไม่พบผู้ใช้" });
     }
-    res.json({
-      user,
-    });
+
+    res.json({ user });
   } catch (error) {
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 };

@@ -202,7 +202,7 @@ export const getJobReportById = async (req, res) => {
         createdBy: report.job.createdBy
           ? {
               id: report.job.createdBy.id,
-              name:getFullName(job.createdBy)
+              name: getFullName(job.createdBy),
             }
           : null,
       },
@@ -259,11 +259,7 @@ export const updateJobReport = async (req, res) => {
       });
     }
 
-    if (
-      start_time &&
-      end_time &&
-      new Date(end_time) < new Date(start_time)
-    ) {
+    if (start_time && end_time && new Date(end_time) < new Date(start_time)) {
       return res.status(400).json({
         error: "เวลาสิ้นสุดต้องมากกว่าหรือเท่ากับเวลาเริ่มต้น",
       });
@@ -405,5 +401,87 @@ export const deleteJobReport = async (req, res) => {
     res.status(500).json({
       error: error.message,
     });
+  }
+};
+export const approveJobReport = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!id) {
+      return res.status(400).json({ error: "Invalid report id" });
+    }
+
+    const report = await prisma.jobReport.findUnique({
+      where: { id },
+    });
+
+    if (!report) {
+      return res.status(404).json({ error: "ไม่พบรายงาน" });
+    }
+
+    const updatedReport = await prisma.jobReport.update({
+      where: { id },
+      data: {
+        status: "APPROVED",
+      },
+    });
+
+    // อัปเดต job ด้วย
+    await prisma.job.update({
+      where: { id: report.jobId },
+      data: {
+        status: "COMPLETED",
+      },
+    });
+
+    res.json({
+      message: "อนุมัติรายงานสำเร็จ",
+      report: updatedReport,
+    });
+  } catch (error) {
+    console.error("approveJobReport error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+export const rejectJobReport = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { reason } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "Invalid report id" });
+    }
+
+    const report = await prisma.jobReport.findUnique({
+      where: { id },
+    });
+
+    if (!report) {
+      return res.status(404).json({ error: "ไม่พบรายงาน" });
+    }
+
+    const updatedReport = await prisma.jobReport.update({
+      where: { id },
+      data: {
+        status: "REJECTED",
+        rejectReason: reason || null, 
+      },
+    });
+
+   
+    await prisma.job.update({
+      where: { id: report.jobId },
+      data: {
+        status: "IN_PROGRESS",
+      },
+    });
+
+    res.json({
+      message: "ปฏิเสธรายงานสำเร็จ",
+      report: updatedReport,
+    });
+  } catch (error) {
+    console.error("rejectJobReport error:", error);
+    res.status(500).json({ error: error.message });
   }
 };
