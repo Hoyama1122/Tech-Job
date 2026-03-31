@@ -4,6 +4,9 @@ import bcrypt from "bcrypt";
 
 async function main() {
   // 1. Clean Up (ลบข้อมูลเก่าก่อนเพื่อป้องกัน ID ซ้ำ)
+  await prisma.message.deleteMany({});
+  await prisma.participant.deleteMany({});
+  await prisma.conversation.deleteMany({});
   await prisma.jobAssignment.deleteMany({});
   await prisma.reportImage.deleteMany({});
   await prisma.jobReport.deleteMany({});

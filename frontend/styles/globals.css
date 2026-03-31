@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -27,9 +25,9 @@
 
   /* ⚡ Optional Highlights */
   --color-highlight: #e99f0c; /* สีเน้นข้อความหรือ icon */
-}
-* {
-  font-family: "Kanit", sans-serif;
+
+  /* 🖋️ Typography */
+  --font-sans: var(--font-anuphan), "Kanit", "Inter", ui-sans-serif, system-ui;
 }
 .font-title {
   @apply font-bold text-primary text-2xl md:text-4xl;
@@ -79,13 +77,40 @@
     transform: scale(1);
   }
 }
+/* ── Chat bubble slide-up ───────────────────────────── */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Widget FAB pop ─────────────────────────────────── */
+@keyframes popIn {
+  0%   { transform: scale(0.8); opacity: 0; }
+  70%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
 /* Scroll */
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;
 }
 
 .animate-scaleIn {
-  animation: scaleIn 0.2s ease-out;
+  animation: scaleIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-slideUp {
+  animation: slideUp 0.18s ease-out;
+}
+
+.animate-popIn {
+  animation: popIn 0.3s ease-out;
 }
 
 ::-webkit-scrollbar {
@@ -99,10 +124,34 @@
   background: #d48d00;
 }
 
+/* ── Subtle scrollbar for chat message area ─────────── */
+.chat-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #29335c20;
+  border-radius: 9999px;
+}
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: #29335c40;
+}
+
+/* Global autofill – dark style (login forms etc.) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   -webkit-text-fill-color: #fff !important;   
   transition: background-color 9999s ease-in-out 0s !important;
   box-shadow: 0 0 0px 1000px #1e3a8a inset !important;
+}
+
+/* Scoped autofill override for light inputs (chat, forms on white bg) */
+.autofill-light:-webkit-autofill,
+.autofill-light:-webkit-autofill:hover,
+.autofill-light:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1a1a1a !important;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important;
 }

@@ -8,12 +8,33 @@ export const getMyProfile = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: {
-        profile: true,
-        department: true,
+      select: {
+        id: true,
+        empno: true,
+        email: true,
+        role: true,
+        departmentId: true,
+        department: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        profile: {
+          select: {
+            id: true,
+            userId: true,
+            firstname: true,
+            lastname: true,
+            phone: true,
+            avatar: true,
+            gender: true,
+            birthday: true,
+            address: true,
+          },
+        },
       },
     });
-
     if (!user) {
       return res.status(404).json({ message: "ไม่พบผู้ใช้งาน" });
     }
@@ -33,7 +54,8 @@ export const getMyProfile = async (req, res) => {
 export const updateMyProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { phone, address, avatar, firstname, lastname, gender, birthday } = req.body;
+    const { phone, address, avatar, firstname, lastname, gender, birthday } =
+      req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { id: userId },

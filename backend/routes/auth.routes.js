@@ -1,6 +1,6 @@
 import Router from "express";
 import { login, logout, me } from "../controller/auth.controller.js";
-import { verifyToken } from "../lib/middleware.js";
+import { authCheck, verifyToken } from "../lib/middleware.js";
 
 const authRouter = Router();
 
@@ -120,6 +120,6 @@ authRouter.post("/logout", logout);
  *       500:
  *         description: Server error
  */
-authRouter.get("/me", verifyToken, me);
+authRouter.get("/me", verifyToken,authCheck, me);
 
 export default authRouter;

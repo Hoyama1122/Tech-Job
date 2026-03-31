@@ -20,6 +20,8 @@ model User {
   assignedJobs JobAssignment[]
   profile      Profile?
   department   Department?     @relation(fields: [departmentId], references: [id])
+  participants Participant[]
+  messages     Message[]
 }
 
 model Profile {
@@ -127,4 +129,38 @@ enum JobStatus {
 enum AssignmentRole {
   SUPERVISOR
   TECHNICIAN
+}
+
+model Conversation {
+  id           Int           @id @default(autoincrement())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  participants Participant[]
+  messages     Message[]
+}
+
+model Participant {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  conversationId Int
+  joinedAt       DateTime     @default(now())
+  lastReadAt     DateTime     @default(now())
+  unreadCount    Int          @default(0)
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conversationId])
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  content        String
+  createdAt      DateTime     @default(now())
+  senderId       Int
+  conversationId Int
+  isRead         Boolean      @default(false)
+
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }

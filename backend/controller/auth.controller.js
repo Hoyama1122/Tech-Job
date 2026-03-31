@@ -22,7 +22,7 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
-      }
+      },
     );
     res.cookie("token", token, {
       httpOnly: true,
@@ -59,25 +59,12 @@ export const logout = async (req, res) => {
 // me
 export const me = async (req, res) => {
   try {
-    const userId = req.user.id;
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        empno: true,
-        email: true,
-        role: true,
-        departmentId: true, 
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "ไม่พบผู้ใช้" });
+    if (!req.user) {
+      return res.status(401).json({ error: "กรุณาเข้าสู่ระบบ" });
     }
 
-    res.json({ user });
+    return res.status(200).json({ user: req.user });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
