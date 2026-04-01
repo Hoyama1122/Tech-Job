@@ -1,169 +1,313 @@
 import "dotenv/config";
-import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";
+import { PrismaClient, Role, JobStatus, AssignmentRole } from "../generated/prisma/index.js";
+
+const prisma = new PrismaClient();
 
 async function main() {
-  // 1. Clean Up (ลบข้อมูลเก่าก่อนเพื่อป้องกัน ID ซ้ำ)
-  await prisma.jobAssignment.deleteMany({});
-  await prisma.reportImage.deleteMany({});
-  await prisma.jobReport.deleteMany({});
-  await prisma.jobImage.deleteMany({});
-  await prisma.job.deleteMany({});
-  await prisma.profile.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.department.deleteMany({});
+  console.log("🌱 Start seeding...");
 
-  const passHashAdmin = await bcrypt.hash("admin123", 10);
-  const passHashSuperAdmin = await bcrypt.hash("superadmin", 10);
-  const passHashTech1 = await bcrypt.hash("tech123", 10);
-  const passHashTech2 = await bcrypt.hash("tech123", 10);
-  const passHashSupervisor = await bcrypt.hash("supervisor", 10);
-  // 2. Mock Departments
+  // ลบข้อมูลเก่าตามลำดับ relation
+  await prisma.reportImage.deleteMany();
+  await prisma.jobReport.deleteMany();
+  await prisma.jobImage.deleteMany();
+  await prisma.jobAssignment.deleteMany();
+  await prisma.job.deleteMany();
+  await prisma.profile.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.department.deleteMany();
+
+  console.log("🧹 Clean old data complete");
+
+  // departments
   const deptIT = await prisma.department.create({
     data: { name: "IT Support" },
   });
+
   const deptMaint = await prisma.department.create({
     data: { name: "Maintenance" },
   });
 
-  // 3. Mock Users & Profiles
+  // password hash
+  const passHashAdmin = await bcrypt.hash("admin123", 10);
+  const passHashSuperAdmin = await bcrypt.hash("superadmin123", 10);
+  const passHashSupervisor = await bcrypt.hash("supervisor123", 10);
+  const passHashTech1 = await bcrypt.hash("tech123", 10);
+  const passHashTech2 = await bcrypt.hash("tech123", 10);
 
-  const superadmin = await prisma.user.create({
+  // users
+  const superAdmin = await prisma.user.create({
     data: {
-      email: "superadmin@techjob.com",
+      email: "superadmin@example.com",
       password: passHashSuperAdmin,
-      role: "SUPERADMIN",
-      empno: "SAM001",
+      empno: "EMP0001",
+      role: Role.SUPERADMIN,
+      profile: {
+        create: {
+          firstname: "Super",
+          lastname: "Admin",
+          phone: "0800000001",
+          gender: "ชาย",
+          address: "Bangkok",
+        },
+      },
     },
+    include: { profile: true },
   });
 
   const admin = await prisma.user.create({
     data: {
-      empno: "ADM001",
-      email: "admin@techjob.com",
+      email: "admin@example.com",
       password: passHashAdmin,
-      role: "ADMIN",
+      empno: "EMP0002",
+      role: Role.ADMIN,
+      departmentId: deptIT.id,
       profile: {
         create: {
-          firstname: "สมหญิง",
-          lastname: "ใจสด",
-          phone: "0999999999",
-          gender: "FEMALE",
-          birthday: new Date("2000-01-01"),
-          address:
-            "122/176 หมุ่2 ถนนสมเด็จ แขวงวังใหม่ เขตวังใหม่ กรุงเทพมหานคร 10120",
+          firstname: "System",
+          lastname: "Admin",
+          phone: "0800000002",
+          gender: "หญิง",
+          address: "Samut Prakan",
         },
       },
-      departmentId: deptIT.id,
     },
+    include: { profile: true },
   });
 
   const supervisor = await prisma.user.create({
     data: {
-      empno: "SUP001",
-      email: "supervisor@techjob.com",
+      email: "supervisor@example.com",
       password: passHashSupervisor,
-      role: "SUPERVISOR",
-      departmentId: deptMaint.id,
+      empno: "EMP0003",
+      role: Role.SUPERVISOR,
+      departmentId: deptIT.id,
       profile: {
-        create: { firstname: "มานะ", lastname: "คุมงาน", phone: "0820002222" },
+        create: {
+          firstname: "Somchai",
+          lastname: "Manager",
+          phone: "0800000003",
+          gender: "ชาย",
+          address: "Bangkok",
+        },
       },
     },
+    include: { profile: true },
   });
 
   const tech1 = await prisma.user.create({
     data: {
-      empno: "TCH001",
-      email: "tech1@techjob.com",
+      email: "tech1@example.com",
       password: passHashTech1,
-      role: "TECHNICIAN",
-      departmentId: deptMaint.id,
+      empno: "EMP0004",
+      role: Role.TECHNICIAN,
+      departmentId: deptIT.id,
       profile: {
-        create: { firstname: "วิชัย", lastname: "ช่างไฟ", phone: "0830003333" },
+        create: {
+          firstname: "Napat",
+          lastname: "TechOne",
+          phone: "0800000004",
+          gender: "ชาย",
+          address: "Phra Samut Chedi",
+        },
       },
     },
+    include: { profile: true },
   });
 
   const tech2 = await prisma.user.create({
     data: {
-      empno: "TCH002",
-      email: "tech2@techjob.com",
+      email: "tech2@example.com",
       password: passHashTech2,
-      role: "TECHNICIAN",
+      empno: "EMP0005",
+      role: Role.TECHNICIAN,
       departmentId: deptMaint.id,
       profile: {
         create: {
-          firstname: "สมศักดิ์",
-          lastname: "ช่างท่อ",
-          phone: "0840004444",
+          firstname: "Suda",
+          lastname: "TechTwo",
+          phone: "0800000005",
+          gender: "หญิง",
+          address: "Samut Prakan",
         },
       },
     },
+    include: { profile: true },
   });
 
-  // 4. Mock Job
-  const job = await prisma.job.create({
+  console.log("👤 Users created");
+
+  // jobs
+  const job1 = await prisma.job.create({
     data: {
-      title: "ซ่อมระบบไฟฟ้าและประปา ห้องประชุมใหญ่",
-      description: "ไฟเพดานดับ 3 ดวง และมีน้ำหยดจากฝ้า",
-      status: "PENDING",
-      departmentId: deptMaint.id,
+      title: "ซ่อมคอมพิวเตอร์แผนกบัญชี",
+      description: "เครื่องเปิดไม่ติด",
+      departmentId: deptIT.id,
       createdById: admin.id,
+      status: JobStatus.PENDING,
+      start_available_at: new Date("2026-04-02T09:00:00.000Z"),
+      end_available_at: new Date("2026-04-02T12:00:00.000Z"),
+      latitude: 13.5967,
+      longitude: 100.5946,
+      location_name: "อาคาร A ชั้น 2",
       images: {
         create: [
           {
-            url: "https://res.cloudinary.com/demo/image/upload/v1/jobs/elec1.jpg",
-            publicId: "elec1",
+            url: "https://dummyimage.com/600x400/cccccc/000000&text=job1-image1",
+            publicId: "techjob/job1-image1",
           },
         ],
       },
     },
+    include: {
+      images: true,
+    },
   });
 
-  // 5. Mock Job Assignment (มอบหมายงานให้ช่าง)
+  const job2 = await prisma.job.create({
+    data: {
+      title: "ตรวจสอบระบบแอร์สำนักงาน",
+      description: "แอร์ไม่เย็น",
+      departmentId: deptMaint.id,
+      createdById: admin.id,
+      status: JobStatus.IN_PROGRESS,
+      start_available_at: new Date("2026-04-03T01:00:00.000Z"),
+      end_available_at: new Date("2026-04-03T05:00:00.000Z"),
+      latitude: 13.6012,
+      longitude: 100.6015,
+      location_name: "อาคาร B ชั้น 1",
+      images: {
+        create: [
+          {
+            url: "https://dummyimage.com/600x400/bbbbbb/000000&text=job2-image1",
+            publicId: "techjob/job2-image1",
+          },
+        ],
+      },
+    },
+    include: {
+      images: true,
+    },
+  });
+
+  const job3 = await prisma.job.create({
+    data: {
+      title: "ตรวจเช็กเครื่องพิมพ์",
+      description: "กระดาษติดบ่อย",
+      departmentId: deptIT.id,
+      createdById: admin.id,
+      status: JobStatus.COMPLETED,
+      location_name: "อาคาร C ชั้น 3",
+    },
+  });
+
+  console.log("🧾 Jobs created");
+
+  // assignments
   await prisma.jobAssignment.createMany({
     data: [
       {
-        jobId: job.id,
+        jobId: job1.id,
         userId: supervisor.id,
-        role: "SUPERVISOR", // คนคุม
+        role: AssignmentRole.SUPERVISOR,
       },
       {
-        jobId: job.id,
+        jobId: job1.id,
         userId: tech1.id,
-        role: "TECHNICIAN", // ช่างคนที่ 1
+        role: AssignmentRole.TECHNICIAN,
       },
       {
-        jobId: job.id,
+        jobId: job1.id,
         userId: tech2.id,
-        role: "TECHNICIAN", // ช่างคนที่ 2
+        role: AssignmentRole.TECHNICIAN,
+      },
+      {
+        jobId: job2.id,
+        userId: supervisor.id,
+        role: AssignmentRole.SUPERVISOR,
+      },
+      {
+        jobId: job2.id,
+        userId: tech2.id,
+        role: AssignmentRole.TECHNICIAN,
+      },
+      {
+        jobId: job3.id,
+        userId: supervisor.id,
+        role: AssignmentRole.SUPERVISOR,
+      },
+      {
+        jobId: job3.id,
+        userId: tech1.id,
+        role: AssignmentRole.TECHNICIAN,
       },
     ],
   });
 
-  // 6. Mock Job Report (รายงานการซ่อม)
-  await prisma.jobReport.create({
+  console.log("🧩 Assignments created");
+
+  // reports
+  const report1 = await prisma.jobReport.create({
     data: {
-      jobId: job.id,
-      status: "PENDING",
-      detail: "เปลี่ยนหลอดไฟ LED ใหม่ และซ่อมรอยรั่วของท่อ PVC เรียบร้อย",
-      summary: "งานเสร็จสิ้น ระบบกลับมาใช้งานได้ปกติ",
-      images: {
-        create: [
-          {
-            url: "https://res.cloudinary.com/demo/image/upload/v1/reports/success1.jpg",
-          },
-        ],
-      },
+      jobId: job3.id,
+      status: JobStatus.COMPLETED,
+      start_time: new Date("2026-04-01T02:00:00.000Z"),
+      end_time: new Date("2026-04-01T03:30:00.000Z"),
+      detail: "ตรวจสอบลูกกลิ้งและชุดดึงกระดาษ",
+      repair_operations: "ทำความสะอาดภายในและเปลี่ยนลูกยาง",
+      inspection_results: "ทดสอบพิมพ์ 20 แผ่น ปกติ",
+      summary: "ใช้งานได้ปกติแล้ว",
+      cus_sign: "customer-signature.png",
     },
   });
 
-  console.log("Mock data created successfully!");
+  const report2 = await prisma.jobReport.create({
+    data: {
+      jobId: job2.id,
+      status: JobStatus.REJECTED,
+      start_time: new Date("2026-04-02T03:00:00.000Z"),
+      end_time: new Date("2026-04-02T04:00:00.000Z"),
+      detail: "ตรวจสอบเบื้องต้นแล้วพบว่าต้องเปลี่ยนอะไหล่",
+      repair_operations: "ยังไม่สามารถซ่อมได้ในรอบนี้",
+      inspection_results: "ต้องรอสั่งอะไหล่",
+      summary: "เลื่อนงานเพื่อรออะไหล่",
+      rejectReason: "อะไหล่ไม่พร้อม",
+    },
+  });
+
+  console.log("📝 Reports created");
+
+  // report images
+  await prisma.reportImage.createMany({
+    data: [
+      {
+        reportId: report1.id,
+        url: "https://dummyimage.com/600x400/aaaaaa/000000&text=report1-image1",
+      },
+      {
+        reportId: report1.id,
+        url: "https://dummyimage.com/600x400/999999/000000&text=report1-image2",
+      },
+      {
+        reportId: report2.id,
+        url: "https://dummyimage.com/600x400/888888/000000&text=report2-image1",
+      },
+    ],
+  });
+
+  console.log("✅ Seed complete");
+  console.log({
+    superAdmin: superAdmin.email,
+    admin: admin.email,
+    supervisor: supervisor.email,
+    technician1: tech1.email,
+    technician2: tech2.email,
+  });
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("❌ Seed error:", e);
     process.exit(1);
   })
   .finally(async () => {
