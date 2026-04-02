@@ -7,7 +7,7 @@ import authRouter from "./routes/auth.routes.js";
 import cookieParser from "cookie-parser";
 import departmentRoute from "./routes/department.routes.js";
 import jobRouter from "./routes/job.routes.js";
-import jobReportRouter from "./routes/jobreport.routes.js";
+import jobReportRouter from "./routes/jobReport.routes.js";
 import userRouter from "./routes/user.routes.js";
 import routerProfile from "./routes/profile.routes.js";
 import chatRouter from "./routes/chat.routes.js";
