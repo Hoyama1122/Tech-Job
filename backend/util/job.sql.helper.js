@@ -1,0 +1,304 @@
+import { prisma, Prisma } from "../lib/prisma.js";
+import { getFullName } from "./job.helper.js";
+
+
+/**
+ * map rows จาก SQL join -> jobs list
+ * ใช้กับ getJobs / getMyJobs
+ */
+export const mapJobsRows = (rows = [], formatJobId) => {
+  const jobsMap = new Map();
+
+  for (const row of rows) {
+    if (!jobsMap.has(row.id)) {
+      jobsMap.set(row.id, {
+        id: row.id,
+        JobId: formatJobId(row.id),
+        title: row.title,
+        description: row.description,
+        status: row.status,
+        start_available_at: row.start_available_at,
+        end_available_at: row.end_available_at,
+        createdAt: row.createdAt,
+        supervisor: null,
+        technicians: [],
+      });
+    }
+
+    const job = jobsMap.get(row.id);
+
+    if (!row.assignment_user_id || !row.assignment_role) continue;
+
+    const fullName = getFullName(
+      row.assignment_user_firstname,
+      row.assignment_user_lastname
+    );
+
+    if (row.assignment_role === "SUPERVISOR") {
+      job.supervisor = {
+        id: row.assignment_user_id,
+        name: fullName,
+      };
+    }
+
+    if (row.assignment_role === "TECHNICIAN") {
+      const exists = job.technicians.some(
+        (tech) => tech.id === row.assignment_user_id
+      );
+
+      if (!exists) {
+        job.technicians.push({
+          id: row.assignment_user_id,
+          name: fullName,
+        });
+      }
+    }
+  }
+
+  return Array.from(jobsMap.values());
+};
+
+/**
+ * map rows จาก SQL join -> job detail
+ */
+export const mapJobDetailRows = (rows = [], formatJobId) => {
+  if (!rows.length) return null;
+
+  const first = rows[0];
+
+  const job = {
+    id: first.id,
+    JobId: formatJobId(first.id),
+    title: first.title,
+    description: first.description,
+    status: first.status,
+    createdAt: first.createdAt,
+    updatedAt: first.updatedAt,
+
+    start_available_at: first.start_available_at,
+    end_available_at: first.end_available_at,
+
+    location: {
+      latitude: first.latitude,
+      longitude: first.longitude,
+      location_name: first.location_name,
+    },
+
+    department: first.department_id
+      ? {
+          id: first.department_id,
+          name: first.department_name,
+        }
+      : null,
+
+    createdBy: first.created_by_id
+      ? {
+          id: first.created_by_id,
+          name: getFullName(
+            first.created_by_firstname,
+            first.created_by_lastname
+          ),
+          department: first.created_by_department_name || null,
+        }
+      : null,
+
+    supervisor: null,
+    technicians: [],
+    images: [],
+    reports: [],
+  };
+
+  const technicianMap = new Map();
+  const imageMap = new Map();
+  const reportMap = new Map();
+
+  for (const row of rows) {
+    if (row.assignment_user_id && row.assignment_role) {
+      const fullName = getFullName(
+        row.assignment_user_firstname,
+        row.assignment_user_lastname
+      );
+
+      if (row.assignment_role === "SUPERVISOR") {
+        job.supervisor = {
+          id: row.assignment_user_id,
+          name: fullName,
+          department: row.assignment_department_name || null,
+        };
+      }
+
+      if (row.assignment_role === "TECHNICIAN") {
+        if (!technicianMap.has(row.assignment_user_id)) {
+          technicianMap.set(row.assignment_user_id, {
+            id: row.assignment_user_id,
+            name: fullName,
+            department: row.assignment_department_name || null,
+          });
+        }
+      }
+    }
+
+    if (row.image_id && !imageMap.has(row.image_id)) {
+      imageMap.set(row.image_id, {
+        id: row.image_id,
+        url: row.image_url,
+        publicId: row.image_public_id,
+        createdAt: row.image_created_at,
+      });
+    }
+
+    if (row.report_id && !reportMap.has(row.report_id)) {
+      reportMap.set(row.report_id, {
+        id: row.report_id,
+        status: row.report_status,
+        detail: row.report_detail,
+        summary: row.report_summary,
+        createdAt: row.report_created_at,
+      });
+    }
+  }
+
+  job.technicians = Array.from(technicianMap.values());
+  job.images = Array.from(imageMap.values());
+  job.reports = Array.from(reportMap.values());
+
+  return job;
+};
+
+/**
+ * สร้าง dynamic update fields
+ */
+export const buildJobUpdateFields = ({
+  title,
+  description,
+  status,
+  location_name,
+  latitude,
+  longitude,
+  start_available_at,
+  end_available_at,
+  departmentId,
+}) => {
+  const fields = [];
+
+  if (title !== undefined) {
+    fields.push(Prisma.sql`title = ${title}`);
+  }
+
+  if (description !== undefined) {
+    fields.push(Prisma.sql`description = ${description}`);
+  }
+
+  if (status !== undefined) {
+    fields.push(Prisma.sql`status = ${status}`);
+  }
+
+  if (location_name !== undefined) {
+    fields.push(Prisma.sql`location_name = ${location_name}`);
+  }
+
+  if (latitude !== undefined) {
+    fields.push(Prisma.sql`latitude = ${latitude}`);
+  }
+
+  if (longitude !== undefined) {
+    fields.push(Prisma.sql`longitude = ${longitude}`);
+  }
+
+  if (start_available_at !== undefined) {
+    fields.push(Prisma.sql`start_available_at = ${start_available_at}`);
+  }
+
+  if (end_available_at !== undefined) {
+    fields.push(Prisma.sql`end_available_at = ${end_available_at}`);
+  }
+
+  if (departmentId !== undefined && departmentId !== "") {
+    fields.push(Prisma.sql`"departmentId" = ${Number(departmentId)}`);
+  }
+
+  fields.push(Prisma.sql`"updatedAt" = NOW()`);
+
+  return fields;
+};
+
+export const insertAssignments = async ({
+  tx,
+  jobId,
+  supervisorId,
+  technicianIds = [],
+}) => {
+  if (supervisorId !== undefined && supervisorId !== null && supervisorId !== "") {
+    await tx.$executeRaw`
+      INSERT INTO "JobAssignment" ("jobId", "userId", role)
+      VALUES (${jobId}, ${Number(supervisorId)}, 'SUPERVISOR')
+    `;
+  }
+
+  for (const technicianId of technicianIds) {
+    await tx.$executeRaw`
+      INSERT INTO "JobAssignment" ("jobId", "userId", role)
+      VALUES (${jobId}, ${Number(technicianId)}, 'TECHNICIAN')
+    `;
+  }
+};
+
+export const replaceAssignments = async ({
+  tx,
+  jobId,
+  supervisorId,
+  technicianIds = [],
+}) => {
+  await tx.$executeRaw`
+    DELETE FROM "JobAssignment"
+    WHERE "jobId" = ${jobId}
+  `;
+
+  await insertAssignments({
+    tx,
+    jobId,
+    supervisorId,
+    technicianIds,
+  });
+};
+
+export const insertJobImages = async ({
+  tx,
+  jobId,
+  uploadedImages = [],
+}) => {
+  if (!uploadedImages.length) return;
+
+  for (const image of uploadedImages) {
+    await tx.$executeRaw`
+      INSERT INTO "JobImage" ("jobId", url, "publicId", "createdAt")
+      VALUES (${jobId}, ${image.url}, ${image.publicId}, NOW())
+    `;
+  }
+};
+
+export const deleteJobRelations = async ({ tx, jobId }) => {
+  await tx.$executeRaw`
+    DELETE FROM "JobAssignment"
+    WHERE "jobId" = ${jobId}
+  `;
+
+  await tx.$executeRaw`
+    DELETE FROM "JobImage"
+    WHERE "jobId" = ${jobId}
+  `;
+
+  await tx.$executeRaw`
+    DELETE FROM "JobReport"
+    WHERE "jobId" = ${jobId}
+  `;
+};
+
+export const getJobImagesPublicIds = async (prismaInstance, jobId) => {
+  const images = await prismaInstance.$queryRaw`
+    SELECT "publicId"
+    FROM "JobImage"
+    WHERE "jobId" = ${jobId}
+  `;
+  return images.map((img) => img.publicId).filter(Boolean);
+};

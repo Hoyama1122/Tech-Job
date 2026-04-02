@@ -1,4 +1,19 @@
-import { uploadToCloudinary } from "../util/cloudinaryUpload.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryUpload.js";
+
+export { deleteFromCloudinary };
+
+export const deleteImages = async (publicIds = []) => {
+  try {
+    if (!publicIds || publicIds.length === 0) return;
+
+    await Promise.all(
+      publicIds.map((publicId) => deleteFromCloudinary(publicId))
+    );
+  } catch (error) {
+    console.error("deleteImages error:", error);
+    throw error;
+  }
+};
 
 export const uploadImages = async (files = [], folder = "techjob") => {
   try {
