@@ -90,7 +90,6 @@ export const getJobById = async (req, res) => {
 
         cb.id AS created_by_id,
         cb.empno AS created_by_empno,
-        cbd.name AS created_by_department_name,
         cbp.firstname AS created_by_firstname,
         cbp.lastname AS created_by_lastname,
 
@@ -120,8 +119,6 @@ export const getJobById = async (req, res) => {
         ON cb.id = j."createdById"
       LEFT JOIN "Profile" cbp
         ON cbp."userId" = cb.id
-      LEFT JOIN "Department" cbd
-        ON cbd.id = cb."departmentId"
 
       LEFT JOIN "JobAssignment" ja
         ON ja."jobId" = j.id
@@ -287,7 +284,6 @@ export const createJob = async (req, res) => {
 
           cb.id AS created_by_id,
           cb.empno AS created_by_empno,
-          cbd.name AS created_by_department_name,
           cbp.firstname AS created_by_firstname,
           cbp.lastname AS created_by_lastname,
 
@@ -316,8 +312,6 @@ export const createJob = async (req, res) => {
           ON cb.id = j."createdById"
         LEFT JOIN "Profile" cbp
           ON cbp."userId" = cb.id
-        LEFT JOIN "Department" cbd
-          ON cbd.id = cb."departmentId"
 
         LEFT JOIN "JobAssignment" ja
           ON ja."jobId" = j.id
@@ -506,7 +500,6 @@ export const updateJob = async (req, res) => {
 
         cb.id AS created_by_id,
         cb.empno AS created_by_empno,
-        cbd.name AS created_by_department_name,
         cbp.firstname AS created_by_firstname,
         cbp.lastname AS created_by_lastname,
 
@@ -536,8 +529,6 @@ export const updateJob = async (req, res) => {
         ON cb.id = j."createdById"
       LEFT JOIN "Profile" cbp
         ON cbp."userId" = cb.id
-      LEFT JOIN "Department" cbd
-        ON cbd.id = cb."departmentId"
 
       LEFT JOIN "JobAssignment" ja
         ON ja."jobId" = j.id
