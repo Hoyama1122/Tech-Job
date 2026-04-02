@@ -1,7 +1,6 @@
 import { uploadImages, uploadSingleImage } from "../util/upload.helper.js";
 import { prisma } from "../lib/prisma.js";
 import { getFullName } from "../util/job.helper.js";
-import { formatReportWithImages } from "../util/jobreport.sql.helper.js";
 
 export const createJobReport = async (req, res) => {
   try {
@@ -19,82 +18,42 @@ export const createJobReport = async (req, res) => {
     const imageFiles = req.files?.images || [];
     const signFile = req.files?.cus_sign?.[0];
 
-    const uploadedImages = await uploadImages(imageFiles, "techjob/job-reports");
+    const uploadedImages = await uploadImages(
+      imageFiles,
+      "techjob/job-reports"
+    );
+
     const uploadedSignature = await uploadSingleImage(
       signFile,
       "techjob/job-reports/sign"
     );
 
-    const result = await prisma.$transaction(async (tx) => {
-      const reports = await tx.$queryRaw`
-        INSERT INTO "JobReport" (
-          "jobId",
-          "status",
-          "start_time",
-          "end_time",
-          "detail",
-          "repair_operations",
-          "inspection_results",
-          "summary",
-          "cus_sign",
-          "createdAt",
-          "updatedAt"
-        )
-        VALUES (
-          ${Number(jobId)},
-          ${status},
-          ${start_time ? new Date(start_time) : null},
-          ${end_time ? new Date(end_time) : null},
-          ${detail},
-          ${repair_operations},
-          ${inspection_results},
-          ${summary},
-          ${uploadedSignature?.url || null},
-          NOW(),
-          NOW()
-        )
-        RETURNING *;
-      `;
+    const report = await prisma.jobReport.create({
+      data: {
+        jobId: Number(jobId),
+        status,
+        start_time: start_time ? new Date(start_time) : null,
+        end_time: end_time ? new Date(end_time) : null,
+        detail,
+        repair_operations,
+        inspection_results,
+        summary,
+        cus_sign: uploadedSignature?.url,
 
-      const report = reports[0];
-
-      if (uploadedImages.length > 0) {
-        const values = uploadedImages.map((img) => Prisma.sql`
-          (${report.id}, ${img.url}, NOW(), NOW())
-        `);
-
-        await tx.$executeRaw`
-          INSERT INTO "ReportImage" (
-            "reportId",
-            "url",
-            "createdAt",
-            "updatedAt"
-          )
-          VALUES ${prisma.join(values)};
-        `;
-      }
-
-      const reportWithImages = await tx.$queryRaw`
-        SELECT
-          jr.*,
-          ri.id AS image_id,
-          ri.url AS image_url,
-          ri."createdAt" AS image_created_at
-        FROM "JobReport" jr
-        LEFT JOIN "ReportImage" ri
-          ON ri."reportId" = jr.id
-        WHERE jr.id = ${report.id}
-        ORDER BY ri.id ASC;
-      `;
-
-      const formatted = formatReportWithImages(reportWithImages);
-
-      return formatted;
+        images: {
+          create: uploadedImages.map((img) => ({
+            url: img.url,
+          })),
+        },
+      },
+      include: {
+        images: true,
+      },
     });
 
     res.json({
       message: "สร้างรายงานสำเร็จ",
-      report: result,
+      report,
     });
   } catch (error) {
     console.error(error);

@@ -97,8 +97,7 @@ export const mapJobDetailRows = (rows = [], formatJobId) => {
           name: getFullName(
             first.created_by_firstname,
             first.created_by_lastname
-          ),
-          department: first.created_by_department_name || null,
+          )
         }
       : null,
 

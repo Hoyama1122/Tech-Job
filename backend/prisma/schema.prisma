@@ -18,10 +18,10 @@ model User {
   empno        String          @unique
   createdJobs  Job[]           @relation("CreatedBy")
   assignedJobs JobAssignment[]
+  messages     Message[]
+  participants Participant[]
   profile      Profile?
   department   Department?     @relation(fields: [departmentId], references: [id])
-  participants Participant[]
-  messages     Message[]
 }
 
 model Profile {
@@ -54,8 +54,8 @@ model Job {
   createdById        Int
   end_available_at   DateTime?
   latitude           Float?
-  longitude          Float?
   location_name      String?
+  longitude          Float?
   start_available_at DateTime?
   status             JobStatus?      @default(PENDING)
   createdBy          User            @relation("CreatedBy", fields: [createdById], references: [id])
@@ -66,7 +66,6 @@ model Job {
 }
 
 model JobReport {
-  id                 Int           @id @default(autoincrement())
   status             JobStatus     @default(COMPLETED)
   start_time         DateTime?
   end_time           DateTime?
@@ -75,20 +74,21 @@ model JobReport {
   inspection_results String?
   summary            String?
   cus_sign           String?
-  rejectReason       String?
+  jobId              Int
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
-  jobId              Int
+  id                 Int           @id @default(autoincrement())
+  rejectReason       String?
   job                Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
   images             ReportImage[]
 }
 
 model JobImage {
-  id        Int      @id @default(autoincrement())
   url       String?
   publicId  String?
   jobId     Int
   createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
   job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
@@ -112,6 +112,38 @@ model JobAssignment {
   @@unique([jobId, userId, role])
 }
 
+model Conversation {
+  id           Int           @id @default(autoincrement())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  messages     Message[]
+  participants Participant[]
+}
+
+model Participant {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  conversationId Int
+  joinedAt       DateTime     @default(now())
+  lastReadAt     DateTime     @default(now())
+  unreadCount    Int          @default(0)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conversationId])
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  content        String
+  createdAt      DateTime     @default(now())
+  senderId       Int
+  conversationId Int
+  isRead         Boolean      @default(false)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   SUPERADMIN
   ADMIN
@@ -129,38 +161,4 @@ enum JobStatus {
 enum AssignmentRole {
   SUPERVISOR
   TECHNICIAN
-}
-
-model Conversation {
-  id           Int           @id @default(autoincrement())
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  participants Participant[]
-  messages     Message[]
-}
-
-model Participant {
-  id             Int          @id @default(autoincrement())
-  userId         Int
-  conversationId Int
-  joinedAt       DateTime     @default(now())
-  lastReadAt     DateTime     @default(now())
-  unreadCount    Int          @default(0)
-
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, conversationId])
-}
-
-model Message {
-  id             Int          @id @default(autoincrement())
-  content        String
-  createdAt      DateTime     @default(now())
-  senderId       Int
-  conversationId Int
-  isRead         Boolean      @default(false)
-
-  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
