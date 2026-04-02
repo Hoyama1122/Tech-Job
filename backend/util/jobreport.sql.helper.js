@@ -1,3 +1,8 @@
+import { Prisma } from "../lib/prisma.js";
+
+/* ================================
+   MAP DETAIL
+================================ */
 export const mapJobReportDetailRows = (rows = []) => {
   if (!rows.length) return null;
 
@@ -72,6 +77,9 @@ export const mapJobReportDetailRows = (rows = []) => {
   };
 };
 
+/* ================================
+   MAP LIST
+================================ */
 export const mapJobReportListRows = (rows = []) => {
   const reportsMap = new Map();
 
@@ -133,7 +141,10 @@ export const mapJobReportListRows = (rows = []) => {
   return Array.from(reportsMap.values());
 };
 
-export const buildReportUpdateQueryInput = ({
+/* ================================
+   BUILD UPDATE FIELD
+================================ */
+export const buildReportUpdateFields = ({
   status,
   start_time,
   end_time,
@@ -141,34 +152,60 @@ export const buildReportUpdateQueryInput = ({
   repair_operations,
   inspection_results,
   summary,
-  uploadedSignature,
+  cus_sign,
 }) => {
-  return {
-    status: status ?? null,
+  const fields = [];
 
-    hasStartTime: start_time !== undefined,
-    start_time: start_time ? new Date(start_time) : null,
+  if (status !== undefined) {
+    fields.push(Prisma.sql`status = ${status}`);
+  }
 
-    hasEndTime: end_time !== undefined,
-    end_time: end_time ? new Date(end_time) : null,
+  if (start_time !== undefined) {
+    fields.push(
+      Prisma.sql`start_time = ${
+        start_time ? new Date(start_time) : null
+      }`
+    );
+  }
 
-    hasDetail: detail !== undefined,
-    detail: detail ?? null,
+  if (end_time !== undefined) {
+    fields.push(
+      Prisma.sql`end_time = ${
+        end_time ? new Date(end_time) : null
+      }`
+    );
+  }
 
-    hasRepairOperations: repair_operations !== undefined,
-    repair_operations: repair_operations ?? null,
+  if (detail !== undefined) {
+    fields.push(Prisma.sql`detail = ${detail}`);
+  }
 
-    hasInspectionResults: inspection_results !== undefined,
-    inspection_results: inspection_results ?? null,
+  if (repair_operations !== undefined) {
+    fields.push(
+      Prisma.sql`repair_operations = ${repair_operations}`
+    );
+  }
 
-    hasSummary: summary !== undefined,
-    summary: summary ?? null,
+  if (inspection_results !== undefined) {
+    fields.push(
+      Prisma.sql`inspection_results = ${inspection_results}`
+    );
+  }
 
-    hasSignature: Boolean(uploadedSignature?.url),
-    cus_sign: uploadedSignature?.url ?? null,
-  };
+  if (summary !== undefined) {
+    fields.push(Prisma.sql`summary = ${summary}`);
+  }
+
+  if (cus_sign !== undefined) {
+    fields.push(Prisma.sql`cus_sign = ${cus_sign}`);
+  }
+
+  return fields;
 };
 
+/* ================================
+   VALIDATE TIME
+================================ */
 export const validateReportTimeRange = ({ start_time, end_time }) => {
   if (start_time && Number.isNaN(new Date(start_time).getTime())) {
     return {
@@ -199,23 +236,37 @@ export const validateReportTimeRange = ({ start_time, end_time }) => {
   return { valid: true };
 };
 
-export const insertReportImages = async ({ tx, reportId, uploadedImages = [] }) => {
-  if (!uploadedImages.length) return;
-
+/* ================================
+   INSERT IMAGES
+================================ */
+export const insertReportImages = async ({
+  tx,
+  reportId,
+  uploadedImages,
+}) => {
   for (const img of uploadedImages) {
-    await tx.$queryRaw`
-      INSERT INTO "ReportImage" (
-        url,
-        "publicId",
-        "reportId",
-        "createdAt"
-      )
+    await tx.$executeRaw`
+      INSERT INTO "ReportImage"
+      ("reportId", url, "publicId", "createdAt")
       VALUES (
-        ${img.url},
-        ${img.publicId ?? null},
         ${reportId},
+        ${img.url},
+        ${img.publicId},
         NOW()
-      );
+      )
     `;
   }
+};
+
+/* ================================
+   GET PUBLIC IDS
+================================ */
+export const getReportImagesPublicIds = async (tx, reportId) => {
+  const rows = await tx.$queryRaw`
+    SELECT "publicId"
+    FROM "ReportImage"
+    WHERE "reportId" = ${reportId}
+  `;
+
+  return rows.map((r) => r.publicId);
 };

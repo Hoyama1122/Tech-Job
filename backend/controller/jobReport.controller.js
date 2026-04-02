@@ -1,12 +1,17 @@
-import { prisma } from "../lib/prisma.js";
-import cloudinary from "../config/cloudinary.js";
-import { uploadImages, uploadSingleImage } from "../util/upload.helper.js";
+import { prisma, Prisma } from "../lib/prisma.js";
+import {
+  uploadImages,
+  uploadSingleImage,
+  deleteImages,
+  extractCloudinaryPublicId,
+} from "../util/upload.helper.js";
 import {
   mapJobReportDetailRows,
   mapJobReportListRows,
-  buildReportUpdateQueryInput,
   validateReportTimeRange,
   insertReportImages,
+  getReportImagesPublicIds,
+  buildReportUpdateFields,
 } from "../util/jobreport.sql.helper.js";
 
 export const createJobReport = async (req, res) => {
@@ -96,7 +101,7 @@ export const createJobReport = async (req, res) => {
           ${repair_operations ?? null},
           ${inspection_results ?? null},
           ${summary ?? null},
-          ${uploadedSignature?.url ?? null},
+          ${uploadedSignature?.secure_url || uploadedSignature?.url || null},
           ${Number(createdById)},
           NOW(),
           NOW()
@@ -184,13 +189,13 @@ export const createJobReport = async (req, res) => {
       return mapJobReportDetailRows(rows);
     });
 
-    res.json({
+    return res.json({
       message: "สร้างรายงานสำเร็จ",
       report,
     });
   } catch (error) {
     console.error("createJobReport error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
   }
@@ -247,13 +252,13 @@ export const getJobReports = async (req, res) => {
 
     const reports = mapJobReportListRows(rows);
 
-    res.json({
+    return res.json({
       message: "ดึงข้อมูลรายงานสำเร็จ",
       reports,
     });
   } catch (error) {
     console.error("getJobReports error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
   }
@@ -339,13 +344,13 @@ export const getJobReportById = async (req, res) => {
 
     const report = mapJobReportDetailRows(rows);
 
-    res.json({
+    return res.json({
       message: "ดึงข้อมูลรายงานสำเร็จ",
       report,
     });
   } catch (error) {
     console.error("getJobReportById error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
   }
@@ -417,13 +422,13 @@ export const getJobReportByJobId = async (req, res) => {
 
     const reports = mapJobReportListRows(rows);
 
-    res.json({
+    return res.json({
       message: "ดึงข้อมูลรายงานสำเร็จ",
       reports,
     });
   } catch (error) {
     console.error("getJobReportByJobId error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
   }
@@ -463,7 +468,8 @@ export const updateJobReport = async (req, res) => {
     const existingRows = await prisma.$queryRaw`
       SELECT
         jr.id,
-        jr."jobId"
+        jr."jobId",
+        jr.cus_sign
       FROM "JobReport" jr
       WHERE jr.id = ${id}
       LIMIT 1;
@@ -490,67 +496,65 @@ export const updateJobReport = async (req, res) => {
       "techjob/job-reports/sign"
     );
 
-    const updateInput = buildReportUpdateQueryInput({
-      status,
-      start_time,
-      end_time,
-      detail,
-      repair_operations,
-      inspection_results,
-      summary,
-      uploadedSignature,
-    });
+    const isImageUpdate = req.files?.images !== undefined;
+
+    let oldImagePublicIds = [];
+    let oldSignaturePublicIds = [];
 
     const report = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`
-        UPDATE "JobReport"
-        SET
-          status = COALESCE(${updateInput.status}, status),
-          start_time = CASE
-            WHEN ${updateInput.hasStartTime} THEN ${updateInput.start_time}
-            ELSE start_time
-          END,
-          end_time = CASE
-            WHEN ${updateInput.hasEndTime} THEN ${updateInput.end_time}
-            ELSE end_time
-          END,
-          detail = CASE
-            WHEN ${updateInput.hasDetail} THEN ${updateInput.detail}
-            ELSE detail
-          END,
-          repair_operations = CASE
-            WHEN ${updateInput.hasRepairOperations} THEN ${updateInput.repair_operations}
-            ELSE repair_operations
-          END,
-          inspection_results = CASE
-            WHEN ${updateInput.hasInspectionResults} THEN ${updateInput.inspection_results}
-            ELSE inspection_results
-          END,
-          summary = CASE
-            WHEN ${updateInput.hasSummary} THEN ${updateInput.summary}
-            ELSE summary
-          END,
-          cus_sign = CASE
-            WHEN ${updateInput.hasSignature} THEN ${updateInput.cus_sign}
-            ELSE cus_sign
-          END,
-          "updatedAt" = NOW()
-        WHERE id = ${id};
-      `;
+      if (isImageUpdate) {
+        oldImagePublicIds = await getReportImagesPublicIds(tx, id);
 
-      await insertReportImages({
-        tx,
-        reportId: id,
-        uploadedImages,
+        await tx.$executeRaw`
+          DELETE FROM "ReportImage"
+          WHERE "reportId" = ${id}
+        `;
+      }
+
+      const newSignatureUrl =
+        uploadedSignature?.secure_url || uploadedSignature?.url;
+
+      if (newSignatureUrl && existingReport.cus_sign) {
+        const maybePublicId = extractCloudinaryPublicId(existingReport.cus_sign);
+        if (maybePublicId) {
+          oldSignaturePublicIds = [maybePublicId];
+        }
+      }
+
+      const updateFields = buildReportUpdateFields({
+        status,
+        start_time,
+        end_time,
+        detail,
+        repair_operations,
+        inspection_results,
+        summary,
+        cus_sign: newSignatureUrl,
       });
 
-      if (status) {
-        await tx.$queryRaw`
+      if (updateFields.length > 0) {
+        await tx.$executeRaw`
+          UPDATE "JobReport"
+          SET ${Prisma.join(updateFields, ", ")},
+              "updatedAt" = NOW()
+          WHERE id = ${id}
+        `;
+      }
+
+      if (uploadedImages.length > 0) {
+        await insertReportImages({
+          tx,
+          reportId: id,
+          uploadedImages,
+        });
+      }
+
+      if (status !== undefined) {
+        await tx.$executeRaw`
           UPDATE "Job"
-          SET
-            status = ${status},
-            "updatedAt" = NOW()
-          WHERE id = ${existingReport.jobId};
+          SET status = ${status},
+              "updatedAt" = NOW()
+          WHERE id = ${existingReport.jobId}
         `;
       }
 
@@ -619,13 +623,23 @@ export const updateJobReport = async (req, res) => {
       return mapJobReportDetailRows(rows);
     });
 
-    res.json({
+    const deletePublicIds = [
+      ...oldImagePublicIds.filter(Boolean),
+      ...oldSignaturePublicIds.filter(Boolean),
+    ];
+
+    if (deletePublicIds.length > 0) {
+      await deleteImages(deletePublicIds);
+    }
+
+    return res.json({
       message: "อัปเดตรายงานสำเร็จ",
       report,
     });
   } catch (error) {
     console.error("updateJobReport error:", error);
-    res.status(500).json({
+
+    return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
   }
@@ -675,25 +689,39 @@ export const deleteJobReport = async (req, res) => {
 
     const report = mapJobReportDetailRows(rows);
 
-    await Promise.all(
-      report.images.map(async (image) => {
-        if (image.publicId) {
-          await cloudinary.uploader.destroy(image.publicId);
-        }
-      })
-    );
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`
+        DELETE FROM "ReportImage"
+        WHERE "reportId" = ${id}
+      `;
 
-    await prisma.$executeRaw`
-      DELETE FROM "JobReport"
-      WHERE id = ${id};
-    `;
+      await tx.$executeRaw`
+        DELETE FROM "JobReport"
+        WHERE id = ${id}
+      `;
+    });
 
-    res.json({
+    const publicIds = [
+      ...(report.images || []).map((image) => image.publicId).filter(Boolean),
+    ];
+
+    if (report.cus_sign) {
+      const signPublicId = extractCloudinaryPublicId(report.cus_sign);
+      if (signPublicId) {
+        publicIds.push(signPublicId);
+      }
+    }
+
+    if (publicIds.length > 0) {
+      await deleteImages(publicIds);
+    }
+
+    return res.json({
       message: "ลบรายงานสำเร็จ",
     });
   } catch (error) {
     console.error("deleteJobReport error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
   }
@@ -743,7 +771,7 @@ export const approveJobReport = async (req, res) => {
       return updatedRows[0];
     });
 
-    res.json({
+    return res.json({
       message: "อนุมัติรายงานสำเร็จ",
       report,
     });
@@ -756,7 +784,7 @@ export const approveJobReport = async (req, res) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
   }
@@ -806,7 +834,7 @@ export const rejectJobReport = async (req, res) => {
       return updatedRows[0];
     });
 
-    res.json({
+    return res.json({
       message: "ปฏิเสธรายงานสำเร็จ",
       report,
     });
@@ -819,8 +847,9 @@ export const rejectJobReport = async (req, res) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
   }
 };
+
