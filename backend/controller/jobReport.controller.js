@@ -403,6 +403,7 @@ export const deleteJobReport = async (req, res) => {
     });
   }
 };
+
 export const approveJobReport = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -443,6 +444,7 @@ export const approveJobReport = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 export const rejectJobReport = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -480,5 +482,101 @@ export const rejectJobReport = async (req, res) => {
   } catch (error) {
     console.error("rejectJobReport error:", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const getJobReportByJobId = async (req, res) => {
+  try {
+    const jobId = Number(req.params.jobId);
+
+    if (!jobId) {
+      return res.status(400).json({
+        error: "Invalid report id",
+      });
+    }
+
+    const report = await prisma.jobReport.findUnique({
+      where: { jobId },
+      include: {
+        job: {
+          include: {
+            department: true,
+            createdBy: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        images: true,
+      },
+    });
+
+    if (!report) {
+      return res.status(404).json({
+        error: "ไม่พบรายงาน",
+      });
+    }
+
+    const formattedReport = {
+      id: report.id,
+      jobId: report.jobId,
+      status: report.status,
+
+      start_time: report.start_time,
+      end_time: report.end_time,
+
+      detail: report.detail,
+      repair_operations: report.repair_operations,
+      inspection_results: report.inspection_results,
+      summary: report.summary,
+
+      cus_sign: report.cus_sign,
+
+      createdAt: report.createdAt,
+      updatedAt: report.updatedAt,
+
+      job: {
+        id: report.job.id,
+        JobId: `JOB-${String(report.job.id).padStart(4, "0")}`,
+        title: report.job.title,
+        description: report.job.description,
+        status: report.job.status,
+
+        start_available_at: report.job.start_available_at,
+        end_available_at: report.job.end_available_at,
+
+        location: {
+          latitude: report.job.latitude,
+          longitude: report.job.longitude,
+          location_name: report.job.location_name,
+        },
+
+        department: report.job.department?.name,
+
+        createdBy: report.job.createdBy
+          ? {
+              id: report.job.createdBy.id,
+              name: getFullName(job.createdBy),
+            }
+          : null,
+      },
+
+      images: report.images.map((image) => ({
+        id: image.id,
+        url: image.url,
+        createdAt: image.createdAt,
+      })),
+    };
+
+    res.json({
+      message: "ดึงข้อมูลรายงานสำเร็จ",
+      report: formattedReport,
+    });
+  } catch (error) {
+    console.error("getJobReportById error:", error);
+    res.status(500).json({
+      error: error.message,
+    });
   }
 };

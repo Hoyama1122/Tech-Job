@@ -21,7 +21,7 @@ export const mapJobsRows = (rows = [], formatJobId) => {
         end_available_at: row.end_available_at,
         createdAt: row.createdAt,
         supervisor: null,
-        technicians: [],
+        technicians: [], // del
       });
     }
 

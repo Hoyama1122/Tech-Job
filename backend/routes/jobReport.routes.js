@@ -5,6 +5,7 @@ import {
   createJobReport,
   deleteJobReport,
   getJobReportById,
+  getJobReportByJobId,
   getJobReports,
   rejectJobReport,
   updateJobReport,
@@ -271,5 +272,7 @@ jobReportRouter.patch("/:id/approve", approveJobReport);
  *         description: Server error
  */
 jobReportRouter.patch("/:id/reject", rejectJobReport);
+
+jobReportRouter.get("/:jobId", getJobReportByJobId)
 
 export default jobReportRouter;
