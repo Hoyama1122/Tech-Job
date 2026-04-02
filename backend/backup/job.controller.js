@@ -208,7 +208,7 @@ export const createJob = async (req, res) => {
       longitude,
       location_name,
     } = req.body;
-
+    const userId = req.user.id;
     if (!title) return res.status(400).json({ message: "กรุณากรอกชื่องาน" });
     if (!departmentId)
       return res.status(400).json({ message: "กรุณาเลือกแผนก" });
@@ -226,7 +226,7 @@ export const createJob = async (req, res) => {
     const technicianIds = normalizeTechnicianIds(technicianId);
     const imageFiles = req.files?.images || [];
 
-    const uploadedImages = await uploadImages(imageFiles, "techjob/job-reports");
+    const uploadedImages = await uploadImages(imageFiles, "techjob/job");
 
     const assignments = [
       ...(supervisorId
@@ -259,7 +259,7 @@ export const createJob = async (req, res) => {
           connect: { id: Number(departmentId) },
         },
         createdBy: {
-          connect: { id: 3 },
+          connect: { id: userId },
         },
         assignment: {
           create: assignments,

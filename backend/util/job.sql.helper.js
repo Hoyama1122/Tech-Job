@@ -1,7 +1,6 @@
-import pkg from "@prisma/client";
-const { Prisma } = pkg;
-
+import { prisma, Prisma } from "../lib/prisma.js";
 import { getFullName } from "./job.helper.js";
+
 
 /**
  * map rows จาก SQL join -> jobs list
@@ -293,4 +292,13 @@ export const deleteJobRelations = async ({ tx, jobId }) => {
     DELETE FROM "JobReport"
     WHERE "jobId" = ${jobId}
   `;
+};
+
+export const getJobImagesPublicIds = async (prismaInstance, jobId) => {
+  const images = await prismaInstance.$queryRaw`
+    SELECT "publicId"
+    FROM "JobImage"
+    WHERE "jobId" = ${jobId}
+  `;
+  return images.map((img) => img.publicId).filter(Boolean);
 };

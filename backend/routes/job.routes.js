@@ -8,7 +8,8 @@ import {
   updateJob,
 } from "../controller/job.controller.js";
 import { upload } from "../lib/upload.js";
-import { verifyToken } from "../lib/middleware.js";
+import { allowRoles, verifyToken } from "../lib/middleware.js";
+import authRouter from "./auth.routes.js";
 
 const jobRouter = Router();
 
@@ -115,7 +116,10 @@ jobRouter.get("/", getJobs);
 jobRouter.post(
   "/",
   upload.fields([{ name: "images", maxCount: 10 }]),
-  createJob
+  verifyToken,
+  authRouter,
+  allowRoles("ADMIN", "SUPERADMIN"),
+  createJob,
 );
 
 /**
@@ -212,7 +216,7 @@ jobRouter.get("/:id", getJobById);
 jobRouter.put(
   "/:id",
   upload.fields([{ name: "images", maxCount: 10 }]),
-  updateJob
+  updateJob,
 );
 
 /**

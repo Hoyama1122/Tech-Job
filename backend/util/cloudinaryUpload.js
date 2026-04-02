@@ -15,3 +15,14 @@ export const uploadToCloudinary = (fileBuffer, folder = "techjob") => {
     streamifier.createReadStream(fileBuffer).pipe(stream);
   });
 };
+
+export const deleteFromCloudinary = async (publicId) => {
+  try {
+    if (!publicId) return null;
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    console.error("deleteFromCloudinary error:", error);
+    throw error;
+  }
+};

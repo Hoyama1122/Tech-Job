@@ -23,7 +23,6 @@ export const authCheck = async (req, res, next) => {
     if (!req.user?.id) {
       return res.status(401).json({ message: "ไม่ได้เข้าสู่ระบบ" });
     }
-
     const user = await prisma.user.findUnique({
       where: { id: Number(req.user.id) },
       select: {

@@ -1,8 +1,5 @@
-import pkg from "@prisma/client";
-const { Prisma } = pkg;
-
-import { prisma } from "../lib/prisma.js";
-import { uploadImages } from "../util/upload.helper.js";
+import { prisma, Prisma } from "../lib/prisma.js";
+import { uploadImages, deleteImages } from "../util/upload.helper.js";
 import {
   formatJobId,
   normalizeTechnicianIds,
@@ -18,6 +15,7 @@ import {
   replaceAssignments,
   insertJobImages,
   deleteJobRelations,
+  getJobImagesPublicIds,
 } from "../util/job.sql.helper.js";
 
 export const getJobs = async (req, res) => {
@@ -177,7 +175,7 @@ export const createJob = async (req, res) => {
       longitude,
       location_name,
     } = req.body;
-
+  
     if (!title) {
       return res.status(400).json({
         message: "กรุณากรอกชื่องาน",
@@ -314,7 +312,6 @@ export const createJob = async (req, res) => {
         FROM "Job" j
         LEFT JOIN "Department" d
           ON d.id = j."departmentId"
-
         LEFT JOIN "User" cb
           ON cb.id = j."createdById"
         LEFT JOIN "Profile" cbp
@@ -417,10 +414,35 @@ export const updateJob = async (req, res) => {
     const imageFiles = req.files?.images || [];
     const uploadedImages = await uploadImages(imageFiles, "techjob/jobs");
 
+    // NEW IMAGE LOGIC: If a field for 'images' was provided but is empty, 
+    // it usually means we want to REPLACE or CLEAR them in PUT.
+    // However, since we might want to ONLY clear if empty as per user request:
+    const shouldClearImages = imageFiles.length === 0 && req.body.images === undefined; 
+    // Wait, the user said "If no images ... delete". 
+    // Usually if req.files.images is missing AND there's no mention of it in body, 
+    // it might be accidental. But if they EXPLICITLY send an update, 
+    // often frontends only send things they want to change.
+    
+    // I'll stick to: if zero uploaded AND it's a PUT update, we'll follow user's request.
+    const isImageUpdate = req.files?.images !== undefined;
+
     const shouldUpdateAssignments =
       supervisorId !== undefined || technicianId !== undefined;
 
+    let oldPublicIds = [];
+
     await prisma.$transaction(async (tx) => {
+      // 1. Fetch old images if we are updating them
+      if (isImageUpdate) {
+        oldPublicIds = await getJobImagesPublicIds(tx, id);
+        
+        // 2. Clear old ones from DB
+        await tx.$executeRaw`
+          DELETE FROM "JobImage"
+          WHERE "jobId" = ${id}
+        `;
+      }
+
       const updateFields = buildJobUpdateFields({
         title,
         description,
@@ -434,13 +456,11 @@ export const updateJob = async (req, res) => {
       });
 
       if (updateFields.length > 0) {
-        await tx.$executeRaw(
-          Prisma.sql`
+        await tx.$executeRaw`
             UPDATE "Job"
-            SET ${Prisma.join(updateFields, Prisma.sql`, `)}
+            SET ${Prisma.join(updateFields, ", ")}
             WHERE id = ${id}
-          `
-        );
+        `;
       }
 
       if (shouldUpdateAssignments) {
@@ -452,6 +472,7 @@ export const updateJob = async (req, res) => {
         });
       }
 
+      // 3. Insert new ones if any
       if (uploadedImages.length > 0) {
         await insertJobImages({
           tx,
@@ -460,6 +481,11 @@ export const updateJob = async (req, res) => {
         });
       }
     });
+
+    // 4. Cleanup Cloudinary AFTER transaction
+    if (oldPublicIds.length > 0) {
+      await deleteImages(oldPublicIds);
+    }
 
     const rows = await prisma.$queryRaw`
       SELECT
@@ -569,6 +595,8 @@ export const deleteJob = async (req, res) => {
       });
     }
 
+    const oldPublicIds = await getJobImagesPublicIds(prisma, id);
+
     await prisma.$transaction(async (tx) => {
       await deleteJobRelations({
         tx,
@@ -580,6 +608,10 @@ export const deleteJob = async (req, res) => {
         WHERE id = ${id}
       `;
     });
+
+    if (oldPublicIds.length > 0) {
+      await deleteImages(oldPublicIds);
+    }
 
     res.json({
       message: "ลบใบงานสำเร็จ",
