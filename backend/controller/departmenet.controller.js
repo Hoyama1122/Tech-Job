@@ -147,4 +147,19 @@ export const deleteDepartment = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};  
+};
+
+export const getDepartmentSQL = async (req, res) => {
+  const department = await prisma.$queryRaw`SELECT * FROM "Department"`;
+  return res.json({ message: "แผนกถูกดึงเรียบร้อย", department });
+};
+export const createDepartmentSQL = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const department =
+      await prisma.$queryRaw`INSERT INTO "Department" (name) VALUES (${name})`;
+    res.json({ message: "แผนกถูกสร้างเรียบร้อย", department });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

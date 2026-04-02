@@ -4,6 +4,7 @@ import {
   deleteDepartment,
   getDepartmentById,
   getDepartments,
+  getDepartmentSQL,
   updateDepartment,
 } from "../controller/departmenet.controller.js";
 
@@ -42,6 +43,7 @@ const departmentRoute = Router();
  *         description: Server error
  */
 departmentRoute.get("/", getDepartments);
+departmentRoute.get("/sql", getDepartmentSQL);
 
 /**
  * @swagger
