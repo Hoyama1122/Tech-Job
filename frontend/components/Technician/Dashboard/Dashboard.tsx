@@ -21,8 +21,8 @@ const Dashboard = () => {
     const fetchMyJobs = async () => {
       try {
         const data = await jobService.getMyJobs();
-        setMyJobs(data);
-        setjobs(data);
+        setMyJobs(data.jobs || []);
+        setjobs(data.jobs || []);
       } catch (err) {
         console.error("โหลดงานของ technician ไม่สำเร็จ", err);
       }

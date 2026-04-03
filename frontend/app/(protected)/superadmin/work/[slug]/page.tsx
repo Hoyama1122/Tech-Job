@@ -54,7 +54,6 @@ export default function WorkDetailPage({ params }: PageProps) {
         const res = await jobService.getJobById(slug);
         const found = res.job;
 
-
         if (!found) {
           setJob(null);
           return;
@@ -78,8 +77,6 @@ export default function WorkDetailPage({ params }: PageProps) {
 
     fetchJob();
   }, [slug]);
-
- 
 
   const canApproveOrReject = job?.status === "PENDING";
 
@@ -134,7 +131,6 @@ export default function WorkDetailPage({ params }: PageProps) {
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
 
-
   return (
     <div>
       <div className="p-4 overflow-y-auto h-[100vh]">
@@ -153,12 +149,7 @@ export default function WorkDetailPage({ params }: PageProps) {
           <div className="space-y-4">
             <BasicInfoCard job={job} />
             <DescriptionCard job={job} />
-            <EvidenceCard
-              job={job}
-              adminImages={adminImages}
-              imagesBefore={imagesBefore}
-              imagesAfter={imagesAfter}
-            />
+            <EvidenceCard job={job} />
           </div>
 
           <Sidebar job={job} />
@@ -184,9 +175,12 @@ export default function WorkDetailPage({ params }: PageProps) {
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-            <h2 className="mb-2 text-xl font-bold text-gray-900">ยืนยันการลบใบงาน</h2>
+            <h2 className="mb-2 text-xl font-bold text-gray-900">
+              ยืนยันการลบใบงาน
+            </h2>
             <p className="mb-6 text-sm text-gray-600">
-              คุณแน่ใจหรือไม่ว่าต้องการลบใบงานนี้? การกระทำนี้ไม่สามารถย้อนกลับได้
+              คุณแน่ใจหรือไม่ว่าต้องการลบใบงานนี้?
+              การกระทำนี้ไม่สามารถย้อนกลับได้
             </p>
             <div className="flex gap-3">
               <button
@@ -202,7 +196,9 @@ export default function WorkDetailPage({ params }: PageProps) {
                     toast.success("ลบใบงานสำเร็จ!");
                     router.push(`/${role.toLowerCase()}/work`);
                   } catch (err: any) {
-                    toast.error(err.response?.data?.message || "ลบใบงานไม่สำเร็จ");
+                    toast.error(
+                      err.response?.data?.message || "ลบใบงานไม่สำเร็จ",
+                    );
                   }
                 }}
                 className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700"

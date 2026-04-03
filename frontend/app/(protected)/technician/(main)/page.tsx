@@ -1,5 +1,6 @@
+import Dashboard from "@/components/Technician/Dashboard/Dashboard";
 import React from "react";
-import Dashboard from "../../../components/Technician/Dashboard/Dashboard";
+
 
 export const metadata = {
   title: "Technician",
