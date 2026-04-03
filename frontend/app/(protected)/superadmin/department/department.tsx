@@ -59,10 +59,10 @@ const Department = () => {
       const departmentList = Array.isArray(data)
         ? data
         : Array.isArray(data?.departments)
-        ? data.departments
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
+          ? data.departments
+          : Array.isArray(data?.data)
+            ? data.data
+            : [];
 
       setDepartments(departmentList);
     } catch (error) {
@@ -133,7 +133,7 @@ const Department = () => {
 
   const handleDelete = async (departmentItem: DepartmentItem) => {
     const confirmed = window.confirm(
-      `ต้องการลบแผนก "${departmentItem.name}" ใช่หรือไม่?`
+      `ต้องการลบแผนก "${departmentItem.name}" ใช่หรือไม่?`,
     );
 
     if (!confirmed) return;
@@ -141,7 +141,7 @@ const Department = () => {
     try {
       await department.deleteDepartment(departmentItem.id);
       setDepartments((prev) =>
-        prev.filter((item) => item.id !== departmentItem.id)
+        prev.filter((item) => item.id !== departmentItem.id),
       );
     } catch (error) {
       console.error("ลบแผนกไม่สำเร็จ", error);
@@ -150,7 +150,7 @@ const Department = () => {
   };
 
   const handleSubmitDepartment = async (
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
 
@@ -181,7 +181,7 @@ const Department = () => {
       } else if (modalMode === "edit" && selectedDepartment) {
         const updated = await department.updateDepartment(
           selectedDepartment.id,
-          payload
+          payload,
         );
 
         const updatedDepartment =
@@ -192,8 +192,8 @@ const Department = () => {
             prev.map((item) =>
               item.id === selectedDepartment.id
                 ? { ...item, ...updatedDepartment }
-                : item
-            )
+                : item,
+            ),
           );
         } else {
           await fetchDepartments();
@@ -204,10 +204,10 @@ const Department = () => {
     } catch (error) {
       console.error(
         modalMode === "create" ? "เพิ่มแผนกไม่สำเร็จ" : "แก้ไขแผนกไม่สำเร็จ",
-        error
+        error,
       );
       toast.error(
-        modalMode === "create" ? "มีแผนกนี้แล้ว" : "แก้ไขแผนกไม่สำเร็จ"
+        modalMode === "create" ? "มีแผนกนี้แล้ว" : "แก้ไขแผนกไม่สำเร็จ",
       );
     } finally {
       setSaving(false);
@@ -259,7 +259,7 @@ const Department = () => {
             title="จำนวนผู้ใช้งานรวม"
             value={departments.reduce(
               (sum, item) => sum + (item.totalUsers || 0),
-              0
+              0,
             )}
             icon={<Building2 className="h-5 w-5" />}
             bg="bg-amber-50"
@@ -294,7 +294,7 @@ const Department = () => {
               <thead>
                 <tr className="bg-primary text-white">
                   <th className="px-4 py-3 text-left">ลำดับ</th>
-                  <th className="px-4 py-3 text-left">ID</th>
+
                   <th className="px-4 py-3 text-left">ชื่อแผนก</th>
                   <th className="px-4 py-3 text-left">คำอธิบาย</th>
                   <th className="px-4 py-3 text-left">จำนวนผู้ใช้</th>
@@ -321,9 +321,6 @@ const Department = () => {
                         {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                       </td>
 
-                      <td className="px-4 py-3 font-medium text-slate-800">
-                        {item.id}
-                      </td>
                       <td className="px-4 py-3 font-medium text-slate-800">
                         {item.name}
                       </td>

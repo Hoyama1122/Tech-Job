@@ -12,9 +12,9 @@ import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
-import { PDFWorkOrder } from "@/app/admin/WorkOrder/PDFWorkOrder";
 import { jobService } from "@/services/job.service";
 import { authService } from "@/services/auth.service";
+import { PDFWorkOrder } from "@/app/(protected)/admin/workorder/PDFWorkOrder";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -135,7 +135,7 @@ export default function WorkDetailPage({ params }: PageProps) {
 
   return (
     <div>
-      <div className="p-4 h-[calc(100vh-64px)] overflow-y-auto">
+      <div className="p-4 overflow-y-auto h-[100vh]">
         <Header
           job={job}
           role={role}

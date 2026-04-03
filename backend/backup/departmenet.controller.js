@@ -2,8 +2,12 @@ import { prisma } from "../lib/prisma.js";
 
 export const getDepartments = async (req, res) => {
   try {
-    const departments =
-      await prisma.$queryRaw`SELECT * FROM "Department" ORDER BY id ASC`;
+    const departments = await prisma.department.findMany({
+      orderBy: {
+        id: "asc",
+      },
+    });
+
     res.json(departments);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -13,9 +17,12 @@ export const getDepartments = async (req, res) => {
 export const getDepartmentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const departments =
-      await prisma.$queryRaw`SELECT * FROM "Department" WHERE id = ${Number(id)} LIMIT 1`;
-    const department = departments[0];
+
+    const department = await prisma.department.findUnique({
+      where: {
+        id: Number(id),
+      },
+    });
 
     if (!department) {
       return res.status(404).json({ message: "ไม่พบแผนก" });
@@ -30,21 +37,26 @@ export const getDepartmentById = async (req, res) => {
 export const createDepartment = async (req, res) => {
   try {
     const { name } = req.body;
-    const trimmedName = name?.trim();
 
-    if (!trimmedName) {
+    if (!name || !name.trim()) {
       return res.status(400).json({ message: "กรุณากรอกชื่อแผนก" });
     }
 
-    const existingDepartments =
-      await prisma.$queryRaw`SELECT * FROM "Department" WHERE name = ${trimmedName} LIMIT 1`;
-    if (existingDepartments.length > 0) {
+    const existingDepartment = await prisma.department.findUnique({
+      where: {
+        name: name.trim(),
+      },
+    });
+
+    if (existingDepartment) {
       return res.status(400).json({ message: "มีแผนกนี้แล้ว" });
     }
 
-    const createdDepartments =
-      await prisma.$queryRaw`INSERT INTO "Department" (name) VALUES (${trimmedName}) RETURNING *`;
-    const department = createdDepartments[0];
+    const department = await prisma.department.create({
+      data: {
+        name: name.trim(),
+      },
+    });
 
     res.json({ message: "แผนกถูกสร้างเรียบร้อย", department });
   } catch (error) {
@@ -56,28 +68,42 @@ export const updateDepartment = async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
-    const trimmedName = name?.trim();
-    const deptId = Number(id);
 
-    if (!trimmedName) {
+    if (!name || !name.trim()) {
       return res.status(400).json({ message: "กรุณากรอกชื่อแผนก" });
     }
 
-    const departments =
-      await prisma.$queryRaw`SELECT * FROM "Department" WHERE id = ${deptId} LIMIT 1`;
-    if (departments.length === 0) {
+    const department = await prisma.department.findUnique({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    if (!department) {
       return res.status(404).json({ message: "ไม่พบแผนก" });
     }
 
-    const conflictDepartments =
-      await prisma.$queryRaw`SELECT * FROM "Department" WHERE name = ${trimmedName} AND id != ${deptId} LIMIT 1`;
-    if (conflictDepartments.length > 0) {
+    const existingDepartment = await prisma.department.findFirst({
+      where: {
+        name: name.trim(),
+        NOT: {
+          id: Number(id),
+        },
+      },
+    });
+
+    if (existingDepartment) {
       return res.status(400).json({ message: "ชื่อแผนกนี้ถูกใช้แล้ว" });
     }
 
-    const updatedDepartments =
-      await prisma.$queryRaw`UPDATE "Department" SET name = ${trimmedName} WHERE id = ${deptId} RETURNING *`;
-    const updatedDepartment = updatedDepartments[0];
+    const updatedDepartment = await prisma.department.update({
+      where: {
+        id: Number(id),
+      },
+      data: {
+        name: name.trim(),
+      },
+    });
 
     res.json({
       message: "อัปเดตแผนกเรียบร้อย",
@@ -91,29 +117,36 @@ export const updateDepartment = async (req, res) => {
 export const deleteDepartment = async (req, res) => {
   try {
     const { id } = req.params;
-    const deptId = Number(id);
 
-    const departments =
-      await prisma.$queryRaw`SELECT * FROM "Department" WHERE id = ${deptId} LIMIT 1`;
-    if (departments.length === 0) {
+    const department = await prisma.department.findUnique({
+      where: {
+        id: Number(id),
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    if (!department) {
       return res.status(404).json({ message: "ไม่พบแผนก" });
     }
 
-    // Check if department has users
-    const userCounts =
-      await prisma.$queryRaw`SELECT count(*) as count FROM "User" WHERE "departmentId" = ${deptId}`;
-    const userCount = Number(userCounts[0].count);
-
-    if (userCount > 0) {
+    if (department.users.length > 0) {
       return res.status(400).json({
         message: "ไม่สามารถลบแผนกได้ เพราะยังมีผู้ใช้งานอยู่ในแผนกนี้",
       });
     }
 
-    await prisma.$executeRaw`DELETE FROM "Department" WHERE id = ${deptId}`;
+    await prisma.department.delete({
+      where: {
+        id: Number(id),
+      },
+    });
 
     res.json({ message: "ลบแผนกเรียบร้อย" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+

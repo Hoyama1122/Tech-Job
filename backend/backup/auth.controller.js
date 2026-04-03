@@ -6,16 +6,16 @@ import jwt from "jsonwebtoken";
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const users =
-      await prisma.$queryRaw`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`;
-    const user = users[0];
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
     if (!user) {
       return res.status(400).json({ message: "ไม่พบผู้ใช้" });
     }
     const PasswordMatch = await bcrypt.compare(password, user.password);
     if (!PasswordMatch) {
       return res
-        .status(400)                      
+        .status(400)
         .json({ message: "รหัสผิดพลาด โปรดลองใหม่อีกครั้ง" });
     }
     const token = jwt.sign(
