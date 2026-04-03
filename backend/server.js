@@ -40,7 +40,9 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cookieParser());
-
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 app.use("/api/auth", authRouter);
 app.use("/api/department", departmentRoute);
 app.use("/api/jobs", jobRouter);
