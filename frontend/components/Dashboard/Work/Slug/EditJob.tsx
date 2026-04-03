@@ -48,12 +48,12 @@ export default function EditWorkModal({
   onSave,
 }: EditWorkModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<{ url: string; file?: File }[]>([]);
   // Images logic for EditJob has limitation: Backend replaces all images if new are sent.
   // We'll focus on text fields and technicians for this core update functionality.
   useEffect(() => {
     if (job.images && Array.isArray(job.images)) {
-      setImages(job.images.map((img: any) => img.url));
+      setImages(job.images.map((img: any) => ({ url: img.url })));
     }
   }, [job]);
 
@@ -98,12 +98,11 @@ export default function EditWorkModal({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () =>
-        setImages((prev) => [...prev, reader.result as string]);
-      reader.readAsDataURL(file);
-    });
+    const newItems = Array.from(files).map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    setImages((prev) => [...prev, ...newItems]);
   };
 
   const removeImage = (index: number) =>
@@ -113,11 +112,13 @@ export default function EditWorkModal({
     setIsSaving(true);
 
     try {
+      const newFiles = images.filter((img) => img.file).map((img) => img.file!);
+
       const payload = {
         title: data.title,
         description: data.description,
         technicianId: data.technicianId,
-        // Optional: departmentId if needed, but not in form.
+        images: newFiles.length > 0 ? newFiles : undefined,
       };
 
       const updatedJobRes = await jobService.updateJob(job.id || job.JobId, payload as any);
@@ -214,7 +215,7 @@ export default function EditWorkModal({
                 {images.map((img, i) => (
                   <div key={i} className="relative group">
                     <img
-                      src={img}
+                      src={img.url}
                       className="w-24 h-24 object-cover rounded-lg shadow-sm"
                     />
                     <button

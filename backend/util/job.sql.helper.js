@@ -277,14 +277,7 @@ export const updateAssignments = async ({
       `;
     }
   }
-}
-
-  await insertAssignments({
-    tx,
-    jobId,
-    supervisorId,
-    technicianIds,
-  });
+};
 
 
 export const insertJobImages = async ({

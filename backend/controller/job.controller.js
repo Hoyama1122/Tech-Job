@@ -12,7 +12,7 @@ import {
   mapJobDetailRows,
   buildJobUpdateFields,
   insertAssignments,
-  replaceAssignments,
+  updateAssignments,
   insertJobImages,
   deleteJobRelations,
   getJobImagesPublicIds,

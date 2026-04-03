@@ -14,6 +14,7 @@ interface Props {
     description?: string;
     status: string;
     supervisorName?: { name: string; department: string };
+    supervisor?: any;
     technician?: any[];
     createdAt: string;
   };
@@ -98,7 +99,7 @@ export default function JobWork({ job }: Props) {
               <span>หัวหน้างาน:</span>
             </div>
             <span className="font-medium text-gray-900">
-              {job.supervisor.name}
+              {job.supervisor?.name || "ไม่ระบุ"}
             </span>
           </div>
 

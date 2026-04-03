@@ -105,16 +105,16 @@ export default function Header({
             </button>
 
             <button
-              disabled={status !== "PENDING_ACTION"}
+              disabled={status !== "PENDING"}
               onClick={() => setShowCancelModal(true)}
               className={`flex items-center gap-1 rounded-md px-4 py-2 text-white ${
-                status === "PENDING_ACTION"
+                status === "PENDING"
                   ? "bg-red-600 hover:bg-red-700"
                   : "cursor-not-allowed bg-gray-300"
               }`}
             >
               <Trash className="h-4 w-4" />
-              ยกเลิกงาน
+              ลบงาน
             </button>
           </>
         )}
