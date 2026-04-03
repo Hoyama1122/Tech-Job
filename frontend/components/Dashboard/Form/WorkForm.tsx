@@ -14,14 +14,11 @@ import ImageUpload from "./ImageUpload";
 import LocationSection from "./LocationSection";
 import CustomerSection from "./CustomerSection";
 import { sendNotificationToTechnicians } from "@/lib/Noti/SendNoti";
-
+import { jobService } from "@/services/job.service";
 
 const LS = {
   USERS: "Users",
-  WORK: "CardWork",
-  IMAGES: "ImagesStore",
 };
-
 
 const parseThaiDate = (str: string | null) => {
   if (!str) return null;
@@ -49,24 +46,11 @@ const parseThaiDate = (str: string | null) => {
   return new Date(year, months[m], Number(d));
 };
 
-const generateJobId = (count: number) =>
-  `JOB_${String(count + 1).padStart(3, "0")}`;
-
-const createImageKey = (jobId: string) => `${jobId}_ADMIN`;
-
-const fileToBase64 = (file: File): Promise<string> =>
-  new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.readAsDataURL(file);
-  });
-
-
 const getTechnicians = () => {
+  if (typeof window === "undefined") return [];
   const users = JSON.parse(localStorage.getItem(LS.USERS) || "[]");
   return users.filter((u: any) => u.role === "technician");
 };
-
 
 const WorkForm = () => {
   const router = useRouter();
@@ -74,7 +58,6 @@ const WorkForm = () => {
   const [availableTechnicians, setAvailableTechnicians] = useState<any[]>([]);
   const [loc, setLoc] = useState({ lat: 13.85, lng: 100.58 });
 
-  // Form
   const methods = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
     defaultValues: {
@@ -99,79 +82,63 @@ const WorkForm = () => {
   const onSubmit = async (data: WorkFormValues) => {
     try {
       setLoading(true);
-      await new Promise((r) => setTimeout(r, 400));
 
-      const users = JSON.parse(localStorage.getItem(LS.USERS) || "[]");
-      const jobs = JSON.parse(localStorage.getItem(LS.WORK) || "[]");
+      const startDate = parseThaiDate(data.dateRange?.startAt || null);
+      const endDate = parseThaiDate(data.dateRange?.endAt || null);
 
-      const jobId = generateJobId(jobs.length);
-      const imageKey = createImageKey(jobId);
+      const startISO = startDate
+        ? `${startDate.toISOString().split("T")[0]}T${data.startTime || "00:00"}:00`
+        : undefined;
 
-      const images = data.image?.length
-        ? await Promise.all(Array.from(data.image).map(fileToBase64))
-        : [];
+      const endISO = endDate
+        ? `${endDate.toISOString().split("T")[0]}T${data.endTime || "00:00"}:00`
+        : undefined;
 
-      // map technicians
-      const techIds = data.technicianId.map(Number);
+      const technicianIds = (data.technicianId || []).map(Number).filter(Boolean);
 
-      const technicianObjects = users.filter((u: any) =>
-        techIds.includes(Number(u.id))
-      );
-
-      // Date
-      const startDate = parseThaiDate(data.dateRange.startAt);
-      const endDate = parseThaiDate(data.dateRange.endAt);
-
-      const startISO =
-        startDate &&
-        `${startDate.toISOString().split("T")[0]}T${
-          data.startTime || "00:00"
-        }:00`;
-
-      const endISO =
-        endDate &&
-        `${endDate.toISOString().split("T")[0]}T${data.endTime || "00:00"}:00`;
-
-      const now = new Date();
-
-      // New job 
-      const newJob = {
-        id: jobs.length + 1,
-        JobId: jobId,
+      const payload = {
         title: data.title,
-        description: data.description,
-        category: data.category,
-        status: "รอการดำเนินงาน",
-        createdAt: now.toISOString(),
-        dateRange: { startAt: startISO, endAt: endISO },
-        supervisorId: Number(data.supervisorId) || null,
-        technicianId: data.technicianId.map(Number),
-        technician: technicianObjects,
-        customer: {
-          name: data.customerName,
-          phone: data.customerPhone,
-          address: data.address,
-        },
-        imageKey,
-        loc,
+        description: data.description || "",
+        departmentId: Number(data.category), // ถ้า category ไม่ใช่ departmentId ให้เปลี่ยนตรงนี้
+        supervisorId: data.supervisorId ? Number(data.supervisorId) : undefined,
+        technicianId: technicianIds,
+        start_available_at: startISO,
+        end_available_at: endISO,
+        latitude: loc.lat ?? null,
+        longitude: loc.lng ?? null,
+        location_name: data.address || "",
+        images: data.image ? Array.from(data.image) : [],
       };
 
-      // Save Jobs
-      localStorage.setItem(LS.WORK, JSON.stringify([...jobs, newJob]));
-      // Save images
-      const imgStore = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
-      imgStore[imageKey] = images;
-      localStorage.setItem(LS.IMAGES, JSON.stringify(imgStore));
+      const res = await jobService.createJob(payload);
 
-      // send noti
-      sendNotificationToTechnicians(newJob.technicianId, newJob);
-      
-      reset();
-      toast.success("เพิ่มใบงานสำเร็จ!");
+      sendNotificationToTechnicians(
+        technicianIds,
+        res?.job || {
+          title: payload.title,
+          description: payload.description,
+          technicianId: technicianIds,
+        }
+      );
+
+      reset({
+        technicianId: [],
+        dateRange: { startAt: "", endAt: "" },
+        location: { lat: null, lng: null },
+      });
+
+      setLoc({ lat: 13.85, lng: 100.58 });
+
+      toast.success(res?.message || "เพิ่มใบงานสำเร็จ!");
       router.push("/admin");
-    } catch (err) {
-      console.error(err);
-      toast.error("เกิดข้อผิดพลาดในการสร้างใบงาน");
+    } catch (err: any) {
+      console.error("create job error:", err?.response?.data || err);
+
+      toast.error(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "เกิดข้อผิดพลาดในการสร้างใบงาน"
+      );
     } finally {
       setLoading(false);
     }
@@ -181,7 +148,6 @@ const WorkForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          {/* left */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
             <JobInfoSection register={register} errors={errors} />
             <DateRangeSection
@@ -191,10 +157,15 @@ const WorkForm = () => {
             <ImageUpload setValue={setValue} register={register} />
           </div>
 
-          {/* right */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
             <LocationSection
-              onLocationSelect={(pos) => setLoc(pos)}
+              onLocationSelect={(pos) => {
+                setLoc(pos);
+                setValue("location", {
+                  lat: pos.lat,
+                  lng: pos.lng,
+                });
+              }}
               setLoc={setLoc}
               setValue={setValue}
             />

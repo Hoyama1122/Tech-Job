@@ -12,9 +12,9 @@ import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
-import { PDFWorkOrder } from "@/app/admin/WorkOrder/PDFWorkOrder";
 import { jobService } from "@/services/job.service";
 import { authService } from "@/services/auth.service";
+import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

@@ -12,7 +12,7 @@ export interface CreateJobPayload {
   description?: string;
   departmentId: number;
   supervisorId?: number;
-  technicianId?: number;
+  technicianId?: number[];
   start_available_at?: string;
   end_available_at?: string;
   latitude?: number | null;
