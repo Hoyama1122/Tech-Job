@@ -10,6 +10,7 @@ import {
   rejectJobReport,
   updateJobReport,
 } from "../controller/jobreport.controller.js";
+import { verifyToken } from "../lib/middleware.js";
 
 const jobReportRouter = Router();
 
@@ -147,6 +148,7 @@ jobReportRouter.post(
     { name: "images", maxCount: 10 },
     { name: "cus_sign", maxCount: 1 },
   ]),
+  verifyToken,
   createJobReport
 );
 
@@ -273,6 +275,6 @@ jobReportRouter.patch("/:id/approve", approveJobReport);
  */
 jobReportRouter.patch("/:id/reject", rejectJobReport);
 
-jobReportRouter.get("/:jobId", getJobReportByJobId)
+jobReportRouter.get("/job/:jobId", getJobReportByJobId)
 
 export default jobReportRouter;

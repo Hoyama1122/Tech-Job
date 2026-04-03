@@ -17,6 +17,7 @@ model User {
   updatedAt    DateTime        @updatedAt
   empno        String          @unique
   createdJobs  Job[]           @relation("CreatedBy")
+  createdJobReports JobReport[] @relation("JobReportCreatedBy")
   assignedJobs JobAssignment[]
   messages     Message[]
   participants Participant[]
@@ -79,7 +80,9 @@ model JobReport {
   updatedAt          DateTime      @updatedAt
   id                 Int           @id @default(autoincrement())
   rejectReason       String?
-  job                Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+   createdById        Int?
+  job                Job?           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdBy          User?            @relation("JobReportCreatedBy", fields: [createdById], references: [id])
   images             ReportImage[]
 }
 
@@ -94,7 +97,8 @@ model JobImage {
 
 model ReportImage {
   id        Int       @id @default(autoincrement())
-  url       String
+  url       String?
+  publicId  String?
   reportId  Int
   createdAt DateTime  @default(now())
   report    JobReport @relation(fields: [reportId], references: [id], onDelete: Cascade)

@@ -52,3 +52,25 @@ export const uploadSingleImage = async (file, folder = "techjob") => {
     throw error;
   }
 };
+
+export const extractCloudinaryPublicId = (url) => {
+  if (!url || typeof url !== "string") return null;
+
+  try {
+    const parts = url.split("/upload/");
+    if (parts.length < 2) return null;
+
+    let path = parts[1];
+
+    path = path.replace(/^v\d+\//, "");
+
+    const lastDotIndex = path.lastIndexOf(".");
+    if (lastDotIndex !== -1) {
+      path = path.substring(0, lastDotIndex);
+    }
+
+    return path || null;
+  } catch {
+    return null;
+  }
+};
