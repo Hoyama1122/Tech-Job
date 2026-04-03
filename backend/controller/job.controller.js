@@ -172,7 +172,7 @@ export const createJob = async (req, res) => {
       longitude,
       location_name,
     } = req.body;
-  
+
     if (!title) {
       return res.status(400).json({
         message: "กรุณากรอกชื่องาน",
@@ -375,15 +375,16 @@ export const updateJob = async (req, res) => {
     const imageFiles = req.files?.images || [];
     const uploadedImages = await uploadImages(imageFiles, "techjob/jobs");
 
-    // NEW IMAGE LOGIC: If a field for 'images' was provided but is empty, 
+    // NEW IMAGE LOGIC: If a field for 'images' was provided but is empty,
     // it usually means we want to REPLACE or CLEAR them in PUT.
     // However, since we might want to ONLY clear if empty as per user request:
-    const shouldClearImages = imageFiles.length === 0 && req.body.images === undefined; 
-    // Wait, the user said "If no images ... delete". 
-    // Usually if req.files.images is missing AND there's no mention of it in body, 
-    // it might be accidental. But if they EXPLICITLY send an update, 
+    const shouldClearImages =
+      imageFiles.length === 0 && req.body.images === undefined;
+    // Wait, the user said "If no images ... delete".
+    // Usually if req.files.images is missing AND there's no mention of it in body,
+    // it might be accidental. But if they EXPLICITLY send an update,
     // often frontends only send things they want to change.
-    
+
     // I'll stick to: if zero uploaded AND it's a PUT update, we'll follow user's request.
     const isImageUpdate = req.files?.images !== undefined;
 
@@ -396,7 +397,7 @@ export const updateJob = async (req, res) => {
       // 1. Fetch old images if we are updating them
       if (isImageUpdate) {
         oldPublicIds = await getJobImagesPublicIds(tx, id);
-        
+
         // 2. Clear old ones from DB
         await tx.$executeRaw`
           DELETE FROM "JobImage"
@@ -425,11 +426,14 @@ export const updateJob = async (req, res) => {
       }
 
       if (shouldUpdateAssignments) {
-        await replaceAssignments({
+        await updateAssignments({
           tx,
           jobId: id,
           supervisorId,
-          technicianIds,
+          technicianIds:
+            technicianId !== undefined
+              ? normalizeTechnicianIds(technicianId)
+              : undefined,
         });
       }
 

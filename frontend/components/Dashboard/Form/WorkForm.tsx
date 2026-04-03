@@ -17,8 +17,6 @@ import { sendNotificationToTechnicians } from "@/lib/Noti/SendNoti";
 
 const LS = {
   USERS: "Users",
-  WORK: "CardWork",
-  IMAGES: "ImagesStore",
 };
 
 const parseThaiDate = (str: string | null) => {
@@ -60,6 +58,7 @@ const fileToBase64 = (file: File): Promise<string> =>
   });
 
 const getTechnicians = () => {
+  if (typeof window === "undefined") return [];
   const users = JSON.parse(localStorage.getItem(LS.USERS) || "[]");
   return users.filter((u: any) => u.role === "technician");
 };
@@ -80,7 +79,6 @@ const WorkForm = () => {
   const [departments, setDepartments] = useState<any[]>([]);
   const [loc, setLoc] = useState({ lat: 13.85, lng: 100.58 });
 
-  // Form
   const methods = useForm<WorkFormValues>({
     resolver: zodResolver(workSchema),
     defaultValues: {
@@ -170,9 +168,14 @@ const WorkForm = () => {
       reset();
       toast.success("เพิ่มใบงานสำเร็จ!");
       router.push("/admin");
-    } catch (err) {
-      console.error(err);
-      toast.error("เกิดข้อผิดพลาดในการสร้างใบงาน");
+    } catch (err: any) {
+      console.error("create job error:", err?.response?.data || err);
+
+      toast.error(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "เกิดข้อผิดพลาดในการสร้างใบงาน"
+      );
     } finally {
       setLoading(false);
     }
@@ -182,7 +185,6 @@ const WorkForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          {/* left */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
             <JobInfoSection
               register={register}
@@ -197,10 +199,15 @@ const WorkForm = () => {
             <ImageUpload setValue={setValue} register={register} />
           </div>
 
-          {/* right */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
             <LocationSection
-              onLocationSelect={(pos) => setLoc(pos)}
+              onLocationSelect={(pos) => {
+                setLoc(pos);
+                setValue("location", {
+                  lat: pos.lat,
+                  lng: pos.lng,
+                });
+              }}
               setLoc={setLoc}
               setValue={setValue as any}
             />

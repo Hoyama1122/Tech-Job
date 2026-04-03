@@ -1,4 +1,3 @@
-// คานนท์ทำเพิ่ม
 
 import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";

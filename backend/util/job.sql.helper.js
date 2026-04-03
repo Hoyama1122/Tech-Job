@@ -180,35 +180,35 @@ export const buildJobUpdateFields = ({
 }) => {
   const fields = [];
 
-  if (title !== undefined) {
+  if (title !== undefined && title !== null && title !== "" ) {
     fields.push(Prisma.sql`title = ${title}`);
   }
 
-  if (description !== undefined) {
+  if (description !== undefined && description !== null && description !== "" ) {
     fields.push(Prisma.sql`description = ${description}`);
   }
 
-  if (status !== undefined) {
+  if (status !== undefined && status !== null && status !== "" ) {
     fields.push(Prisma.sql`status = ${status}`);
   }
 
-  if (location_name !== undefined) {
+  if (location_name !== undefined && location_name !== null && location_name !== "") {
     fields.push(Prisma.sql`location_name = ${location_name}`);
   }
 
-  if (latitude !== undefined) {
+  if (latitude !== undefined && latitude !== null && latitude !== "") {
     fields.push(Prisma.sql`latitude = ${latitude}`);
   }
 
-  if (longitude !== undefined) {
+  if (longitude !== undefined && longitude !== null && longitude !== "") {
     fields.push(Prisma.sql`longitude = ${longitude}`);
   }
 
-  if (start_available_at !== undefined) {
+  if (start_available_at !== undefined && start_available_at !== null && start_available_at !== "") {
     fields.push(Prisma.sql`start_available_at = ${start_available_at}`);
   }
 
-  if (end_available_at !== undefined) {
+  if (end_available_at !== undefined && end_available_at !== null && end_available_at !== "") {
     fields.push(Prisma.sql`end_available_at = ${end_available_at}`);
   }
 
@@ -242,16 +242,42 @@ export const insertAssignments = async ({
   }
 };
 
-export const replaceAssignments = async ({
+export const updateAssignments = async ({
   tx,
   jobId,
   supervisorId,
-  technicianIds = [],
+  technicianIds,
 }) => {
-  await tx.$executeRaw`
-    DELETE FROM "JobAssignment"
-    WHERE "jobId" = ${jobId}
-  `;
+  if (supervisorId !== undefined) {
+    await tx.$executeRaw`
+      DELETE FROM "JobAssignment"
+      WHERE "jobId" = ${jobId}
+      AND role = 'SUPERVISOR'
+    `;
+
+    if (supervisorId !== null && supervisorId !== "") {
+      await tx.$executeRaw`
+        INSERT INTO "JobAssignment" ("jobId", "userId", role)
+        VALUES (${jobId}, ${Number(supervisorId)}, 'SUPERVISOR')
+      `;
+    }
+  }
+
+  if (technicianIds !== undefined) {
+    await tx.$executeRaw`
+      DELETE FROM "JobAssignment"
+      WHERE "jobId" = ${jobId}
+      AND role = 'TECHNICIAN'
+    `;
+
+    for (const technicianId of technicianIds) {
+      await tx.$executeRaw`
+        INSERT INTO "JobAssignment" ("jobId", "userId", role)
+        VALUES (${jobId}, ${Number(technicianId)}, 'TECHNICIAN')
+      `;
+    }
+  }
+}
 
   await insertAssignments({
     tx,
@@ -259,7 +285,7 @@ export const replaceAssignments = async ({
     supervisorId,
     technicianIds,
   });
-};
+
 
 export const insertJobImages = async ({
   tx,
