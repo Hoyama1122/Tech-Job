@@ -117,7 +117,6 @@ jobRouter.post(
   "/",
   upload.fields([{ name: "images", maxCount: 10 }]),
   verifyToken,
-  authRouter,
   allowRoles("ADMIN", "SUPERADMIN"),
   createJob,
 );
@@ -215,6 +214,8 @@ jobRouter.get("/:id", getJobById);
  */
 jobRouter.put(
   "/:id",
+  verifyToken,
+  allowRoles("ADMIN", "SUPERADMIN"),
   upload.fields([{ name: "images", maxCount: 10 }]),
   updateJob,
 );

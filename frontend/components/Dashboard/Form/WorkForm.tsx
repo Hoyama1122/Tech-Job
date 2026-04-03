@@ -15,13 +15,11 @@ import LocationSection from "./LocationSection";
 import CustomerSection from "./CustomerSection";
 import { sendNotificationToTechnicians } from "@/lib/Noti/SendNoti";
 
-
 const LS = {
   USERS: "Users",
   WORK: "CardWork",
   IMAGES: "ImagesStore",
 };
-
 
 const parseThaiDate = (str: string | null) => {
   if (!str) return null;
@@ -61,17 +59,25 @@ const fileToBase64 = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
-
 const getTechnicians = () => {
   const users = JSON.parse(localStorage.getItem(LS.USERS) || "[]");
   return users.filter((u: any) => u.role === "technician");
 };
 
+import { userService, UserItem } from "@/services/user.service";
+import { department as departmentService } from "@/services/depertmane.service";
+import { jobService, CreateJobPayload } from "@/services/job.service";
 
 const WorkForm = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [availableTechnicians, setAvailableTechnicians] = useState<any[]>([]);
+  const [availableTechnicians, setAvailableTechnicians] = useState<UserItem[]>(
+    [],
+  );
+  const [availableSupervisors, setAvailableSupervisors] = useState<UserItem[]>(
+    [],
+  );
+  const [departments, setDepartments] = useState<any[]>([]);
   const [loc, setLoc] = useState({ lat: 13.85, lng: 100.58 });
 
   // Form
@@ -80,7 +86,7 @@ const WorkForm = () => {
     defaultValues: {
       technicianId: [],
       dateRange: { startAt: "", endAt: "" },
-      location: { lat: null, lng: null },
+      // location: { lat: null, lng: null },
     },
   });
 
@@ -93,79 +99,74 @@ const WorkForm = () => {
   } = methods;
 
   useEffect(() => {
-    setAvailableTechnicians(getTechnicians());
+    const fetchData = async () => {
+      try {
+        const [usersRes, deptsRes] = await Promise.all([
+          userService.getUsers(),
+          departmentService.getDepartments(),
+        ]);
+
+        const users = Array.isArray(usersRes.data)
+          ? usersRes.data
+          : Array.isArray(usersRes)
+            ? usersRes
+            : [];
+        const depts = Array.isArray(deptsRes.data)
+          ? deptsRes.data
+          : Array.isArray(deptsRes)
+            ? deptsRes
+            : [];
+
+        console.log("Users fetched:", users);
+        console.log("Departments fetched:", depts);
+
+        setAvailableTechnicians(
+          users.filter((u: UserItem) => u.role?.toUpperCase() === "TECHNICIAN"),
+        );
+        setAvailableSupervisors(
+          users.filter((u: UserItem) => u.role?.toUpperCase() === "SUPERVISOR"),
+        );
+        setDepartments(depts);
+      } catch (err) {
+        console.error("Failed to fetch data:", err);
+        toast.error("ไม่สามารถโหลดข้อมูลผู้ใช้และแผนกได้");
+      }
+    };
+    fetchData();
   }, []);
 
   const onSubmit = async (data: WorkFormValues) => {
     try {
       setLoading(true);
-      await new Promise((r) => setTimeout(r, 400));
 
-      const users = JSON.parse(localStorage.getItem(LS.USERS) || "[]");
-      const jobs = JSON.parse(localStorage.getItem(LS.WORK) || "[]");
-
-      const jobId = generateJobId(jobs.length);
-      const imageKey = createImageKey(jobId);
-
-      const images = data.image?.length
-        ? await Promise.all(Array.from(data.image).map(fileToBase64))
-        : [];
-
-      // map technicians
-      const techIds = data.technicianId.map(Number);
-
-      const technicianObjects = users.filter((u: any) =>
-        techIds.includes(Number(u.id))
-      );
-
-      // Date
       const startDate = parseThaiDate(data.dateRange.startAt);
       const endDate = parseThaiDate(data.dateRange.endAt);
 
       const startISO =
         startDate &&
-        `${startDate.toISOString().split("T")[0]}T${
-          data.startTime || "00:00"
-        }:00`;
-
+        `${startDate.toISOString().split("T")[0]}T${data.startTime || "00:00"}:00`;
       const endISO =
         endDate &&
         `${endDate.toISOString().split("T")[0]}T${data.endTime || "00:00"}:00`;
 
-      const now = new Date();
-
-      // New job 
-      const newJob = {
-        id: jobs.length + 1,
-        JobId: jobId,
+      const payload: CreateJobPayload = {
         title: data.title,
-        description: data.description,
-        category: data.category,
-        status: "รอการดำเนินงาน",
-        createdAt: now.toISOString(),
-        dateRange: { startAt: startISO, endAt: endISO },
-        supervisorId: Number(data.supervisorId) || null,
-        technicianId: data.technicianId.map(Number),
-        technician: technicianObjects,
-        customer: {
-          name: data.customerName,
-          phone: data.customerPhone,
-          address: data.address,
-        },
-        imageKey,
-        loc,
+        description: data.description || "",
+        departmentId: Number(data.category), // API expects departmentId
+        supervisorId: Number(data.supervisorId),
+        technicianId: data.technicianId, // Pass the entire array
+        start_available_at: startISO || undefined,
+        end_available_at: endISO || undefined,
+        latitude: loc.lat,
+        longitude: loc.lng,
+        location_name: data.address,
+        images: data.image ? Array.from(data.image) : [],
       };
 
-      // Save Jobs
-      localStorage.setItem(LS.WORK, JSON.stringify([...jobs, newJob]));
-      // Save images
-      const imgStore = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
-      imgStore[imageKey] = images;
-      localStorage.setItem(LS.IMAGES, JSON.stringify(imgStore));
+      console.log("WorkForm payload:", payload, "data.image:", data.image);
 
-      // send noti
-      sendNotificationToTechnicians(newJob.technicianId, newJob);
-      
+      await jobService.createJob(payload);
+
       reset();
       toast.success("เพิ่มใบงานสำเร็จ!");
       router.push("/admin");
@@ -183,10 +184,15 @@ const WorkForm = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           {/* left */}
           <div className="bg-white shadow rounded-lg p-4 space-y-4">
-            <JobInfoSection register={register} errors={errors} />
+            <JobInfoSection
+              register={register}
+              errors={errors}
+              departments={departments}
+            />
             <DateRangeSection
               errors={errors}
               technicians={availableTechnicians}
+              supervisors={availableSupervisors}
             />
             <ImageUpload setValue={setValue} register={register} />
           </div>
@@ -196,7 +202,7 @@ const WorkForm = () => {
             <LocationSection
               onLocationSelect={(pos) => setLoc(pos)}
               setLoc={setLoc}
-              setValue={setValue}
+              setValue={setValue as any}
             />
 
             {errors.location?.message && (

@@ -70,7 +70,7 @@ export default function Header({
           </>
         )}
 
-        {myRole === "admin" && (
+        {myRole === "admin" || myRole === "superadmin" && (
           <>
             <button
               onClick={() => setShowEditModal(true)}

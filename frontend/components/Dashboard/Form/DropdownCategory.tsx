@@ -12,15 +12,7 @@ import {
 } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
-const categories = [
-  { id: "ไฟฟ้า", label: "งานไฟฟ้า", icon: <Zap size={16} /> },
-  { id: "แอร์", label: "งานแอร์", icon: <Snowflake size={16} /> },
-  { id: "ประปา", label: "งานประปา", icon: <Droplets size={16} /> },
-  { id: "ระบบสื่อสาร", label: "งานระบบสื่อสาร", icon: <Wifi size={16} /> },
-  { id: "ทั่วไป", label: "งานทั่วไป", icon: <Layers size={16} /> },
-];
-
-export default function DropdownCategory() {
+export default function DropdownCategory({ departments }: { departments: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -83,16 +75,16 @@ export default function DropdownCategory() {
       {/* dropdown list */}
       {isOpen && (
         <div className="absolute z-20 w-full bg-white border border-gray-100 shadow-md rounded-lg mt-1 overflow-hidden">
-          {categories.map((cat) => (
+          {departments.map((dept) => (
             <button
-              key={cat.id}
-              onClick={() => handleSelect(cat)}
+              key={dept.id}
+              onClick={() => handleSelect({ id: dept.id, label: dept.name })}
               className="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-primary/5 transition text-left"
             >
               <div className="w-6 h-6 bg-gray-200 cursor-pointer rounded flex items-center justify-center text-gray-600 text-xs">
-                {cat.icon}
+                <Layers size={14} />
               </div>
-              <span className="text-gray-800">{cat.label}</span>
+              <span className="text-gray-800">{dept.name}</span>
             </button>
           ))}
         </div>

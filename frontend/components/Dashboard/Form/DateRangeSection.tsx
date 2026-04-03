@@ -4,15 +4,18 @@ import { WorkFormValues } from '@/lib/Validations/SchemaForm';
 import { AlertCircle } from 'lucide-react';
 import DatePickerTH from '@/components/DueDate/Date';
 import DropdownTechnician from './DropdownTechnician';
+import DropdownSupervisor from './DropdownSupervisor';
 
 interface DateRangeSectionProps {
   errors: FieldErrors<WorkFormValues>;
   technicians: any[];
+  supervisors: any[];
 }
 
-const DateRangeSection: React.FC<DateRangeSectionProps> = ({ errors, technicians }) => {
+const DateRangeSection: React.FC<DateRangeSectionProps> = ({ errors, technicians, supervisors }) => {
   return (
     <>
+      <DropdownSupervisor supervisors={supervisors} />
       <DropdownTechnician technicians={technicians} />
       <DatePickerTH />
       {(errors.dateRange?.startAt || errors.dateRange?.endAt) && (

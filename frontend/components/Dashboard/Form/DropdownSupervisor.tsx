@@ -7,18 +7,12 @@ import Image from "next/image";
 import { useFormContext } from "react-hook-form";
 import { Users } from "@/lib/Mock/UserMock";
 
-export default function DropdownSupervisor() {
+export default function DropdownSupervisor({ supervisors }: { supervisors: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [supervisors, setSupervisors] = useState<any[]>([]);
   const ref = useRef<HTMLDivElement>(null);
   const { setValue, register } = useFormContext();
-
-  useEffect(() => {
-    const filtered = Users.filter((user) => user.role === "supervisor");
-    setSupervisors(filtered);
-  }, []);
-
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -54,23 +48,25 @@ export default function DropdownSupervisor() {
       >
         {selected ? (
           <div className="flex items-center gap-2">
-            {selected.avatar ? (
+            {selected.profile?.avatar ? (
               <Image
-                src={selected.avatar}
-                alt={selected.name}
+                src={selected.profile.avatar}
+                alt={selected.profile.firstname || selected.email}
                 width={28}
                 height={28}
                 className="rounded-md object-cover border border-gray-200"
               />
             ) : (
               <div className="w-7 h-7 bg-gray-300 rounded-md flex items-center justify-center text-white text-sm">
-                {selected.name[0]}
+                {(selected.profile?.firstname || selected.email)[0]}
               </div>
             )}
             <div className="flex flex-col text-left">
-              <span className="font-medium text-gray-800">{selected.name}</span>
+              <span className="font-medium text-gray-800">
+                {selected.profile?.firstname ? `${selected.profile.firstname} ${selected.profile.lastname || ""}` : selected.email || selected.empno}
+              </span>
               <span className="text-xs text-gray-500">
-                {selected.department}
+                {selected.department?.name || "ไม่ระบุแผนก"}
               </span>
             </div>
           </div>
@@ -96,22 +92,24 @@ export default function DropdownSupervisor() {
               onClick={() => handleSelect(sup)}
               className="w-full cursor-pointer flex items-center gap-3 px-4 py-2 hover:bg-primary/5 transition-colors text-left"
             >
-              {sup.avatar ? (
+              {sup.profile?.avatar ? (
                 <Image
-                  src={sup.avatar}
-                  alt={sup.name}
+                  src={sup.profile.avatar}
+                  alt={sup.profile.firstname || sup.email}
                   width={28}
                   height={28}
                   className="rounded-md object-cover border border-gray-200"
                 />
               ) : (
                 <div className="w-7 h-7 bg-gray-300 rounded-md flex items-center justify-center text-white text-sm">
-                  {sup.name[0]}
+                  {(sup.profile?.firstname || sup.email)[0]}
                 </div>
               )}
               <div className="flex flex-col">
-                <span className="font-medium text-gray-800">{sup.name}</span>
-                <span className="text-xs text-gray-500">{sup.department}</span>
+                <span className="font-medium text-gray-800">
+                  {sup.profile?.firstname ? `${sup.profile.firstname} ${sup.profile.lastname || ""}` : sup.email || sup.empno}
+                </span>
+                <span className="text-xs text-gray-500">{sup.department?.name || "ไม่ระบุแผนก"}</span>
               </div>
             </button>
           ))}

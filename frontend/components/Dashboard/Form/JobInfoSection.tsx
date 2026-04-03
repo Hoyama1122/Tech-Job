@@ -7,11 +7,13 @@ import DropdownCategory from "./DropdownCategory";
 interface JobInfoSectionProps {
   register: UseFormRegister<WorkFormValues>;
   errors: FieldErrors<WorkFormValues>;
+  departments: any[];
 }
 
 const JobInfoSection: React.FC<JobInfoSectionProps> = ({
   register,
   errors,
+  departments,
 }) => {
   return (
     <div className="space-y-4">
@@ -59,7 +61,7 @@ const JobInfoSection: React.FC<JobInfoSectionProps> = ({
           placeholder="รายละเอียดงาน, ข้อมูลเพิ่มเติม, หมายเหตุ..."
         />
       </div>
-      <DropdownCategory register={register} />
+      <DropdownCategory departments={departments} />
     </div>
   );
 };

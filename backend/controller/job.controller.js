@@ -209,11 +209,17 @@ export const createJob = async (req, res) => {
       end_available_at,
     });
 
+    console.log("createJob req.body:", req.body);
+    console.log("createJob req.files:", req.files);
+    
     const imageFiles = req.files?.images || [];
+    console.log("createJob imageFiles:", imageFiles.length);
+    
     const uploadedImages = await uploadImages(imageFiles, "techjob/jobs");
     const createdById = req.user?.id || 3;
 
-    const createdJob = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Insert Job using Raw SQL with proper quoting
       const insertedJobs = await tx.$queryRaw`
         INSERT INTO "Job" (
           title,
@@ -231,7 +237,7 @@ export const createJob = async (req, res) => {
         )
         VALUES (
           ${title},
-          ${description ?? null},
+          ${description || null},
           'PENDING',
           ${dateFields.start_available_at},
           ${dateFields.end_available_at},
@@ -243,7 +249,7 @@ export const createJob = async (req, res) => {
           NOW(),
           NOW()
         )
-        RETURNING id
+        RETURNING id;
       `;
 
       const jobId = insertedJobs?.[0]?.id;
@@ -252,82 +258,43 @@ export const createJob = async (req, res) => {
         throw new Error("ไม่สามารถสร้างใบงานได้");
       }
 
+      // 2. Insert Assignments via manual helpers
       await insertAssignments({
         tx,
-        jobId,
+        jobId: Number(jobId),
         supervisorId,
         technicianIds,
       });
 
+      // 3. Insert Images via manual helpers
       await insertJobImages({
         tx,
-        jobId,
+        jobId: Number(jobId),
         uploadedImages,
       });
 
+      // 4. Fetch the fully mapped result using our SQL helper for consistent output format
       const rows = await tx.$queryRaw`
         SELECT
-          j.id,
-          j.title,
-          j.description,
-          j.status,
-          j."createdAt",
-          j."updatedAt",
-          j.start_available_at,
-          j.end_available_at,
-          j.latitude,
-          j.longitude,
-          j.location_name,
-
-          d.id AS department_id,
-          d.name AS department_name,
-
-          cb.id AS created_by_id,
-          cb.empno AS created_by_empno,
-          cbp.firstname AS created_by_firstname,
-          cbp.lastname AS created_by_lastname,
-
-          ja.role AS assignment_role,
-          au.id AS assignment_user_id,
-          au.empno AS assignment_user_empno,
-          ad.name AS assignment_department_name,
-          ap.firstname AS assignment_user_firstname,
-          ap.lastname AS assignment_user_lastname,
-
-          ji.id AS image_id,
-          ji.url AS image_url,
-          ji."publicId" AS image_public_id,
-          ji."createdAt" AS image_created_at,
-
-          jr.id AS report_id,
-          jr.status AS report_status,
-          jr.detail AS report_detail,
-          jr.summary AS report_summary,
-          jr."createdAt" AS report_created_at
-
+          j.id, j.title, j.description, j.status, j."createdAt", j."updatedAt",
+          j.start_available_at, j.end_available_at, j.latitude, j.longitude, j.location_name,
+          d.id AS department_id, d.name AS department_name,
+          cb.id AS created_by_id, cb.empno AS created_by_empno,
+          cbp.firstname AS created_by_firstname, cbp.lastname AS created_by_lastname,
+          ja.role AS assignment_role, au.id AS assignment_user_id, au.empno AS assignment_user_empno,
+          ad.name AS assignment_department_name, ap.firstname AS assignment_user_firstname, ap.lastname AS assignment_user_lastname,
+          ji.id AS image_id, ji.url AS image_url, ji."publicId" AS image_public_id, ji."createdAt" AS image_created_at,
+          jr.id AS report_id, jr.status AS report_status, jr.detail AS report_detail, jr.summary AS report_summary, jr."createdAt" AS report_created_at
         FROM "Job" j
-        LEFT JOIN "Department" d
-          ON d.id = j."departmentId"
-        LEFT JOIN "User" cb
-          ON cb.id = j."createdById"
-        LEFT JOIN "Profile" cbp
-          ON cbp."userId" = cb.id
-
-        LEFT JOIN "JobAssignment" ja
-          ON ja."jobId" = j.id
-        LEFT JOIN "User" au
-          ON au.id = ja."userId"
-        LEFT JOIN "Profile" ap
-          ON ap."userId" = au.id
-        LEFT JOIN "Department" ad
-          ON ad.id = au."departmentId"
-
-        LEFT JOIN "JobImage" ji
-          ON ji."jobId" = j.id
-
-        LEFT JOIN "JobReport" jr
-          ON jr."jobId" = j.id
-
+        LEFT JOIN "Department" d ON d.id = j."departmentId"
+        LEFT JOIN "User" cb ON cb.id = j."createdById"
+        LEFT JOIN "Profile" cbp ON cbp."userId" = cb.id
+        LEFT JOIN "JobAssignment" ja ON ja."jobId" = j.id
+        LEFT JOIN "User" au ON au.id = ja."userId"
+        LEFT JOIN "Profile" ap ON ap."userId" = au.id
+        LEFT JOIN "Department" ad ON ad.id = au."departmentId"
+        LEFT JOIN "JobImage" ji ON ji."jobId" = j.id
+        LEFT JOIN "JobReport" jr ON jr."jobId" = j.id
         WHERE j.id = ${jobId}
       `;
 
@@ -336,7 +303,7 @@ export const createJob = async (req, res) => {
 
     res.json({
       message: "สร้างใบงานสำเร็จ",
-      job: createdJob,
+      job: result,
     });
   } catch (error) {
     res.status(500).json({

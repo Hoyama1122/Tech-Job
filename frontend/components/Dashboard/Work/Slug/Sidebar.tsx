@@ -75,11 +75,11 @@ export default function Sidebar({ job }: any) {
         )}
 
         <p className="text-sm text-gray-500 mb-2 border-b border-gray-200 pb-2">
-          ช่างที่รับผิดชอบ ({job.technician.length} คน)
+          ช่างที่รับผิดชอบ ({ (job?.technicians || job?.technician || []).length } คน)
         </p>
 
         <div className="space-y-3">
-          {job.technician.map((t: any) => (
+          {(job?.technicians || job?.technician || []).map((t: any) => (
             <div
               key={t.id}
               className="flex items-start gap-3 rounded-xl  bg-blue-100 p-4  shadow-sm"

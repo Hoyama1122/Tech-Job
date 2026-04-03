@@ -14,6 +14,10 @@ import {
 } from "lucide-react";
 
 import DropdownTechnician from "../../Form/DropdownTechnician";
+import { jobService } from "@/services/job.service";
+import { userService } from "@/services/user.service";
+import { toast } from "react-toastify";
+
 
 interface Technician {
   id: number;
@@ -22,10 +26,13 @@ interface Technician {
 }
 
 interface Job {
+  id?: number | string;
   JobId: string;
   title: string;
   description: string;
   technician: Technician[];
+  technicians?: Technician[];
+  images?: any[];
   imageKey?: string;
 }
 
@@ -42,25 +49,21 @@ export default function EditWorkModal({
 }: EditWorkModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<string[]>([]);
-  
+  // Images logic for EditJob has limitation: Backend replaces all images if new are sent.
+  // We'll focus on text fields and technicians for this core update functionality.
   useEffect(() => {
-    try {
-      const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
-      const list = store[job.imageKey] || [];
-      setImages(list);
-    } catch {
-      setImages([]);
+    if (job.images && Array.isArray(job.images)) {
+      setImages(job.images.map((img: any) => img.url));
     }
-  }, [job.imageKey]);
-  const [availableTechnicians, setAvailableTechnicians] = useState<
-    Technician[]
-  >([]);
+  }, [job]);
+
+  const [availableTechnicians, setAvailableTechnicians] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const methods = useForm({
     defaultValues: {
       title: job.title,
-      description: job.description,
-      technicianId: job.technician?.map((t) => t.id) || [],
+      description: job.description || "",
+      technicianId: job.technicians?.map((t: any) => t.id) || job.technician?.map((t: any) => t.id) || [],
     },
   });
   const {
@@ -79,13 +82,17 @@ export default function EditWorkModal({
   }, [onClose]);
 
   useEffect(() => {
-    try {
-      const users = JSON.parse(localStorage.getItem("Users") || "[]");
-      const techs = users.filter((u: any) => u.role === "technician");
-      setAvailableTechnicians(techs);
-    } catch {
-      setAvailableTechnicians([]);
-    }
+    const fetchTechs = async () => {
+      try {
+        const res = await userService.getUsers();
+        const users = Array.isArray(res.data) ? res.data : Array.isArray(res) ? res : [];
+        const techs = users.filter((u: any) => u.role?.toUpperCase() === "TECHNICIAN");
+        setAvailableTechnicians(techs);
+      } catch (err) {
+        console.error("Failed to load technicians", err);
+      }
+    };
+    fetchTechs();
   }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,40 +113,24 @@ export default function EditWorkModal({
     setIsSaving(true);
 
     try {
-      const users = JSON.parse(localStorage.getItem("Users") || "[]");
-
-      const selectedTechnicians = users.filter((u: any) =>
-        data.technicianId?.map(Number).includes(u.id)
-      );
-      const imageKey = job.imageKey || `IMG_${job.JobId}`;
-
-      const store = JSON.parse(localStorage.getItem("ImagesStore") || "{}");
-
-      store[imageKey] = images;
-      
-      localStorage.setItem("ImagesStore", JSON.stringify(store));
-
-      const updatedJob = {
-        ...job,
+      const payload = {
         title: data.title,
         description: data.description,
-        technician: selectedTechnicians,
-        imageKey,
+        technicianId: data.technicianId,
+        // Optional: departmentId if needed, but not in form.
       };
 
-      const cardList = JSON.parse(localStorage.getItem("CardWork") || "[]");
-      const newList = cardList.map((x: any) =>
-        x.JobId === job.JobId ? updatedJob : x
-      );
+      const updatedJobRes = await jobService.updateJob(job.id || job.JobId, payload as any);
 
-      localStorage.setItem("CardWork", JSON.stringify(newList));
-
+      toast.success("แก้ไขรายละเอียดใบงานสำเร็จ");
+      // Give time for UI
       await new Promise((res) => setTimeout(res, 500));
 
-      onSave(updatedJob);
+      onSave(updatedJobRes.job || updatedJobRes);
       onClose();
     } catch (err) {
       console.error("Error saving job:", err);
+      toast.error("เกิดข้อผิดพลาดในการแก้ไขใบงาน");
     } finally {
       setIsSaving(false);
     }

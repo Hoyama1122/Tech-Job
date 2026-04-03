@@ -64,26 +64,17 @@ export default function DropdownTechnician({
         shouldDirty: true,
       }
     );
-
-    // auto assign supervisor
-    if (updated.length > 0) {
-      const users = JSON.parse(localStorage.getItem("Users") || "[]");
-      const supervisor = users.find(
-        (u) => u.role === "supervisor" && u.department === updated[0].department
-      );
-      setValue("supervisorId", supervisor ? supervisor.id.toString() : "");
-    } else {
-      setValue("supervisorId", "");
-    }
   };
 
   // ฟิลเตอร์ตาม Search
   const filteredTech = techList.filter((tech) => {
     const keyword = search.toLowerCase();
+    const fullName = `${tech.profile?.firstname || ""} ${tech.profile?.lastname || ""}`.toLowerCase();
+    const deptName = (tech.department?.name || "").toLowerCase();
     return (
-      tech.name.toLowerCase().includes(keyword) ||
-      tech.department?.toLowerCase().includes(keyword) ||
-      tech.team?.toLowerCase().includes(keyword)
+      fullName.includes(keyword) ||
+      deptName.includes(keyword) ||
+      tech.email.toLowerCase().includes(keyword)
     );
   });
 
@@ -114,9 +105,9 @@ export default function DropdownTechnician({
               className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm font-medium"
             >
               <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
-                {tech.name.charAt(0)}
+                {(tech.profile?.firstname || tech.email).charAt(0)}
               </div>
-              <span>{tech.name}</span>
+              <span>{tech.profile?.firstname ? `${tech.profile.firstname} ${tech.profile.lastname || ""}` : tech.email || tech.empno}</span>
               <button type="button" onClick={() => toggleTech(tech)}>
                 <X size={14} className="text-red-500" />
               </button>
@@ -203,19 +194,19 @@ export default function DropdownTechnician({
                         isSelected ? "bg-primary" : "bg-gray-300"
                       }`}
                     >
-                      {tech.name.charAt(0)}
+                      {(tech.profile?.firstname || tech.email).charAt(0)}
                     </div>
                     <div className="text-left">
                       <p className="text-sm font-medium text-gray-800">
-                        {tech.name}
+                        {tech.profile?.firstname ? `${tech.profile.firstname} ${tech.profile.lastname || ""}` : tech.email || tech.empno}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-xs text-gray-500">
-                          {tech.department || "ไม่ระบุแผนก"}
+                          {tech.department?.name || "ไม่ระบุแผนก"}
                         </span>
-                        {tech.team && (
+                        {tech.empno && (
                           <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
-                            {tech.team}
+                            {tech.empno}
                           </span>
                         )}
                       </div>
@@ -228,6 +219,7 @@ export default function DropdownTechnician({
             })}
           </div>
         )}
+
       </div>
     </div>
   );

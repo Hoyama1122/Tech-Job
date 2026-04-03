@@ -266,12 +266,18 @@ export const insertJobImages = async ({
   jobId,
   uploadedImages = [],
 }) => {
-  if (!uploadedImages.length) return;
+  if (!uploadedImages || uploadedImages.length === 0) return;
 
   for (const image of uploadedImages) {
+    // Ensure we don't pass undefined to SQL
+    const imageUrl = image.url || null;
+    const publicId = image.publicId || null;
+
+    if (!jobId || !imageUrl) continue;
+
     await tx.$executeRaw`
-      INSERT INTO "JobImage" ("jobId", url, "publicId", "createdAt")
-      VALUES (${jobId}, ${image.url}, ${image.publicId}, NOW())
+      INSERT INTO "JobImage" ("jobId", "url", "publicId", "createdAt")
+      VALUES (${Number(jobId)}, ${imageUrl}, ${publicId}, NOW())
     `;
   }
 };

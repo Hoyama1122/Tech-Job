@@ -13,6 +13,10 @@ interface ImageUploadProps {
 const ImageUpload: React.FC<ImageUploadProps> = ({ setValue, register }) => {
   const [preview, setPreview] = useState<string[]>([]);
 
+  React.useEffect(() => {
+    register("image");
+  }, [register]);
+
   const handleFiles = (files: FileList | null) => {
     if (!files?.length) return;
     if (files.length > 6) return toast.warning("อัปโหลดได้สูงสุด 6 รูป");
@@ -41,7 +45,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ setValue, register }) => {
         <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
         รูปภาพประกอบ
       </label>
-      <input type="hidden" {...register("image")} />
 
       <label className="inline-flex items-center gap-2 bg-primary px-3 py-1.5 rounded-lg cursor-pointer hover:bg-primary/80 transition text-white text-sm">
         <Plus size={18} />

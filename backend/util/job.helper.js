@@ -11,11 +11,17 @@ export const formatJobId = (id) => {
  * user.profile.firstname / lastname
  * หรือ object ที่ส่ง firstname / lastname มาโดยตรง
  */
-export const getFullName = (user) => {
-  if (!user) return "";
+export const getFullName = (userOrFirst, last) => {
+  if (!userOrFirst) return "";
 
-  const firstname = user?.profile?.firstname ?? user?.firstname ?? "";
-  const lastname = user?.profile?.lastname ?? user?.lastname ?? "";
+  // Support separate string arguments
+  if (typeof userOrFirst === "string") {
+    return [userOrFirst, last].filter(Boolean).join(" ").trim();
+  }
+
+  // Support user object with nested profile
+  const firstname = userOrFirst?.profile?.firstname ?? userOrFirst?.firstname ?? "";
+  const lastname = userOrFirst?.profile?.lastname ?? userOrFirst?.lastname ?? "";
 
   return [firstname, lastname].filter(Boolean).join(" ").trim();
 };
