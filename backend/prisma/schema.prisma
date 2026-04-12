@@ -34,7 +34,7 @@ model Profile {
   avatar    String?
   birthday  DateTime?
   address   String?
-  gender    String?
+  gender    Gender? 
   user      User      @relation(fields: [userId], references: [id])
 }
 
@@ -158,6 +158,7 @@ enum Role {
 enum JobStatus {
   PENDING
   IN_PROGRESS
+  SUBMITTED
   COMPLETED
   REJECTED
 }
@@ -165,4 +166,9 @@ enum JobStatus {
 enum AssignmentRole {
   SUPERVISOR
   TECHNICIAN
+}
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }

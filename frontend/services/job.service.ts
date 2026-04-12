@@ -150,4 +150,12 @@ export const jobService = {
     });
     return res.data;
   },
+  async getMyJobDetail(id: number | string) {
+    const res = await api.get(`/jobs/my/${id}`);
+    return res.data;
+  },
+  async updateMyJobStatus(id: number | string, status: string) {
+    const res = await api.patch(`/jobs/my/${id}/status`, { status });
+    return res.data;
+  },
 };

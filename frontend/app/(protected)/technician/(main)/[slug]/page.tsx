@@ -7,11 +7,14 @@ import JobsDetail from "@/components/Technician/slug/JobsDetail";
 
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
 
 import {
   technicianReportSchema,
   TechnicianReportForm,
 } from "@/lib/Validations/technicianReportSchema";
+import { jobService } from "@/services/job.service";
+import { reportService, CreateReportPayload } from "@/services/report.service";
 
 const LS = {
   WORK: "CardWork",
@@ -82,101 +85,110 @@ export default function Page({ params }: PageProps) {
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   };
 
-  const loadJobAndImages = () => {
-    const cardData = localStorage.getItem(LS.WORK);
-    const imgStore = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
+  const fetchJobDetail = async () => {
+    try {
+      setIsLoading(true);
+      const res = await jobService.getMyJobDetail(slug);
+      const found = res.job;
 
-    if (!cardData) return;
+      if (!found) {
+        setJob(null);
+        return;
+      }
 
-    const jobs = JSON.parse(cardData);
-    const found = jobs.find((j: any) => j.JobId === slug);
+      setJob(found);
+      setCurrentStatus(found.status);
 
-    if (!found) {
+      // images from API
+      // images uploaded by admin
+      setAdminImages(found.images?.map((img: any) => img.url) || []);
+
+      // technician images (from the first report)
+      const report = found.reports?.[0];
+      setStoredBeforeImages(report?.images?.filter((i: any) => i.type === 'BEFORE' || !i.type).map((i: any) => i.url) || []);
+      setStoredAfterImages(report?.images?.filter((i: any) => i.type === 'AFTER').map((i: any) => i.url) || []);
+      
+      // Note: If your schema doesn't have type, you might need a different heuristic or separate relation.
+      // Based on my getMyJobDetail controller, I'll assume for now we just get images.
+      // Actually, my getMyJobDetail mapping returns job.reports[0] as technicianReport.
+      
+    } catch (error: any) {
+      console.error("โหลดรายละเอียดงานไม่สำเร็จ:", error);
       setJob(null);
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    setJob(found);
-    setCurrentStatus(found.status);
-
-    //  admin images
-    setAdminImages(imgStore[found.imageKey] || []);
-
-    //  technician stored images
-    setStoredBeforeImages(
-      imgStore[found.technicianReport?.imagesBeforeKey] || []
-    );
-    setStoredAfterImages(
-      imgStore[found.technicianReport?.imagesAfterKey] || []
-    );
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    loadJobAndImages();
-    setTimeout(() => setIsLoading(false), 250);
+    fetchJobDetail();
   }, [slug]);
 
-  //  update job status
-  const updateJobStatus = (newStatus: string, reportData?: any) => {
-    const cardData = localStorage.getItem(LS.WORK);
-    if (!cardData) return;
+  // Helper to convert base64 to File for upload
+  const dataURLtoFile = (dataurl: string, filename: string) => {
+    try {
+      const arr = dataurl.split(',');
+      if (arr.length < 2) return null;
+      const mime = arr[0].match(/:(.*?);/)?.[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], filename, { type: mime });
+    } catch (e) {
+      return null;
+    }
+  };
 
-    const jobs = JSON.parse(cardData);
-
-    const updatedJobs = jobs.map((j: any) =>
-      j.JobId === slug
-        ? {
-            ...j,
-            status: newStatus,
-            completedAt:
-              newStatus === "รอการตรวจสอบ"
-                ? new Date().toISOString()
-                : j.completedAt,
-            technicianReport: reportData || j.technicianReport,
-          }
-        : j
-    );
-
-    localStorage.setItem(LS.WORK, JSON.stringify(updatedJobs));
-    setJob(updatedJobs.find((x: any) => x.JobId === slug));
+  const updateJobStateLocally = (newStatus: string, reportData?: any) => {
+    setJob((prev: any) => ({
+      ...prev,
+      status: newStatus,
+      technicianReport: reportData || prev.technicianReport,
+    }));
     setCurrentStatus(newStatus);
   };
 
   //  start job
-  const handleStartJob = () => {
+  const handleStartJob = async () => {
     if (!navigator.geolocation) {
       toast.error("ไม่รองรับการหาตำแหน่ง");
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const distance = getDistanceMeters(
           pos.coords.latitude,
           pos.coords.longitude,
-          job.loc?.lat,
-          job.loc?.lng
+          job.latitude,
+          job.longitude
         );
 
         if (distance > 200) {
           toast.error(`คุณอยู่ห่างจากจุดงาน ${Math.floor(distance)} เมตร`);
           return;
         }
-        const now = new Date().toISOString();
 
-        updateJobStatus("กำลังทำงาน", {
-          ...(job.technicianReport || {}),
-          startTime: now,
-        });
-        toast.success("เริ่มงานสำเร็จ!");
+        try {
+          await jobService.updateMyJobStatus(slug, JobStatus.IN_PROGRESS);
+          updateJobStateLocally(JobStatus.IN_PROGRESS, {
+            ...(job.technicianReport || {}),
+            startTime: new Date().toISOString(),
+          });
+          toast.success("เริ่มงานสำเร็จ!");
+        } catch (err: any) {
+          toast.error(err.response?.data?.message || "ไม่สามารถเริ่มงานได้");
+        }
       },
       () => toast.error("เปิดพิกัดไม่สำเร็จ กรุณาอนุญาต Location")
     );
   };
 
   //  sumbit report
-  const handleSubmitReport = () => {
+  const handleSubmitReport = async () => {
     const validated = technicianReportSchema.safeParse({
       ...formData,
       imagesBefore: formBeforeImages,
@@ -194,44 +206,73 @@ export default function Page({ params }: PageProps) {
     }
 
     setErrors({});
-    const now = new Date().toISOString();
+    
+    try {
+      // Prepare files
+      const beforeFiles = formBeforeImages
+        .map((base64, i) => dataURLtoFile(base64, `before_${i}.jpg`))
+        .filter((f): f is File => !!f);
+      
+      const afterFiles = formAfterImages
+        .map((base64, i) => dataURLtoFile(base64, `after_${i}.jpg`))
+        .filter((f): f is File => !!f);
 
-    const beforeKey = `before_${slug}_${Date.now()}`;
-    const afterKey = `after_${slug}_${Date.now()}`;
+      const signFile = formData.customerSignature 
+        ? dataURLtoFile(formData.customerSignature, "customer_sign.png")
+        : undefined;
 
-    saveImagesToStore(beforeKey, formBeforeImages);
-    saveImagesToStore(afterKey, formAfterImages);
+      // In this specific implementation, we combine images or handle them as needed
+      // Given createReport expects images: File[], we might want to tag them or send them together
+      // Backend createJobReport might need adjustment if it expects separate before/after fields
+      // For now, I'll send all as 'images' to match the service
+      
+      const payload: CreateReportPayload = {
+        jobId: job.id, // numeric ID from job object
+        status: JobStatus.SUBMITTED,
+        detail: formData.detail,
+        repair_operations: formData.repairOperations,
+        inspection_results: formData.inspectionResults,
+        summary: formData.summaryOfOperatingResults,
+        images: [...beforeFiles, ...afterFiles],
+        cus_sign: signFile || undefined,
+        start_time: job?.technicianReport?.startTime,
+        end_time: new Date().toISOString(),
+      };
 
-    const reportData = {
-      ...validated.data,
-      imagesBeforeKey: beforeKey,
-      imagesAfterKey: afterKey,
-      submittedAt: new Date().toISOString(),
-      endTime: now, 
-      startTime: job?.technicianReport?.startTime, 
-    };
-
-    updateJobStatus("รอการตรวจสอบ", reportData);
-    setShowFormModal(false);
-    toast.success("บันทึกรายงานปิดงานสำเร็จ!");
+      await reportService.createReport(payload);
+      
+      updateJobStateLocally(JobStatus.SUBMITTED);
+      setShowFormModal(false);
+      toast.success("บันทึกรายงานปิดงานสำเร็จ!");
+      
+      // Refresh data
+      fetchJobDetail();
+    } catch (err: any) {
+      console.error("Submit error:", err);
+      toast.error(err.response?.data?.message || "บันทึกรายงานไม่สำเร็จ");
+    }
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
-      กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      สำเร็จ: "bg-green-100 text-green-700 border-green-200",
-      รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
-      รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
-      ตีกลับ: "bg-red-100 text-red-700 border-red-200",
+    const s = status?.toUpperCase();
+    const displayStatus = getStatusThai(status);
+    
+    const styles: Record<string, string> = {
+      [JobStatus.PENDING]: "bg-blue-100 text-blue-700 border-blue-200",
+      [JobStatus.IN_PROGRESS]: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      [JobStatus.SUBMITTED]: "bg-indigo-100 text-indigo-700 border-indigo-200",
+      [JobStatus.COMPLETED]: "bg-green-100 text-green-700 border-green-200",
+      [JobStatus.REJECTED]: "bg-red-100 text-red-700 border-red-200",
+      "รอการดำเนินงาน": "bg-orange-100 text-orange-700 border-orange-200",
     };
+
+    const style = styles[s] || styles[status] || "bg-gray-100 text-gray-700 border-gray-200";
 
     return (
       <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-          styles[status] || "bg-gray-100 text-gray-700 border-gray-200"
-        }`}
+        className={`px-3 py-1 rounded-full text-xs font-semibold border ${style}`}
       >
-        {status}
+        {displayStatus}
       </span>
     );
   };
@@ -255,7 +296,7 @@ export default function Page({ params }: PageProps) {
       <HeaderSlugTechni job={job} getStatusBadge={getStatusBadge} />
       <JobsDetail job={job} adminImages={adminImages} />
 
-      {(currentStatus === "รอการตรวจสอบ" || currentStatus === "สำเร็จ") && (
+      {(currentStatus?.toUpperCase() === JobStatus.SUBMITTED || currentStatus?.toUpperCase() === JobStatus.COMPLETED || currentStatus === "รอการตรวจสอบ" || currentStatus === "สำเร็จ") && (
         <DetailFromTech
           job={job}
           imagesBefore={storedBeforeImages}
@@ -263,7 +304,7 @@ export default function Page({ params }: PageProps) {
         />
       )}
 
-      {(currentStatus === "รอการดำเนินงาน" || currentStatus === "ตีกลับ") && (
+      {(currentStatus?.toUpperCase() === JobStatus.PENDING || currentStatus === "รอการดำเนินงาน" || currentStatus?.toUpperCase() === JobStatus.REJECTED || currentStatus === "ตีกลับ") && (
         <button
           onClick={handleStartJob}
           className="fixed bottom-6 right-6 px-5 py-3 bg-blue-600 text-white rounded-full shadow-lg"
@@ -272,7 +313,7 @@ export default function Page({ params }: PageProps) {
         </button>
       )}
 
-      {currentStatus === "กำลังทำงาน" && (
+      {(currentStatus?.toUpperCase() === JobStatus.IN_PROGRESS || currentStatus === "กำลังทำงาน") && (
         <button
           onClick={() => setShowFormModal(true)}
           className="fixed bottom-6 right-6 px-5 py-3 bg-green-600 text-white rounded-full shadow-lg"

@@ -1,40 +1,46 @@
 "use client";
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
-import { Loader } from "lucide-react";
 
-export default function MapLocation({ lat, lng }) {
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-  });
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
 
-  if (!isLoaded)
-    return (
-      <div className="flex items-center justify-center py-4">
-        <Loader size={24} className="animate-spin text-gray-600" />
+const MapDetailInner = dynamic(
+  () => import("@/components/ui/LeafletMapDetailInner"),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center py-4 w-full h-64 bg-gray-50 rounded-xl">
+        <Loader2 size={24} className="animate-spin text-gray-600" />
       </div>
-    );
+    )
+  }
+);
+
+export default function MapLocation({ lat, lng }: { lat: any; lng: any }) {
+  const latitude = Number(lat);
+  const longitude = Number(lng);
 
   const openDirection = () => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
     window.open(url, "_blank");
   };
 
+  if (!latitude || !longitude) {
+    return (
+      <div className="flex items-center justify-center py-4 w-full h-64 bg-gray-50 rounded-xl text-gray-400">
+        ไม่มีตำแหน่งระบุในแผนที่
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
-      <GoogleMap
-        zoom={17}
-        center={{ lat, lng }}
-        mapContainerClassName="w-full h-64 rounded-xl shadow"
-      >
-        <Marker
-          position={{ lat, lng }}
-          animation={window.google.maps.Animation.DROP}
-        />
-      </GoogleMap>
+      <div className="w-full h-64 rounded-xl overflow-hidden shadow">
+        <MapDetailInner lat={latitude} lng={longitude} />
+      </div>
 
       <button
         onClick={openDirection}
-        className="w-full py-2 bg-primary text-white rounded-xl transition"
+        className="w-full py-2 bg-primary text-white rounded-xl transition hover:bg-primary-hover active:scale-[0.98]"
       >
         ดูเส้นทาง
       </button>

@@ -21,6 +21,7 @@ import {
   type UpdateUserPayload,
 } from "@/services/user.service";
 import { toast } from "react-toastify";
+import { department as departmentService } from "@/services/depertmane.service";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -58,6 +59,7 @@ const initialForm: FormState = {
 const Page = () => {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [departments, setDepartments] = useState<{ id: number; name: string }[]>([]);
   const [departmentFilter, setDepartmentFilter] = useState("ทั้งหมด");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,23 +79,35 @@ const Page = () => {
         "โหลด users ไม่สำเร็จ:",
         error?.response?.data || error.message
       );
-      alert(error?.response?.data?.message || "โหลดข้อมูลผู้ใช้ไม่สำเร็จ");
+      toast.error(error?.response?.data?.message || "โหลดข้อมูลผู้ใช้ไม่สำเร็จ");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const res = await departmentService.getDepartments();
+      const depts = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : [];
+      setDepartments(depts);
+    } catch (error) {
+      console.error("โหลด departments ไม่สำเร็จ:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchDepartments();
   }, []);
 
   const departmentOptions = useMemo(() => {
-    const names = users
-      .map((item) => item.department?.name)
-      .filter((name): name is string => Boolean(name));
-
-    return ["ทั้งหมด", ...Array.from(new Set(names))];
-  }, [users]);
+    const names = departments.map((d) => d.name);
+    return ["ทั้งหมด", ...names];
+  }, [departments]);
 
   const filteredUsers = useMemo(() => {
     const text = searchTerm.trim().toLowerCase();
@@ -181,7 +195,7 @@ const Page = () => {
         "ลบ user ไม่สำเร็จ:",
         error?.response?.data || error.message
       );
-      alert(error?.response?.data?.message || "ลบผู้ใช้ไม่สำเร็จ");
+      toast.error(error?.response?.data?.message || "ลบผู้ใช้ไม่สำเร็จ");
     }
   };
 
@@ -191,41 +205,31 @@ const Page = () => {
     try {
       setIsSaving(true);
 
+      const payloadBase = {
+        empno: form.empno,
+        email: form.email,
+        role: form.role,
+        departmentId: form.departmentId ? Number(form.departmentId) : null,
+        firstname: form.firstname,
+        lastname: form.lastname,
+        phone: form.phone,
+        address: form.address,
+        avatar: form.avatar,
+        gender: form.gender || null,
+        birthday: form.birthday || undefined,
+      };
+
       if (mode === "create") {
-        const payload: CreateUserPayload = {
-          empno: form.empno,
-          email: form.email,
+        await userService.createUser({
+          ...payloadBase,
           password: form.password,
-          role: form.role,
-          departmentId: form.departmentId ? Number(form.departmentId) : null,
-          firstname: form.firstname,
-          lastname: form.lastname,
-          phone: form.phone,
-          address: form.address,
-          avatar: form.avatar,
-          gender: form.gender,
-          birthday: form.birthday || undefined,
-        };
-
-        await userService.createUser(payload);
+        } as CreateUserPayload);
       } else {
-        const payload: UpdateUserPayload = {
+        await userService.updateUser({
+          ...payloadBase,
           id: Number(form.id),
-          empno: form.empno,
-          email: form.email,
-          role: form.role,
-          departmentId: form.departmentId ? Number(form.departmentId) : null,
-          firstname: form.firstname,
-          lastname: form.lastname,
-          phone: form.phone,
-          address: form.address,
-          avatar: form.avatar,
-          gender: form.gender,
-          birthday: form.birthday || undefined,
           ...(form.password ? { password: form.password } : {}),
-        };
-
-        await userService.updateUser(payload);
+        } as UpdateUserPayload);
       }
 
       setOpenModal(false);
@@ -237,7 +241,7 @@ const Page = () => {
         "บันทึก user ไม่สำเร็จ:",
         error?.response?.data || error.message
       );
-      alert(error?.response?.data?.message || "บันทึกข้อมูลไม่สำเร็จ");
+      toast.error(error?.response?.data?.message || "บันทึกข้อมูลไม่สำเร็จ");
     } finally {
       setIsSaving(false);
     }
@@ -445,7 +449,7 @@ const Page = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-6 py-6">
+            <form onSubmit={handleSubmit} className="px-6 py-6 h border-gray-100 h-[65vh] overflow-y-auto">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-700">
@@ -558,30 +562,41 @@ const Page = () => {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-700">
-                    Department ID
+                    แผนก (Department)
                   </label>
-                  <input
-                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
-                    placeholder="เช่น 1"
+                  <select
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
                     value={form.departmentId}
                     onChange={(e) =>
                       setForm({ ...form, departmentId: e.target.value })
                     }
-                  />
+                    required
+                  >
+                    <option value="">เลือกแผนก</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-700">
-                    เพศ
+                    เพศ (Gender)
                   </label>
-                  <input
-                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
-                    placeholder="เพศ"
+                  <select
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
                     value={form.gender}
                     onChange={(e) =>
                       setForm({ ...form, gender: e.target.value })
                     }
-                  />
+                  >
+                    <option value="">เลือกเพศ</option>
+                    <option value="MALE">ชาย</option>
+                    <option value="FEMALE">หญิง</option>
+                    <option value="OTHER">อื่นๆ</option>
+                  </select>
                 </div>
 
                 <div className="space-y-2">

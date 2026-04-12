@@ -1,6 +1,7 @@
 import { FileText, Download, ArrowLeft, Edit, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateWorkPDF } from "@/lib/pdf/generateWorkPDF";
+import { JobStatus } from "@/types/job";
 
 export default function Header({
   job,
@@ -45,9 +46,9 @@ export default function Header({
         {myRole === "supervisor" && (
           <>
             <button
-              disabled={status !== "PENDING"}
+              disabled={status !== JobStatus.SUBMITTED && status !== JobStatus.PENDING && job?.status !== "ส่งงานแล้ว" && job?.status !== "รอการตรวจสอบ"}
               className={`rounded-md px-4 py-2 text-white ${
-                status === "PENDING"
+                (status === JobStatus.SUBMITTED || status === JobStatus.PENDING || job?.status === "ส่งงานแล้ว" || job?.status === "รอการตรวจสอบ")
                   ? "bg-red-600 hover:bg-red-700"
                   : "cursor-not-allowed bg-gray-300"
               }`}
@@ -57,9 +58,9 @@ export default function Header({
             </button>
 
             <button
-              disabled={status !== "PENDING"}
+              disabled={status !== JobStatus.SUBMITTED && status !== JobStatus.PENDING && job?.status !== "ส่งงานแล้ว" && job?.status !== "รอการตรวจสอบ"}
               className={`rounded-md px-4 py-2 text-white ${
-                status === "PENDING"
+                (status === JobStatus.SUBMITTED || status === JobStatus.PENDING || job?.status === "ส่งงานแล้ว" || job?.status === "รอการตรวจสอบ")
                   ? "bg-green-600 hover:bg-green-700"
                   : "cursor-not-allowed bg-gray-300"
               }`}
@@ -81,9 +82,9 @@ export default function Header({
             </button>
 
             <button
-              disabled={status !== "PENDING"}
+              disabled={status !== JobStatus.SUBMITTED && status !== JobStatus.PENDING && job?.status !== "ส่งงานแล้ว" && job?.status !== "รอการตรวจสอบ"}
               className={`rounded-md px-4 py-2 text-white ${
-                status === "PENDING"
+                (status === JobStatus.SUBMITTED || status === JobStatus.PENDING || job?.status === "ส่งงานแล้ว" || job?.status === "รอการตรวจสอบ")
                   ? "bg-red-500 hover:bg-red-600"
                   : "cursor-not-allowed bg-gray-300"
               }`}
@@ -93,9 +94,9 @@ export default function Header({
             </button>
 
             <button
-              disabled={status !== "PENDING"}
+              disabled={status !== JobStatus.SUBMITTED && status !== JobStatus.PENDING && job?.status !== "ส่งงานแล้ว" && job?.status !== "รอการตรวจสอบ"}
               className={`rounded-md px-4 py-2 text-white ${
-                status === "PENDING"
+                (status === JobStatus.SUBMITTED || status === JobStatus.PENDING || job?.status === "ส่งงานแล้ว" || job?.status === "รอการตรวจสอบ")
                   ? "bg-green-600 hover:bg-green-700"
                   : "cursor-not-allowed bg-gray-300"
               }`}
@@ -105,10 +106,10 @@ export default function Header({
             </button>
 
             <button
-              disabled={status !== "PENDING"}
+              disabled={status !== JobStatus.PENDING && job?.status !== "รอการตรวจสอบ"}
               onClick={() => setShowCancelModal(true)}
               className={`flex items-center gap-1 rounded-md px-4 py-2 text-white ${
-                status === "PENDING"
+                (status === JobStatus.PENDING || job?.status === "รอการตรวจสอบ")
                   ? "bg-red-600 hover:bg-red-700"
                   : "cursor-not-allowed bg-gray-300"
               }`}

@@ -20,7 +20,14 @@ import {
 
 export const getJobs = async (req, res) => {
   try {
-    const rows = await prisma.$queryRaw`
+    const { role, departmentId } = req.user;
+
+    // Only ADMIN, SUPERADMIN, and SUPERVISOR can access this
+    if (!["ADMIN", "SUPERADMIN", "SUPERVISOR"].includes(role)) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลส่วนนี้" });
+    }
+
+    let query = Prisma.sql`
       SELECT
         j.id,
         j.title,
@@ -29,6 +36,7 @@ export const getJobs = async (req, res) => {
         j."createdAt",
         j.start_available_at,
         j.end_available_at,
+        j."departmentId",
 
         ja.role AS assignment_role,
         au.id AS assignment_user_id,
@@ -43,8 +51,18 @@ export const getJobs = async (req, res) => {
         ON au.id = ja."userId"
       LEFT JOIN "Profile" ap
         ON ap."userId" = au.id
-      ORDER BY j."createdAt" DESC
     `;
+
+    // Filter by departmentId if it exists (for all roles as requested)
+    // Note: If SUPERADMIN should see all, we'd check if role !== 'SUPERADMIN'
+    // But user said: "fetch เฉพาะjob departmentId ตัวเอง" for all three roles.
+    if (departmentId) {
+      query = Prisma.sql`${query} WHERE j."departmentId" = ${departmentId}`;
+    }
+
+    query = Prisma.sql`${query} ORDER BY j."createdAt" DESC`;
+
+    const rows = await prisma.$queryRaw(query);
 
     const formattedJobs = mapJobsRows(rows, formatJobId);
 
@@ -598,6 +616,7 @@ export const getMyJobs = async (req, res) => {
         j."createdAt",
         j.start_available_at,
         j.end_available_at,
+        j.location_name,
 
         ja.role AS assignment_role,
         au.id AS assignment_user_id,
@@ -625,6 +644,178 @@ export const getMyJobs = async (req, res) => {
       jobs: formattedJobs,
     });
   } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+};
+
+/**
+ * ดึงรายละเอียดใบงานของ "ฉัน" (Technician) ตาม ID หรือ Slug (เช่น JOB-0001)
+ * โดยต้องเป็นงานที่ได้รับมอบหมายเท่านั้น
+ */
+export const getMyJobDetail = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id: jobIdOrSlug } = req.params;
+    let jobId;
+
+    // Handle JOB-0001 format
+    if (typeof jobIdOrSlug === "string" && jobIdOrSlug.startsWith("JOB-")) {
+      jobId = parseInt(jobIdOrSlug.split("-")[1]);
+    } else {
+      jobId = parseInt(jobIdOrSlug);
+    }
+
+    if (isNaN(jobId)) {
+      return res.status(400).json({ message: "รูปแบบรหัสใบงานไม่ถูกต้อง" });
+    }
+
+    // Use Prisma Client findFirst to ensure assignment
+    const job = await prisma.job.findFirst({
+      where: {
+        id: jobId,
+        assignment: {
+          some: {
+            userId: userId,
+          },
+        },
+      },
+      include: {
+        department: true,
+        createdBy: {
+          include: {
+            profile: true,
+          },
+        },
+        assignment: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+                department: true,
+              },
+            },
+          },
+        },
+        images: true,
+        reports: {
+          include: {
+            images: true,
+            createdBy: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
+
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบใบงานที่ได้รับมอบหมาย" });
+    }
+
+    // Map to a friendlier format for the frontend
+    // This transform aims to stay consistent with the existing app's structure
+    // Exclude the raw 'assignment' field to prevent leaking sensitive user data (like passwords)
+    const { assignment: rawAssignment, ...jobData } = job;
+
+    const formattedJob = {
+      ...jobData,
+      JobId: formatJobId(job.id),
+      createdBy: {
+        id: job.createdBy.id,
+        empno: job.createdBy.empno,
+        fullname: `${job.createdBy.profile?.firstname || ""} ${job.createdBy.profile?.lastname || ""}`.trim(),
+      },
+      department: job.department,
+      assignments: rawAssignment.map(a => ({
+        id: a.user.id,
+        empno: a.user.empno,
+        role: a.role,
+        fullname: `${a.user.profile?.firstname || ""} ${a.user.profile?.lastname || ""}`.trim(),
+        departmentName: a.user.department?.name,
+      })),
+      images: job.images,
+      reports: job.reports.map(r => ({
+        ...r,
+        createdBy: {
+            id: r.createdBy?.id,
+            fullname: `${r.createdBy?.profile?.firstname || ""} ${r.createdBy?.profile?.lastname || ""}`.trim(),
+        }
+      })),
+      loc: {
+        lat: job.latitude,
+        lng: job.longitude
+      },
+      customer: {
+        address: job.location_name || "ไม่ระบุสถานที่"
+      },
+      // Set single technicianReport if relevant for backward compatibility
+      technicianReport: job.reports[0] || null,
+    };
+
+    res.json({
+      message: "ดึงรายละเอียดงานสำเร็จ",
+      job: formattedJob,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+};
+
+/**
+ * อัปเดตสถานะงานโดย Technician (งานที่ตนเองได้รับมอบหมายเท่านั้น)
+ */
+export const updateMyJobStatus = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id: jobIdOrSlug } = req.params;
+    const { status } = req.body;
+    let jobId;
+
+    if (typeof jobIdOrSlug === "string" && jobIdOrSlug.startsWith("JOB-")) {
+      jobId = parseInt(jobIdOrSlug.split("-")[1]);
+    } else {
+      jobId = parseInt(jobIdOrSlug);
+    }
+
+    if (isNaN(jobId)) {
+      return res.status(400).json({ message: "รูปแบบรหัสใบงานไม่ถูกต้อง" });
+    }
+
+    // Check if the job is assigned to this user
+    const assignment = await prisma.jobAssignment.findFirst({
+      where: {
+        jobId: jobId,
+        userId: userId,
+      },
+    });
+
+    if (!assignment) {
+      return res.status(403).json({ message: "คุณไม่มีสิทธิ์เข้าถึงหรือแก้ไขงานนี้" });
+    }
+
+    const updatedJob = await prisma.job.update({
+      where: { id: jobId },
+      data: { 
+        status: status,
+        updatedAt: new Date(),
+      },
+    });
+
+    res.json({
+      message: "อัปเดตสถานะงานสำเร็จ",
+      job: updatedJob,
+    });
+  } catch (error) {
+    console.error("updateMyJobStatus error:", error);
     res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });

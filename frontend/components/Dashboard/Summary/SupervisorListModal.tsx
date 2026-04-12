@@ -1,4 +1,4 @@
-import { X, Phone, Mail, Building, User, Hash, Filter } from "lucide-react";
+import { X, Phone, Mail, Building, User,Users, Hash, Filter } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 
 const SupervisorListModal = ({ supervisors, onClose }) => {

@@ -8,28 +8,20 @@ import { useRouter } from "next/navigation";
 import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import Jobs from "./Jobs";
 import { jobService } from "@/services/job.service";
+import { JobStatus, getStatusThai, JobStatusThai } from "@/types/job";
+
+import { useJobStore } from "@/store/useJobStore";
 
 const Dashboard = () => {
-  const [myJobs, setMyJobs] = useState([]);
-  const [jobs, setjobs] = useState([]);
+  const { myJobs, fetchMyJobs, isMyJobsLoading } = useJobStore();
   const [showFilter, setShowFilter] = useState(false);
   const [time, setTime] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"today" | "all">("today");
   const router = useRouter();
 
   useEffect(() => {
-    const fetchMyJobs = async () => {
-      try {
-        const data = await jobService.getMyJobs();
-        setMyJobs(data.jobs || []);
-        setjobs(data.jobs || []);
-      } catch (err) {
-        console.error("โหลดงานของ technician ไม่สำเร็จ", err);
-      }
-    };
-
     fetchMyJobs();
-  }, []);
+  }, [fetchMyJobs]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -48,9 +40,18 @@ const Dashboard = () => {
   }, []);
 
   const todayJobs = myJobs.filter((job: any) => {
-    const jobDate = new Date(job.createdAt).toDateString();
-    const today = new Date().toDateString();
-    return jobDate === today;
+    if (!job.start_available_at || !job.end_available_at) return false;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const start = new Date(job.start_available_at);
+    start.setHours(0, 0, 0, 0);
+    
+    const end = new Date(job.end_available_at);
+    end.setHours(23, 59, 59, 999);
+    
+    return today >= start && today <= end;
   });
 
   const displayJobs = activeTab === "today" ? todayJobs : myJobs;
@@ -99,7 +100,7 @@ const Dashboard = () => {
                   {
                     myJobs.filter(
                       (j: any) =>
-                        j.status === "สำเร็จ" || j.status === "COMPLETED"
+                        getStatusThai(j.status) === JobStatusThai[JobStatus.COMPLETED]
                     ).length
                   }
                 </p>
@@ -118,7 +119,7 @@ const Dashboard = () => {
                   {
                     myJobs.filter(
                       (j: any) =>
-                        j.status === "รอการตรวจสอบ" || j.status === "PENDING"
+                        getStatusThai(j.status) === JobStatusThai[JobStatus.PENDING]
                     ).length
                   }
                 </p>

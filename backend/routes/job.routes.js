@@ -5,11 +5,13 @@ import {
   getJobById,
   getJobs,
   getMyJobs,
+  getMyJobDetail,
+  updateMyJobStatus,
   updateJob,
 } from "../controller/job.controller.js";
 import { upload } from "../lib/upload.js";
-import { allowRoles, verifyToken } from "../lib/middleware.js";
-import authRouter from "./auth.routes.js";
+import { allowRoles, authCheck, verifyToken } from "../lib/middleware.js";
+
 
 const jobRouter = Router();
 
@@ -37,6 +39,8 @@ const jobRouter = Router();
  *         description: Server error
  */
 jobRouter.get("/my", verifyToken, getMyJobs);
+jobRouter.get("/my/:id", verifyToken, getMyJobDetail);
+jobRouter.patch("/my/:id/status", verifyToken, updateMyJobStatus);
 
 /**
  * @swagger
@@ -50,7 +54,7 @@ jobRouter.get("/my", verifyToken, getMyJobs);
  *       500:
  *         description: Server error
  */
-jobRouter.get("/", getJobs);
+jobRouter.get("/", verifyToken, authCheck, getJobs);
 
 /**
  * @swagger

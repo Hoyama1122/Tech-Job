@@ -120,9 +120,16 @@ export default function Sidebar({ job }: any) {
       </div>
       <div className="bg-white rounded-xl shadow-md p-4">
           {/* Map */}
-           <div className="w-full h-64 bg-gray-200 flex items-center justify-center text-gray-500">
-            {/* <MapForAdmin lat={job.loc.lat} lng={job.loc.lng} /> */}
-          </div>
+          {(() => {
+            const loc = (typeof job?.location === 'string' ? JSON.parse(job.location) : job?.location) || job?.loc || {};
+            const lat = loc?.lat || loc?.latitude || job?.lat;
+            const lng = loc?.lng || loc?.longitude || job?.lng;
+            return (
+              <div className="w-full h-64 bg-gray-200 flex items-center justify-center text-gray-500">
+                <MapForAdmin lat={lat} lng={lng} />
+              </div>
+            );
+          })()}
         </div>
     </div>
   );

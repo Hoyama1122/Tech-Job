@@ -121,6 +121,14 @@ export const createJobReport = async (req, res) => {
         uploadedImages,
       });
 
+      // Update Job status to SUBMITTED
+      await tx.$executeRaw`
+        UPDATE "Job"
+        SET status = 'SUBMITTED',
+            "updatedAt" = NOW()
+        WHERE id = ${Number(jobId)};
+      `;
+
       const rows = await tx.$queryRaw`
         SELECT
           jr.id,

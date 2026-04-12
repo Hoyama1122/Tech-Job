@@ -14,8 +14,7 @@ import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
 import { jobService } from "@/services/job.service";
-import { authService } from "@/services/auth.service";
-import { PDFWorkOrder } from "@/app/(protected)/admin/workorder/PDFWorkOrder";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -23,7 +22,6 @@ interface PageProps {
 
 export default function WorkDetailPage({ params }: PageProps) {
   const { slug } = use(params);
-  const [role, setRole] = useState("");
 
   const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = useState<any>(null);
@@ -34,18 +32,12 @@ export default function WorkDetailPage({ params }: PageProps) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await authService.me();
-        setRole(res.user.role);
-      } catch {
-        setRole("");
-      }
-    };
+  const { user, fetchMe } = useAuthStore();
+  const role = user?.role || "";
 
+  useEffect(() => {
     fetchMe();
-  }, []);
+  }, [fetchMe]);
   useEffect(() => {
     const fetchJob = async () => {
       setIsLoading(true);

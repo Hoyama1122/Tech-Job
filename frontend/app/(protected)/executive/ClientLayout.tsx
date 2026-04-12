@@ -9,49 +9,26 @@ import { CardWork } from "@/lib/Mock/Jobs";
 import NavbarExec from "@/components/Executive/NavbarExec";
 import SidebarWrapperExc from "@/components/Executive/SidebarWrapperExc";
 
-type UserRole =
-  | "ADMIN"
-  | "SUPERVISOR"
-  | "TECHNICIAN"
-  | "EXECUTIVE"
-  | "SUPERADMIN";
-
-type AuthUser = {
-  id: number;
-  email: string;
-  empno?: string;
-  role: UserRole;
-  departmentId?: number | null;
-  profile?: {
-    firstname?: string | null;
-    lastname?: string | null;
-    avatar?: string | null;
-    phone?: string | null;
-  } | null;
-};
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, fetchMe, isLoading } = useAuthStore();
 
   useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await authService.me();
-        setUser(res.user);
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMe();
-  }, []);
+  }, [fetchMe]);
+
+  if (isLoading && !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen bg-primary`}>

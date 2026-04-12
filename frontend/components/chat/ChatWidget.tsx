@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import ConversationList from './ConversationList';
 import ActiveChatPanel from './ActiveChatPanel';
-import { authService } from '@/services/auth.service';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeChat, setActiveChat] = useState<any | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { user: currentUser, fetchMe } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -22,10 +22,8 @@ export default function ChatWidget() {
     if (!mounted) return;
     if (pathname === '/login') return;
     
-    authService.me().then(res => {
-      setCurrentUser(res.user);
-    }).catch(err => console.error("Could not fetch current user for chat", err));
-  }, [mounted, pathname]);
+    fetchMe();
+  }, [mounted, pathname, fetchMe]);
 
   // Listen for custom events to handle navigation within the widget
   useEffect(() => {

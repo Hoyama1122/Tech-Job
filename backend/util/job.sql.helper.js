@@ -20,6 +20,10 @@ export const mapJobsRows = (rows = [], formatJobId) => {
         start_available_at: row.start_available_at,
         end_available_at: row.end_available_at,
         createdAt: row.createdAt,
+        location_name: row.location_name,
+        customer: {
+            address: row.location_name || "ไม่ระบุสถานที่"
+        },
         supervisor: null,
         technicians: [], // del
       });

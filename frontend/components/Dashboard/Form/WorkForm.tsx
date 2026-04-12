@@ -208,6 +208,7 @@ const WorkForm = () => {
                   lng: pos.lng,
                 });
               }}
+              loc={loc}
               setLoc={setLoc}
               setValue={setValue as any}
             />

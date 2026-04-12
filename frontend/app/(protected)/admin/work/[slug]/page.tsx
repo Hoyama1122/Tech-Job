@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, use } from "react";
+import { useRef, useState, useEffect, use, useMemo } from "react";
 import React from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -14,8 +14,9 @@ import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
 import { jobService } from "@/services/job.service";
-import { authService } from "@/services/auth.service";
+import { useAuthStore } from "@/store/useAuthStore";
 import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
+import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -23,29 +24,21 @@ interface PageProps {
 
 export default function WorkDetailPage({ params }: PageProps) {
   const { slug } = use(params);
-  const [role, setRole] = useState("");
 
   const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [imgStore, setImgStore] = useState<any>({});
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await authService.me();
-        setRole(res.user.role);
-      } catch {
-        setRole("");
-      }
-    };
+  const { user, fetchMe } = useAuthStore();
+  const role = user?.role || "";
 
+  useEffect(() => {
     fetchMe();
-  }, []);
+  }, [fetchMe]);
   useEffect(() => {
     const fetchJob = async () => {
       setIsLoading(true);
@@ -82,30 +75,31 @@ export default function WorkDetailPage({ params }: PageProps) {
 
  
 
-  const canApproveOrReject = job?.status === "PENDING";
+  const statusStr = job?.status?.toUpperCase() || "";
+  const canApproveOrReject = statusStr === JobStatus.SUBMITTED || statusStr === "ส่งงานแล้ว" || statusStr === JobStatus.PENDING;
 
   const handleApprove = async () => {
     if (!canApproveOrReject) {
-      toast.error("This job cannot be approved");
+      toast.error("ไม่สามารถอนุมัติใบงานนี้ได้");
       return;
     }
 
     try {
       setJob((prev: any) => ({
         ...prev,
-        status: "COMPLETED",
+        status: JobStatus.COMPLETED,
         approvedAt: new Date().toISOString(),
       }));
 
-      toast.success("Job approved successfully");
+      toast.success("อนุมัติใบงานสำเร็จ");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Approve failed");
+      toast.error(error.response?.data?.message || "การอนุมัติล้มเหลว");
     }
   };
 
   const handleRejectClick = () => {
     if (!canApproveOrReject) {
-      toast.error("This job cannot be rejected");
+      toast.error("ไม่สามารถตีกลับใบงานนี้ได้");
       return;
     }
 
@@ -116,30 +110,51 @@ export default function WorkDetailPage({ params }: PageProps) {
     try {
       setJob((prev: any) => ({
         ...prev,
-        status: "REJECTED",
+        status: JobStatus.REJECTED,
         rejectReason: reason,
         rejectedAt: new Date().toISOString(),
       }));
 
       setShowRejectModal(false);
-      toast.success("Job rejected successfully");
+      toast.success("ตีกลับใบงานสำเร็จ");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Reject failed");
+      toast.error(error.response?.data?.message || "การตีกลับล้มเหลว");
     }
   };
 
-  const imagesBefore = imgStore[job?.technicianReport?.imagesBeforeKey] || [];
-  const imagesAfter = imgStore[job?.technicianReport?.imagesAfterKey] || [];
-  const adminImages = imgStore[job?.imageKey] || [];
+  const imagesBefore = job?.technicianReport?.imagesBefore || [];
+  const imagesAfter = job?.technicianReport?.imagesAfter || [];
+  const adminImages = job?.images?.map((img: any) => img.url) || [];
+
+  // Memoize detail cards to prevent lag during state updates
+  const DetailContent = useMemo(() => (
+    <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
+      <div className="space-y-4">
+        <BasicInfoCard job={job} />
+        <DescriptionCard job={job} />
+        <EvidenceCard
+          job={job}
+        />
+      </div>
+      <Sidebar job={job} />
+    </div>
+  ), [job, adminImages, imagesBefore, imagesAfter]);
+
+  // Memoize PDF Generation Container above early returns to follow Rules of Hooks
+  const PDFContainer = useMemo(() => (
+    <div className="fixed left-[-9999px] top-0 -z-50 pointer-events-none opacity-0">
+      <div ref={pdfRef}>
+        <PDFWorkOrder job={job} />
+      </div>
+    </div>
+  ), [job]);
 
   if (isLoading) return <LoadingSkeleton />;
   if (!job) return <NotFoundPage jobId={slug} />;
 
-
   return (
-    <div>
-      <div className="p-4 h-[calc(100vh-64px)] overflow-y-auto">
-        <Header
+    <div className="p-4">
+      <Header
           job={job}
           role={role}
           pdfRef={pdfRef}
@@ -149,22 +164,7 @@ export default function WorkDetailPage({ params }: PageProps) {
           onReject={handleRejectClick}
           canApproveOrReject={canApproveOrReject}
         />
-
-        <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
-          <div className="space-y-4">
-            <BasicInfoCard job={job} />
-            <DescriptionCard job={job} />
-            <EvidenceCard
-              job={job}
-              adminImages={adminImages}
-              imagesBefore={imagesBefore}
-              imagesAfter={imagesAfter}
-            />
-          </div>
-
-          <Sidebar job={job} />
-        </div>
-      </div>
+        {DetailContent}
 
       {showEditModal && (
         <EditWorkModal
@@ -214,13 +214,8 @@ export default function WorkDetailPage({ params }: PageProps) {
           </div>
         </div>
       )}
-
-      <div
-        ref={pdfRef}
-        className="absolute opacity-0 pointer-events-none -z-50 top-0 left-0"
-      >
-        <PDFWorkOrder job={job} />
-      </div>
+      {/* PDF Generation Container */}
+      {PDFContainer}
     </div>
   );
 }

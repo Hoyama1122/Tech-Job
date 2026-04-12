@@ -3,6 +3,7 @@
 import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import { FileText, User, Clock, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
 
 interface Props {
   job: {
@@ -18,20 +19,15 @@ interface Props {
 }
 
 const getStatusStyle = (status: string) => {
-  switch (status?.trim()) {
-    case "สำเร็จ":
-      return "bg-emerald-100 text-emerald-700 border-emerald-200";
-    case "กำลังทำงาน":
-      return "bg-yellow-100 text-yellow-700 border-yellow-200";
-    case "ตีกลับ":
-      return "bg-red-100 text-red-700 border-red-200";
-    case "รอการตรวจสอบ":
-      return "bg-blue-100 text-blue-700 border-blue-200";
-    case "รอการดำเนินงาน":
-      return "bg-orange-100 text-orange-700 border-orange-200";
-    default:
-      return "bg-gray-100 text-gray-700 border-gray-200";
-  }
+  const s = status?.toUpperCase();
+  if (s === JobStatus.PENDING || status === "รอการตรวจสอบ") return "bg-blue-100 text-blue-700 border-blue-200";
+  if (s === JobStatus.IN_PROGRESS || status === "กำลังทำงาน") return "bg-yellow-100 text-yellow-700 border-yellow-200";
+  if (s === JobStatus.SUBMITTED || status === "ส่งงานแล้ว") return "bg-indigo-100 text-indigo-700 border-indigo-200";
+  if (s === JobStatus.COMPLETED || status === "สำเร็จ") return "bg-emerald-100 text-emerald-700 border-emerald-200";
+  if (s === JobStatus.REJECTED || status === "ตีกลับ") return "bg-red-100 text-red-700 border-red-200";
+  // Fallback for custom statuses
+  if (status === "รอการดำเนินงาน") return "bg-orange-100 text-orange-700 border-orange-200";
+  return "bg-gray-100 text-gray-700 border-gray-200";
 };
 
 export default function JobCard({ job }: Props) {
@@ -52,7 +48,7 @@ export default function JobCard({ job }: Props) {
               job.status
             )}`}
           >
-            {job.status?.trim()}
+            {getStatusThai(job.status)}
           </span>
         </div>
       </div>

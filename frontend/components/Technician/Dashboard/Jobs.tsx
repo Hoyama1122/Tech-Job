@@ -2,26 +2,26 @@ import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import { ChevronRight, FileText, MapPin, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
 
 const Jobs = ({ displayJobs, activeTab }) => {
   const getStatusBadge = (status: string) => {
-    const styles = {
-      กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      สำเร็จ: "bg-green-100 text-green-700 border-green-200",
-      รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
-      รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
-       ตีกลับ: "bg-red-100 text-red-700 border-red-200",
-    };
-
-    const defaultStyle = "bg-gray-100 text-gray-700 border-gray-200";
+    const s = status?.toUpperCase();
+    const displayStatus = getStatusThai(status);
+    
+    let style = "bg-gray-100 text-gray-700 border-gray-200";
+    if (s === JobStatus.PENDING || status === "รอการตรวจสอบ") style = "bg-blue-100 text-blue-700 border-blue-200";
+    else if (s === JobStatus.IN_PROGRESS || status === "กำลังทำงาน") style = "bg-yellow-100 text-yellow-700 border-yellow-200";
+    else if (s === JobStatus.SUBMITTED || status === "ส่งงานแล้ว") style = "bg-indigo-100 text-indigo-700 border-indigo-200";
+    else if (s === JobStatus.COMPLETED || status === "สำเร็จ") style = "bg-green-100 text-green-700 border-green-200";
+    else if (s === JobStatus.REJECTED || status === "ตีกลับ") style = "bg-red-100 text-red-700 border-red-200";
+    else if (status === "รอการดำเนินงาน") style = "bg-orange-100 text-orange-700 border-orange-200";
 
     return (
       <span
-        className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-          styles[status] || defaultStyle
-        }`}
+        className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${style}`}
       >
-        {status}
+        {displayStatus}
       </span>
     );
   };

@@ -5,13 +5,14 @@ import React, { useEffect, useState, useMemo } from "react";
 import { ArrowLeft, ArrowRight, Eye, Search, Filter, Calendar, User } from "lucide-react";
 import Link from "next/link";
 import formatThaiDateTime from "@/lib/Format/DateFormatThai";
+import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
 
 const ReviewDashboard = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Filter States
-  const [filterStatus, setFilterStatus] = useState("รอการตรวจสอบ");
+  const [filterStatus, setFilterStatus] = useState(JobStatusThai[JobStatus.PENDING]);
   const [searchTerm, setSearchTerm] = useState("");
   
   // Pagination
@@ -65,7 +66,7 @@ const ReviewDashboard = () => {
   const filteredItems = useMemo(() => {
     return jobs.filter((job) => {
       // 1. Filter by Status
-      const matchStatus = filterStatus === "ทั้งหมด" ? true : job.status === filterStatus;
+      const matchStatus = filterStatus === "ทั้งหมด" ? true : (job.status === filterStatus || getStatusThai(job.status) === filterStatus);
 
       // 2. Filter by Search (Job ID, Title, Technician Name)
       const searchLower = searchTerm.toLowerCase();
@@ -84,12 +85,12 @@ const ReviewDashboard = () => {
   const currentItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
 
   const getStatusClass = (status: string) => {
-    switch (status) {
-      case "รอการตรวจสอบ": return "bg-blue-100 text-blue-700 border-blue-200";
-      case "ตีกลับ": return "bg-red-100 text-red-700 border-red-200";
-      case "สำเร็จ": return "bg-green-100 text-green-700 border-green-200";
-      default: return "bg-gray-100 text-gray-700";
-    }
+    const s = status?.toUpperCase();
+    if (s === JobStatus.PENDING || status === "รอการตรวจสอบ") return "bg-blue-100 text-blue-700 border-blue-200";
+    if (s === JobStatus.SUBMITTED || status === "ส่งงานแล้ว") return "bg-indigo-100 text-indigo-700 border-indigo-200";
+    if (s === JobStatus.REJECTED || status === "ตีกลับ") return "bg-red-100 text-red-700 border-red-200";
+    if (s === JobStatus.COMPLETED || status === "สำเร็จ") return "bg-green-100 text-green-700 border-green-200";
+    return "bg-gray-100 text-gray-700";
   };
 
   if (isLoading) {
@@ -128,10 +129,11 @@ const ReviewDashboard = () => {
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-auto"
             >
-                <option value="รอการตรวจสอบ">รอการตรวจสอบ (Default)</option>
+                <option value={JobStatusThai[JobStatus.PENDING]}>{JobStatusThai[JobStatus.PENDING]} (Default)</option>
                 <option value="ทั้งหมด">ทั้งหมด</option>
-                <option value="ตีกลับ">ตีกลับ</option>
-                <option value="สำเร็จ">สำเร็จ</option>
+                {Object.entries(JobStatusThai).map(([key, value]) => (
+                    key !== JobStatus.PENDING && <option key={key} value={value}>{value}</option>
+                ))}
             </select>
         </div>
       </div>
@@ -176,7 +178,7 @@ const ReviewDashboard = () => {
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusClass(job.status)}`}>
-                      {job.status}
+                    {getStatusThai(job.status)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">

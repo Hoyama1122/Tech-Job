@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Anuphan } from "next/font/google";
 import "@/styles/globals.css";
 import "@/styles/calendar.css";
+import "leaflet/dist/leaflet.css";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
 import ToastProvider from "@/components/ToastProvider";
 import ChatWidget from "@/components/chat/ChatWidget";

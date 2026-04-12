@@ -4,6 +4,7 @@ import Map from "../Map/Map";
 
 interface LocationSectionProps {
   onLocationSelect: (pos: { lat: number; lng: number }) => void;
+  loc: { lat: number; lng: number } | null;
   setLoc: (pos: { lat: number; lng: number }) => void;
   setValue: (
     name: string,
@@ -15,6 +16,7 @@ interface LocationSectionProps {
 const LocationSection: React.FC<LocationSectionProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onLocationSelect,
+  loc,
   setLoc,
   setValue,
 }) => {
@@ -29,13 +31,29 @@ const LocationSection: React.FC<LocationSectionProps> = ({
           <p className="text-sm text-gray-500">เลือกตำแหน่งในแผนที่</p>
         </div>
       </div>
-      <div className="flex">
+      <div className="flex flex-col gap-3">
         <Map
           onLocationSelect={(pos) => {
             setLoc(pos);
             setValue("location", pos, { shouldValidate: true });
           }}
         />
+        
+        {/* Display Latitude and Longitude */}
+        <div className="flex gap-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+          <div className="flex-1">
+            <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold block mb-1">Latitude</span>
+            <div className="text-sm font-mono text-primary bg-white px-3 py-1.5 rounded border border-gray-200 shadow-sm">
+              {loc?.lat?.toFixed(6) || "—"}
+            </div>
+          </div>
+          <div className="flex-1">
+            <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold block mb-1">Longitude</span>
+            <div className="text-sm font-mono text-primary bg-white px-3 py-1.5 rounded border border-gray-200 shadow-sm">
+              {loc?.lng?.toFixed(6) || "—"}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
