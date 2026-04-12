@@ -1,25 +1,38 @@
 export enum JobStatus {
   PENDING = "PENDING",
   IN_PROGRESS = "IN_PROGRESS",
-  SUBMITTED = "SUBMITTED",
   COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum JobReportStatus {
+  SUBMITTED = "SUBMITTED",
+  APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }
 
 export const JobStatusThai: Record<JobStatus, string> = {
-  [JobStatus.PENDING]: "รอการตรวจสอบ",
+  [JobStatus.PENDING]: "รอการดำเนินงาน",
   [JobStatus.IN_PROGRESS]: "กำลังทำงาน",
-  [JobStatus.SUBMITTED]: "ส่งงานแล้ว",
   [JobStatus.COMPLETED]: "สำเร็จ",
-  [JobStatus.REJECTED]: "ตีกลับ",
+  [JobStatus.CANCELLED]: "ยกเลิก",
 };
 
-export const getStatusThai = (status: string | JobStatus): string => {
-  const s = status?.toUpperCase();
-  if (s === "PENDING" || status === "รอการตรวจสอบ") return JobStatusThai[JobStatus.PENDING];
-  if (s === "IN_PROGRESS" || status === "กำลังทำงาน") return JobStatusThai[JobStatus.IN_PROGRESS];
-  if (s === "SUBMITTED" || status === "ส่งงานแล้ว") return JobStatusThai[JobStatus.SUBMITTED];
-  if (s === "COMPLETED" || status === "สำเร็จ") return JobStatusThai[JobStatus.COMPLETED];
-  if (s === "REJECTED" || status === "ตีกลับ") return JobStatusThai[JobStatus.REJECTED];
-  return status || "ไม่ระบุ";
+export const JobReportStatusThai: Record<JobReportStatus, string> = {
+  [JobReportStatus.SUBMITTED]: "รอการตรวจสอบ",
+  [JobReportStatus.APPROVED]: "อนุมัติแล้ว",
+  [JobReportStatus.REJECTED]: "ตีกลับ/แก้ไข",
+};
+
+export const getStatusThai = (status: string): string => {
+  if (!status) return "ไม่ระบุ";
+  const s = status.toUpperCase();
+  
+  // Check JobStatus
+  if (JobStatusThai[s as JobStatus]) return JobStatusThai[s as JobStatus];
+  
+  // Check JobReportStatus
+  if (JobReportStatusThai[s as JobReportStatus]) return JobReportStatusThai[s as JobReportStatus];
+  
+  return status;
 };

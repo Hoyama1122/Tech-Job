@@ -43,4 +43,14 @@ export const reportService = {
     const res = await api.get(`/job-reports/job/${jobId}`);
     return res.data;
   },
+
+  async approveReport(id: number | string) {
+    const res = await api.patch(`/job-reports/${id}/approve`);
+    return res.data;
+  },
+
+  async rejectReport(id: number | string, rejectReason: string) {
+    const res = await api.patch(`/job-reports/${id}/reject`, { rejectReason });
+    return res.data;
+  },
 };

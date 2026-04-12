@@ -14,7 +14,9 @@ import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
 import { PDFWorkOrder } from "@/app/admin/WorkOrder/PDFWorkOrder";
 import { jobService } from "@/services/job.service";
+import { reportService } from "@/services/report.service";
 import { useAuthStore } from "@/store/useAuthStore";
+import { JobReportStatus, JobStatus } from "@/types/job";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -72,7 +74,8 @@ export default function WorkDetailPage({ params }: PageProps) {
 
  
 
-  const canApproveOrReject = job?.status === "PENDING";
+  const report = job?.reports && job.reports[0];
+  const canApproveOrReject = report && report.status === JobReportStatus.SUBMITTED;
 
   const handleApprove = async () => {
     if (!canApproveOrReject) {
@@ -81,10 +84,15 @@ export default function WorkDetailPage({ params }: PageProps) {
     }
 
     try {
+      if (!report) return;
+      await reportService.approveReport(report.id);
+      
       setJob((prev: any) => ({
         ...prev,
-        status: "COMPLETED",
-        approvedAt: new Date().toISOString(),
+        status: JobStatus.COMPLETED,
+        reports: prev.reports.map((r: any) => 
+          r.id === report.id ? { ...r, status: JobReportStatus.APPROVED } : r
+        )
       }));
 
       toast.success("Job approved successfully");
@@ -104,11 +112,15 @@ export default function WorkDetailPage({ params }: PageProps) {
 
   const onConfirmReject = async (reason: string) => {
     try {
+      if (!report) return;
+      await reportService.rejectReport(report.id, reason);
+
       setJob((prev: any) => ({
         ...prev,
-        status: "REJECTED",
-        rejectReason: reason,
-        rejectedAt: new Date().toISOString(),
+        status: JobStatus.IN_PROGRESS,
+        reports: prev.reports.map((r: any) => 
+          r.id === report.id ? { ...r, status: JobReportStatus.REJECTED, rejectReason: reason } : r
+        )
       }));
 
       setShowRejectModal(false);

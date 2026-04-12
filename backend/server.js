@@ -10,18 +10,10 @@ import jobRouter from "./routes/job.routes.js";
 import jobReportRouter from "./routes/jobReport.routes.js";
 import userRouter from "./routes/user.routes.js";
 import routerProfile from "./routes/profile.routes.js";
-import chatRouter from "./routes/chat.routes.js";
 import { swaggerSpec } from "./swagger.js";
 const PORT = process.env.PORT || 5000;
 
-import { createServer } from "http";
-import setupSocket from "./lib/socket.js";
-
 const app = express();
-const httpServer = createServer(app);
-
-// Initialize Socket.io
-setupSocket(httpServer);
 
 app.use(
   cors({
@@ -49,9 +41,8 @@ app.use("/api/jobs", jobRouter);
 app.use("/api/job-reports", jobReportRouter);
 app.use("/api/users", userRouter);
 app.use("/api/profile", routerProfile);
-app.use("/api/chat", chatRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-httpServer.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

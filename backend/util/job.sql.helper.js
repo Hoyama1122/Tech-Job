@@ -21,6 +21,8 @@ export const mapJobsRows = (rows = [], formatJobId) => {
         end_available_at: row.end_available_at,
         createdAt: row.createdAt,
         location_name: row.location_name,
+        latitude: row.latitude,
+        longitude: row.longitude,
         customer: {
             address: row.location_name || "ไม่ระบุสถานที่"
         },
@@ -54,6 +56,7 @@ export const mapJobsRows = (rows = [], formatJobId) => {
         job.technicians.push({
           id: row.assignment_user_id,
           name: fullName,
+          phone: row.assignment_user_phone,
         });
       }
     }

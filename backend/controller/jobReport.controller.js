@@ -94,7 +94,7 @@ export const createJobReport = async (req, res) => {
         )
         VALUES (
           ${Number(jobId)},
-          ${status ?? "COMPLETED"},
+          ${status ?? "SUBMITTED"},
           ${start_time ? new Date(start_time) : null},
           ${end_time ? new Date(end_time) : null},
           ${detail ?? null},
@@ -762,7 +762,9 @@ export const approveJobReport = async (req, res) => {
       const updatedRows = await tx.$queryRaw`
         UPDATE "JobReport"
         SET
-          status = 'COMPLETED',
+          status = 'APPROVED',
+          "approvedById" = ${req.user.id},
+          "approvedAt" = NOW(),
           "updatedAt" = NOW()
         WHERE id = ${id}
         RETURNING *;
@@ -822,10 +824,15 @@ export const rejectJobReport = async (req, res) => {
         throw new Error("REPORT_NOT_FOUND");
       }
 
+      const { rejectReason } = req.body;
+
       const updatedRows = await tx.$queryRaw`
         UPDATE "JobReport"
         SET
           status = 'REJECTED',
+          "rejectedById" = ${req.user.id},
+          "rejectedAt" = NOW(),
+          "rejectReason" = ${rejectReason || null},
           "updatedAt" = NOW()
         WHERE id = ${id}
         RETURNING *;

@@ -36,13 +36,17 @@ export const getJobs = async (req, res) => {
         j."createdAt",
         j.start_available_at,
         j.end_available_at,
+        j.latitude,
+        j.longitude,
+        j.location_name,
         j."departmentId",
 
         ja.role AS assignment_role,
         au.id AS assignment_user_id,
         au.empno AS assignment_user_empno,
         ap.firstname AS assignment_user_firstname,
-        ap.lastname AS assignment_user_lastname
+        ap.lastname AS assignment_user_lastname,
+        ap.phone AS assignment_user_phone
 
       FROM "Job" j
       LEFT JOIN "JobAssignment" ja

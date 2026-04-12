@@ -99,8 +99,7 @@ const Dashboard = () => {
                 <p className="text-2xl font-bold text-gray-900">
                   {
                     myJobs.filter(
-                      (j: any) =>
-                        getStatusThai(j.status) === JobStatusThai[JobStatus.COMPLETED]
+                      (j: any) => j.status === JobStatus.COMPLETED
                     ).length
                   }
                 </p>
@@ -118,12 +117,11 @@ const Dashboard = () => {
                 <p className="text-2xl font-bold text-gray-900">
                   {
                     myJobs.filter(
-                      (j: any) =>
-                        getStatusThai(j.status) === JobStatusThai[JobStatus.PENDING]
+                      (j: any) => j.status === JobStatus.PENDING
                     ).length
                   }
                 </p>
-                <p className="text-xs text-gray-500">รอการตรวจสอบ</p>
+                <p className="text-xs text-gray-500">รอดำเนินการ</p>
               </div>
             </div>
           </div>

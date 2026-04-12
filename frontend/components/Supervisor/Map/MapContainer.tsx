@@ -24,15 +24,18 @@ const TeamMap = ({ jobs, users }: { jobs: any[]; users: any[] }) => {
     if (jobs && users) {
       const jobsWithTechnician = jobs.map((job) => {
         // Handle coordinates from different possible formats
-        let lat = job.latitude || (job.loc?.lat) || null;
-        let lng = job.longitude || (job.loc?.lng) || null;
+        let lat = job.latitude;
+        let lng = job.longitude;
 
-        // Find technicians
-        const technicians = Array.isArray(job.technicianId)
-          ? users.filter(
-              (u) => u.role?.toLowerCase() === "technician" && job.technicianId.includes(u.id)
-            )
-          : [];
+        // prioritize job.technicians if it exists (from new API)
+        let technicians = job.technicians || [];
+        
+        // If it's empty but we have technicianId and users, try to find them (fallback)
+        if (technicians.length === 0 && Array.isArray(job.technicianId) && users.length > 0) {
+           technicians = users.filter(
+              (u) => (u.role?.toLowerCase() === "technician" || u.role === "ช่าง") && job.technicianId.includes(u.id)
+            );
+        }
 
         return {
           ...job,

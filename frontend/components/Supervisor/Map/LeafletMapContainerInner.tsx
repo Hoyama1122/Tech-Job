@@ -1,18 +1,22 @@
 "use client";
 
+import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { CircleCheck, Phone, User } from "lucide-react";
+import { CircleCheck, Phone, User, Clock } from "lucide-react";
+import { JobStatus, JobStatusThai, getStatusThai, JobReportStatus } from "@/types/job";
 
 // Helper for status icons
-const getLeafletIcon = (status: string) => {
+const getLeafletIcon = (status: string, reportStatus?: string) => {
   let iconUrl = "/marker/gray.svg";
-  if (status === "กำลังทำงาน") iconUrl = "/marker/yellow.svg";
-  else if (status === "รอการดำเนินงาน") iconUrl = "/marker/orange.svg";
-  else if (status === "รอการตรวจสอบ") iconUrl = "/marker/blue.svg";
-  else if (status === "สำเร็จ") iconUrl = "/marker/green.svg";
-  else if (status === "ตีกลับ") iconUrl = "/marker/red.svg";
+  
+  // สถานะรายงานเป็นตัวกำหนดสีหลักหากมีการส่งงาน
+  if (reportStatus === JobReportStatus.SUBMITTED) iconUrl = "/marker/blue.svg";
+  else if (status === JobStatus.IN_PROGRESS) iconUrl = "/marker/yellow.svg";
+  else if (status === JobStatus.PENDING) iconUrl = "/marker/orange.svg";
+  else if (status === JobStatus.COMPLETED) iconUrl = "/marker/green.svg";
+  else if (status === JobStatus.CANCELLED || reportStatus === JobReportStatus.REJECTED) iconUrl = "/marker/red.svg";
 
   return L.icon({
     iconUrl,
@@ -23,7 +27,14 @@ const getLeafletIcon = (status: string) => {
 };
 
 const TeamMapInner = ({ members }: { members: any[] }) => {
+  const [isMounted, setIsMounted] = React.useState(false);
   const defaultCenter: [number, number] = [13.855, 100.585];
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   return (
     <div className="rounded-lg overflow-hidden shadow-md" style={{ height: "300px", width: "100%" }}>
@@ -39,12 +50,14 @@ const TeamMapInner = ({ members }: { members: any[] }) => {
 
         {members.map((m: any) => {
           if (!m.lat || !m.lng) return null;
+          const report = m.reports && m.reports[0];
+          const reportStatus = report?.status;
 
           return (
             <Marker 
               key={m.id} 
               position={[m.lat, m.lng]} 
-              icon={getLeafletIcon(m.status)}
+              icon={getLeafletIcon(m.status, reportStatus)}
             >
               <Popup>
                 <div className="text-sm font-sans min-w-[200px]">
@@ -56,20 +69,21 @@ const TeamMapInner = ({ members }: { members: any[] }) => {
                   {/* Status */}
                   <div
                     className={`flex items-center gap-2 mb-2 ${
-                      m.status === "สำเร็จ"
+                      m.status === JobStatus.COMPLETED
                         ? "text-emerald-700"
-                        : m.status === "ตีกลับ"
+                        : m.status === JobStatus.CANCELLED || reportStatus === JobReportStatus.REJECTED
                         ? "text-red-700"
-                        : m.status === "รอการตรวจสอบ"
+                        : reportStatus === JobReportStatus.SUBMITTED
                         ? "text-blue-700"
-                        : m.status === "กำลังทำงาน"
+                        : m.status === JobStatus.IN_PROGRESS
                         ? "text-yellow-700"
-                        : m.status === "รอการดำเนินงาน"
-                        ? "text-orange-700"
-                        : "text-gray-500"
+                        : "text-orange-700"
                     } font-semibold`}
                   >
-                    <CircleCheck size={16} /> <span className="text-[11px]">สถานะ: {m.status}</span>
+                    {reportStatus === JobReportStatus.SUBMITTED ? <Clock size={16} /> : <CircleCheck size={16} />}
+                    <span className="text-[11px]">
+                      สถานะ: {reportStatus === JobReportStatus.SUBMITTED ? "รอการตรวจสอบ" : getStatusThai(m.status)}
+                    </span>
                   </div>
 
                   {/* Technicians */}

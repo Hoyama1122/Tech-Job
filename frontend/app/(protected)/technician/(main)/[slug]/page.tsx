@@ -7,7 +7,7 @@ import JobsDetail from "@/components/Technician/slug/JobsDetail";
 
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
+import { JobStatus, JobReportStatus, getStatusThai } from "@/types/job";
 
 import {
   technicianReportSchema,
@@ -228,7 +228,7 @@ export default function Page({ params }: PageProps) {
       
       const payload: CreateReportPayload = {
         jobId: job.id, // numeric ID from job object
-        status: JobStatus.SUBMITTED,
+        status: JobReportStatus.SUBMITTED,
         detail: formData.detail,
         repair_operations: formData.repairOperations,
         inspection_results: formData.inspectionResults,
@@ -241,7 +241,10 @@ export default function Page({ params }: PageProps) {
 
       await reportService.createReport(payload);
       
-      updateJobStateLocally(JobStatus.SUBMITTED);
+      updateJobStateLocally(JobStatus.IN_PROGRESS, { 
+        ...job.technicianReport, 
+        status: JobReportStatus.SUBMITTED 
+      });
       setShowFormModal(false);
       toast.success("บันทึกรายงานปิดงานสำเร็จ!");
       
@@ -260,10 +263,11 @@ export default function Page({ params }: PageProps) {
     const styles: Record<string, string> = {
       [JobStatus.PENDING]: "bg-blue-100 text-blue-700 border-blue-200",
       [JobStatus.IN_PROGRESS]: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      [JobStatus.SUBMITTED]: "bg-indigo-100 text-indigo-700 border-indigo-200",
       [JobStatus.COMPLETED]: "bg-green-100 text-green-700 border-green-200",
-      [JobStatus.REJECTED]: "bg-red-100 text-red-700 border-red-200",
-      "รอการดำเนินงาน": "bg-orange-100 text-orange-700 border-orange-200",
+      [JobStatus.CANCELLED]: "bg-red-100 text-red-700 border-red-200",
+      [JobReportStatus.SUBMITTED]: "bg-indigo-100 text-indigo-700 border-indigo-200",
+      [JobReportStatus.APPROVED]: "bg-green-100 text-green-700 border-green-200",
+      [JobReportStatus.REJECTED]: "bg-orange-100 text-orange-700 border-orange-200",
     };
 
     const style = styles[s] || styles[status] || "bg-gray-100 text-gray-700 border-gray-200";
@@ -296,7 +300,7 @@ export default function Page({ params }: PageProps) {
       <HeaderSlugTechni job={job} getStatusBadge={getStatusBadge} />
       <JobsDetail job={job} adminImages={adminImages} />
 
-      {(currentStatus?.toUpperCase() === JobStatus.SUBMITTED || currentStatus?.toUpperCase() === JobStatus.COMPLETED || currentStatus === "รอการตรวจสอบ" || currentStatus === "สำเร็จ") && (
+      {job.technicianReport && (
         <DetailFromTech
           job={job}
           imagesBefore={storedBeforeImages}
@@ -304,21 +308,21 @@ export default function Page({ params }: PageProps) {
         />
       )}
 
-      {(currentStatus?.toUpperCase() === JobStatus.PENDING || currentStatus === "รอการดำเนินงาน" || currentStatus?.toUpperCase() === JobStatus.REJECTED || currentStatus === "ตีกลับ") && (
+      {currentStatus === JobStatus.PENDING && (
         <button
           onClick={handleStartJob}
-          className="fixed bottom-6 right-6 px-5 py-3 bg-blue-600 text-white rounded-full shadow-lg"
+          className="fixed bottom-6 right-6 px-4 py-2.5 bg-primary text-white rounded-full shadow-lg font-medium flex items-center gap-2"
         >
-          เริ่มงาน
+          เริ่มเข้าจุดปฏิบัติงาน
         </button>
       )}
 
-      {(currentStatus?.toUpperCase() === JobStatus.IN_PROGRESS || currentStatus === "กำลังทำงาน") && (
+      {currentStatus === JobStatus.IN_PROGRESS && (!job.technicianReport || job.technicianReport.status === JobReportStatus.REJECTED) && (
         <button
           onClick={() => setShowFormModal(true)}
-          className="fixed bottom-6 right-6 px-5 py-3 bg-green-600 text-white rounded-full shadow-lg"
+          className="fixed bottom-6 right-6 px-4 py-2.5 bg-green-600 text-white rounded-full shadow-lg font-medium flex items-center gap-2"
         >
-          บันทึกเพื่อปิดงาน
+          ส่งรายงานปิดงาน
         </button>
       )}
 
