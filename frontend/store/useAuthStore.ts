@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { authService, UserRole } from "@/services/auth.service";
+import { disconnectSocket } from "@/lib/socket";
 
 let fetchMePromise: Promise<any> | null = null;
 
@@ -35,7 +36,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   fetchMe: async (force = false) => {
     const { hasFetched, isLoading } = get();
-    
+
     // Skip if already fetched and not forced
     if (hasFetched && !force) return;
 
@@ -46,23 +47,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     set({ isLoading: true, error: null });
-    
+
     fetchMePromise = authService.me();
-    
+
     try {
       const res = await fetchMePromise;
-      set({ 
-        user: res?.user || null, 
-        hasFetched: true, 
-        isLoading: false 
+      set({
+        user: res?.user || null,
+        hasFetched: true,
+        isLoading: false
       });
     } catch (err: any) {
       console.error("fetchMe error:", err);
-      set({ 
-        user: null, 
-        hasFetched: true, 
+      set({
+        user: null,
+        hasFetched: true,
         isLoading: false,
-        error: "กรุณาเข้าสู่ระบบ" 
+        error: "กรุณาเข้าสู่ระบบ"
       });
     } finally {
       fetchMePromise = null;
@@ -75,6 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authService.logout();
     } finally {
+      disconnectSocket();
       set({ user: null, hasFetched: false });
     }
   },

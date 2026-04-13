@@ -40,6 +40,7 @@ export const login = async (req, res) => {
     res.json({
       message: "เข้าสู่ระบบ",
       role: user.role,
+      token: token, // Return token in body as fallback for CORS/Cookies issues
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

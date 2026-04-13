@@ -9,9 +9,6 @@ export const technicianReportSchema = z.object({
   inspectionResults: z.string().min(1, "กรุณากรอกรายละเอียดผลการตรวจสอบ"),
   repairOperations: z.string().min(1, "กรุณากรอกรายละเอียดการซ่อมแซม"),
   summaryOfOperatingResults: z.string().min(1, "กรุณากรอกรายละเอียดสรุปผลการดำเนินงาน"),
-  technicianSignature: z
-    .string()
-    .min(1, "กรุณาเซ็นลายเซ็นช่าง"),
   customerSignature: z
     .string()
     .min(1, "กรุณาเซ็นลายเซ็นลูกค้า"),

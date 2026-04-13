@@ -679,7 +679,7 @@ export const getMyJobDetail = async (req, res) => {
     const job = await prisma.job.findFirst({
       where: {
         id: jobId,
-        assignment: {
+        assignments: {
           some: {
             userId: userId,
           },
@@ -692,7 +692,7 @@ export const getMyJobDetail = async (req, res) => {
             profile: true,
           },
         },
-        assignment: {
+        assignments: {
           include: {
             user: {
               include: {
@@ -726,7 +726,7 @@ export const getMyJobDetail = async (req, res) => {
     // Map to a friendlier format for the frontend
     // This transform aims to stay consistent with the existing app's structure
     // Exclude the raw 'assignment' field to prevent leaking sensitive user data (like passwords)
-    const { assignment: rawAssignment, ...jobData } = job;
+    const { assignments: rawAssignment, ...jobData } = job;
 
     const formattedJob = {
       ...jobData,

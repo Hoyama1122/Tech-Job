@@ -49,7 +49,6 @@ export default function Page({ params }: PageProps) {
     inspectionResults: "",
     repairOperations: "",
     summaryOfOperatingResults: "",
-    technicianSignature: "",
     customerSignature: "",
   });
 
@@ -98,20 +97,14 @@ export default function Page({ params }: PageProps) {
 
       setJob(found);
       setCurrentStatus(found.status);
-
-      // images from API
-      // images uploaded by admin
       setAdminImages(found.images?.map((img: any) => img.url) || []);
 
-      // technician images (from the first report)
+
       const report = found.reports?.[0];
       setStoredBeforeImages(report?.images?.filter((i: any) => i.type === 'BEFORE' || !i.type).map((i: any) => i.url) || []);
       setStoredAfterImages(report?.images?.filter((i: any) => i.type === 'AFTER').map((i: any) => i.url) || []);
-      
-      // Note: If your schema doesn't have type, you might need a different heuristic or separate relation.
-      // Based on my getMyJobDetail controller, I'll assume for now we just get images.
-      // Actually, my getMyJobDetail mapping returns job.reports[0] as technicianReport.
-      
+  
+    
     } catch (error: any) {
       console.error("โหลดรายละเอียดงานไม่สำเร็จ:", error);
       setJob(null);
@@ -167,7 +160,7 @@ export default function Page({ params }: PageProps) {
           job.longitude
         );
 
-        if (distance > 200) {
+        if (distance > 2000) {
           toast.error(`คุณอยู่ห่างจากจุดงาน ${Math.floor(distance)} เมตร`);
           return;
         }
@@ -221,10 +214,6 @@ export default function Page({ params }: PageProps) {
         ? dataURLtoFile(formData.customerSignature, "customer_sign.png")
         : undefined;
 
-      // In this specific implementation, we combine images or handle them as needed
-      // Given createReport expects images: File[], we might want to tag them or send them together
-      // Backend createJobReport might need adjustment if it expects separate before/after fields
-      // For now, I'll send all as 'images' to match the service
       
       const payload: CreateReportPayload = {
         jobId: job.id, // numeric ID from job object
@@ -317,7 +306,7 @@ export default function Page({ params }: PageProps) {
         </button>
       )}
 
-      {currentStatus === JobStatus.IN_PROGRESS && (!job.technicianReport || job.technicianReport.status === JobReportStatus.REJECTED) && (
+      {currentStatus === JobStatus.IN_PROGRESS && (!job.technicianReport?.status || job.technicianReport.status === JobReportStatus.REJECTED) && (
         <button
           onClick={() => setShowFormModal(true)}
           className="fixed bottom-6 right-6 px-4 py-2.5 bg-green-600 text-white rounded-full shadow-lg font-medium flex items-center gap-2"

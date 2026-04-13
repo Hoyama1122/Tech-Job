@@ -83,9 +83,9 @@ export default function MainSupervisor() {
     const technicians = users.filter((u: any) => u.role === "technician").length;
 
     const waitingJobs = card.filter((j: any) => {
-        const s = j.status?.toUpperCase();
-        return s === JobStatus.SUBMITTED || s === JobStatus.PENDING || 
-               j.status === "ส่งงานแล้ว" || j.status === "รอการตรวจสอบ";
+      const s = j.status?.toUpperCase();
+      return s === JobStatus.SUBMITTED || s === JobStatus.PENDING ||
+        j.status === "ส่งงานแล้ว" || j.status === "รอการตรวจสอบ";
     }).length;
 
     const inProgressJobs = card.filter((j: any) => j.status === "กำลังทำงาน").length;
@@ -249,7 +249,7 @@ export default function MainSupervisor() {
           </div>
 
         </div>
-        
+
         {/* Right Bar */}
         <div>
           {/* Map */}
@@ -260,7 +260,7 @@ export default function MainSupervisor() {
             <TeamMap jobs={filteredCard} users={users} />
           </div>
 
-            {/* log */}
+          {/* log */}
           <div>
             {/* <Activities/> */}
           </div>

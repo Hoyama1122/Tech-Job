@@ -111,30 +111,12 @@ export default function DetailFromTech({
           <UserCheck className="w-5 h-5 text-green-600" />
           ลายเซ็นยืนยัน
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Technician */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <User className="w-4 h-4 text-primary" />
-              ลายเซ็นช่าง
-            </p>
-            {report.technicianSignature ? (
-              <img
-                src={report.technicianSignature}
-                className="w-full h-28 object-contain bg-gray-50 rounded-lg p-4 border"
-              />
-            ) : (
-              <div className="w-full h-28 bg-gray-100 rounded-lg border border-dashed flex items-center justify-center text-gray-400">
-                ไม่มีลายเซ็น
-              </div>
-            )}
-          </div>
-
+        <div className="grid grid-cols-1 gap-6">
           {/* Customer */}
           <div className="space-y-2">
             <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
               <User className="w-4 h-4 text-green-500" />
-              ลายเซ็นลูกค้า
+              ลายเซ็นสแตมป์ลูกค้า
             </p>
             {report.customerSignature ? (
               <img
