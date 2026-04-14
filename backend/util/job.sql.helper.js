@@ -159,6 +159,12 @@ export const mapJobDetailRows = (rows = [], formatJobId) => {
         status: row.report_status,
         detail: row.report_detail,
         summary: row.report_summary,
+        repair_operations: row.report_repair_operations,
+        inspection_results: row.report_inspection_results,
+        cus_sign: row.report_cus_sign,
+        rejectReason: row.report_reject_reason,
+        start_time: row.report_start_time,
+        end_time: row.report_end_time,
         createdAt: row.report_created_at,
       });
     }

@@ -20,13 +20,11 @@ interface Props {
 
 const getStatusStyle = (status: string) => {
   const s = status?.toUpperCase();
-  if (s === JobStatus.PENDING || status === "รอการตรวจสอบ") return "bg-blue-100 text-blue-700 border-blue-200";
+  if (s === JobStatus.PENDING || status === "รอการดำเนินงาน") return "bg-blue-100 text-blue-700 border-blue-200";
   if (s === JobStatus.IN_PROGRESS || status === "กำลังทำงาน") return "bg-yellow-100 text-yellow-700 border-yellow-200";
-  if (s === JobStatus.SUBMITTED || status === "ส่งงานแล้ว") return "bg-indigo-100 text-indigo-700 border-indigo-200";
+  if (s === JobStatus.SUBMITTED || status === "รอการตรวจสอบ" || status === "ส่งงานแล้ว") return "bg-indigo-100 text-indigo-700 border-indigo-200";
   if (s === JobStatus.COMPLETED || status === "สำเร็จ") return "bg-emerald-100 text-emerald-700 border-emerald-200";
-  if (s === JobStatus.REJECTED || status === "ตีกลับ") return "bg-red-100 text-red-700 border-red-200";
-  // Fallback for custom statuses
-  if (status === "รอการดำเนินงาน") return "bg-orange-100 text-orange-700 border-orange-200";
+  if (s === JobStatus.REJECTED || status === "ตีกลับ" || status === "ตีกลับ/แก้ไข") return "bg-red-100 text-red-700 border-red-200";
   return "bg-gray-100 text-gray-700 border-gray-200";
 };
 
@@ -75,11 +73,11 @@ export default function JobCard({ job }: Props) {
               <span>หัวหน้างาน:</span>
             </div>
             <span className="font-medium text-gray-900">
-             
+
               {typeof job.supervisorName === "object"
                 ? job.supervisorName.name
                 : job.supervisorName || "ไม่ระบุ"}
-                ({job.supervisorName.department})
+              ({job.supervisorName.department})
             </span>
           </div>
 
@@ -106,7 +104,7 @@ export default function JobCard({ job }: Props) {
           )}
         </div>
 
-     
+
         <Link
           href={`/admin/work/${job.JobId}`}
           className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-md hover:shadow-lg mt-auto"

@@ -131,6 +131,12 @@ export const getJobById = async (req, res) => {
         jr.status AS report_status,
         jr.detail AS report_detail,
         jr.summary AS report_summary,
+        jr.repair_operations AS report_repair_operations,
+        jr.inspection_results AS report_inspection_results,
+        jr.cus_sign AS report_cus_sign,
+        jr."rejectReason" AS report_reject_reason,
+        jr.start_time AS report_start_time,
+        jr.end_time AS report_end_time,
         jr."createdAt" AS report_created_at
 
       FROM "Job" j
@@ -306,7 +312,11 @@ export const createJob = async (req, res) => {
           ja.role AS assignment_role, au.id AS assignment_user_id, au.empno AS assignment_user_empno,
           ad.name AS assignment_department_name, ap.firstname AS assignment_user_firstname, ap.lastname AS assignment_user_lastname,
           ji.id AS image_id, ji.url AS image_url, ji."publicId" AS image_public_id, ji."createdAt" AS image_created_at,
-          jr.id AS report_id, jr.status AS report_status, jr.detail AS report_detail, jr.summary AS report_summary, jr."createdAt" AS report_created_at
+          jr.id AS report_id, jr.status AS report_status, jr.detail AS report_detail, jr.summary AS report_summary,
+          jr.repair_operations AS report_repair_operations, jr.inspection_results AS report_inspection_results,
+          jr.cus_sign AS report_cus_sign, jr."rejectReason" AS report_reject_reason,
+          jr.start_time AS report_start_time, jr.end_time AS report_end_time,
+          jr."createdAt" AS report_created_at
         FROM "Job" j
         LEFT JOIN "Department" d ON d.id = j."departmentId"
         LEFT JOIN "User" cb ON cb.id = j."createdById"
@@ -512,6 +522,12 @@ export const updateJob = async (req, res) => {
         jr.status AS report_status,
         jr.detail AS report_detail,
         jr.summary AS report_summary,
+        jr.repair_operations AS report_repair_operations,
+        jr.inspection_results AS report_inspection_results,
+        jr.cus_sign AS report_cus_sign,
+        jr."rejectReason" AS report_reject_reason,
+        jr.start_time AS report_start_time,
+        jr.end_time AS report_end_time,
         jr."createdAt" AS report_created_at
 
       FROM "Job" j
@@ -654,10 +670,6 @@ export const getMyJobs = async (req, res) => {
   }
 };
 
-/**
- * ดึงรายละเอียดใบงานของ "ฉัน" (Technician) ตาม ID หรือ Slug (เช่น JOB-0001)
- * โดยต้องเป็นงานที่ได้รับมอบหมายเท่านั้น
- */
 export const getMyJobDetail = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -808,11 +820,42 @@ export const updateMyJobStatus = async (req, res) => {
 
     const updatedJob = await prisma.job.update({
       where: { id: jobId },
-      data: { 
+      data: {
         status: status,
         updatedAt: new Date(),
       },
     });
+
+    // Automatically record start_time when state changes to IN_PROGRESS
+    if (status === "IN_PROGRESS" || status === "กำลังทำงาน") {
+      const existingReport = await prisma.jobReport.findFirst({
+        where: {
+          jobId: jobId,
+          createdById: userId,
+        },
+      });
+
+      if (existingReport) {
+        if (!existingReport.start_time) {
+          await prisma.jobReport.update({
+            where: { id: existingReport.id },
+            data: {
+              start_time: new Date(),
+              status: "IN_PROGRESS",
+            },
+          });
+        }
+      } else {
+        await prisma.jobReport.create({
+          data: {
+            jobId: jobId,
+            createdById: userId,
+            status: "IN_PROGRESS",
+            start_time: new Date(),
+          },
+        });
+      }
+    }
 
     res.json({
       message: "อัปเดตสถานะงานสำเร็จ",

@@ -77,39 +77,66 @@ export const createJobReport = async (req, res) => {
         throw new Error("ไม่พบใบงาน");
       }
 
-      const insertedReports = await tx.$queryRaw`
-        INSERT INTO "JobReport" (
-          "jobId",
-          "status",
-          "start_time",
-          "end_time",
-          "detail",
-          "repair_operations",
-          "inspection_results",
-          "summary",
-          "cus_sign",
-          "createdById",
-          "createdAt",
-          "updatedAt"
-        )
-        VALUES (
-          ${Number(jobId)},
-          ${status ?? "SUBMITTED"},
-          ${start_time ? new Date(start_time) : null},
-          ${end_time ? new Date(end_time) : null},
-          ${detail ?? null},
-          ${repair_operations ?? null},
-          ${inspection_results ?? null},
-          ${summary ?? null},
-          ${uploadedSignature?.secure_url || uploadedSignature?.url || null},
-          ${Number(createdById)},
-          NOW(),
-          NOW()
-        )
-        RETURNING id;
+      // Check if an IN_PROGRESS report already exists for this technician
+      const existingInProgress = await tx.$queryRaw`
+        SELECT id FROM "JobReport"
+        WHERE "jobId" = ${Number(jobId)}
+        AND "createdById" = ${Number(createdById)}
+        AND status = 'IN_PROGRESS'
+        LIMIT 1;
       `;
 
-      const reportId = insertedReports?.[0]?.id;
+      let reportId;
+
+      if (existingInProgress.length > 0) {
+        reportId = existingInProgress[0].id;
+        await tx.$executeRaw`
+          UPDATE "JobReport"
+          SET
+            "status" = ${status ?? "SUBMITTED"},
+            "end_time" = ${end_time ? new Date(end_time) : new Date()},
+            "detail" = ${detail ?? null},
+            "repair_operations" = ${repair_operations ?? null},
+            "inspection_results" = ${inspection_results ?? null},
+            "summary" = ${summary ?? null},
+            "cus_sign" = ${uploadedSignature?.secure_url || uploadedSignature?.url || null},
+            "updatedAt" = NOW()
+          WHERE id = ${reportId};
+        `;
+      } else {
+        const insertedReports = await tx.$queryRaw`
+          INSERT INTO "JobReport" (
+            "jobId",
+            "status",
+            "start_time",
+            "end_time",
+            "detail",
+            "repair_operations",
+            "inspection_results",
+            "summary",
+            "cus_sign",
+            "createdById",
+            "createdAt",
+            "updatedAt"
+          )
+          VALUES (
+            ${Number(jobId)},
+            ${status ?? "SUBMITTED"},
+            ${start_time ? new Date(start_time) : null},
+            ${end_time ? new Date(end_time) : new Date()},
+            ${detail ?? null},
+            ${repair_operations ?? null},
+            ${inspection_results ?? null},
+            ${summary ?? null},
+            ${uploadedSignature?.secure_url || uploadedSignature?.url || null},
+            ${Number(createdById)},
+            NOW(),
+            NOW()
+          )
+          RETURNING id;
+        `;
+        reportId = insertedReports?.[0]?.id;
+      }
 
       if (!reportId) {
         throw new Error("ไม่สามารถสร้างรายงานได้");

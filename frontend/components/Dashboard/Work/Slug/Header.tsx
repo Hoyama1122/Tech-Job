@@ -16,6 +16,15 @@ export default function Header({
   const myRole = role?.toLowerCase?.() || "";
   const status = job?.status?.toUpperCase?.() || "";
 
+  const hasReport = (job?.reports?.length || 0) > 0;
+  const isPendingReview =
+    status === JobStatus.SUBMITTED ||
+    status === JobStatus.PENDING ||
+    job?.status === "ส่งงานแล้ว" ||
+    job?.status === "รอการตรวจสอบ";
+
+  const canApproveOrRejectJob = isPendingReview && hasReport;
+
   const handleDownload = async () => {
     if (!pdfRef?.current) return;
     await generateWorkPDF(pdfRef.current, "ใบงานช่าง_" + job.JobId);
@@ -46,24 +55,22 @@ export default function Header({
         {myRole === "supervisor" && (
           <>
             <button
-              disabled={status !== JobStatus.SUBMITTED && status !== JobStatus.PENDING && job?.status !== "ส่งงานแล้ว" && job?.status !== "รอการตรวจสอบ"}
-              className={`rounded-md px-4 py-2 text-white ${
-                (status === JobStatus.SUBMITTED || status === JobStatus.PENDING || job?.status === "ส่งงานแล้ว" || job?.status === "รอการตรวจสอบ")
+              disabled={!canApproveOrRejectJob}
+              className={`rounded-md px-4 py-2 text-white ${canApproveOrRejectJob
                   ? "bg-red-600 hover:bg-red-700"
                   : "cursor-not-allowed bg-gray-300"
-              }`}
+                }`}
               onClick={onReject}
             >
               ตีกลับงาน
             </button>
 
             <button
-              disabled={status !== JobStatus.SUBMITTED && status !== JobStatus.PENDING && job?.status !== "ส่งงานแล้ว" && job?.status !== "รอการตรวจสอบ"}
-              className={`rounded-md px-4 py-2 text-white ${
-                (status === JobStatus.SUBMITTED || status === JobStatus.PENDING || job?.status === "ส่งงานแล้ว" || job?.status === "รอการตรวจสอบ")
+              disabled={!canApproveOrRejectJob}
+              className={`rounded-md px-4 py-2 text-white ${canApproveOrRejectJob
                   ? "bg-green-600 hover:bg-green-700"
                   : "cursor-not-allowed bg-gray-300"
-              }`}
+                }`}
               onClick={onApprove}
             >
               อนุมัติงาน
@@ -71,7 +78,7 @@ export default function Header({
           </>
         )}
 
-        {myRole === "admin" || myRole === "superadmin" && (
+        {(myRole === "admin" || myRole === "superadmin") && (
           <>
             <button
               onClick={() => setShowEditModal(true)}
@@ -82,24 +89,22 @@ export default function Header({
             </button>
 
             <button
-              disabled={status !== JobStatus.SUBMITTED && status !== JobStatus.PENDING && job?.status !== "ส่งงานแล้ว" && job?.status !== "รอการตรวจสอบ"}
-              className={`rounded-md px-4 py-2 text-white ${
-                (status === JobStatus.SUBMITTED || status === JobStatus.PENDING || job?.status === "ส่งงานแล้ว" || job?.status === "รอการตรวจสอบ")
+              disabled={!canApproveOrRejectJob}
+              className={`rounded-md px-4 py-2 text-white ${canApproveOrRejectJob
                   ? "bg-red-500 hover:bg-red-600"
                   : "cursor-not-allowed bg-gray-300"
-              }`}
+                }`}
               onClick={onReject}
             >
               ตีกลับงาน
             </button>
 
             <button
-              disabled={status !== JobStatus.SUBMITTED && status !== JobStatus.PENDING && job?.status !== "ส่งงานแล้ว" && job?.status !== "รอการตรวจสอบ"}
-              className={`rounded-md px-4 py-2 text-white ${
-                (status === JobStatus.SUBMITTED || status === JobStatus.PENDING || job?.status === "ส่งงานแล้ว" || job?.status === "รอการตรวจสอบ")
+              disabled={!canApproveOrRejectJob}
+              className={`rounded-md px-4 py-2 text-white ${canApproveOrRejectJob
                   ? "bg-green-600 hover:bg-green-700"
                   : "cursor-not-allowed bg-gray-300"
-              }`}
+                }`}
               onClick={onApprove}
             >
               อนุมัติงาน
@@ -108,11 +113,10 @@ export default function Header({
             <button
               disabled={status !== JobStatus.PENDING && job?.status !== "รอการตรวจสอบ"}
               onClick={() => setShowCancelModal(true)}
-              className={`flex items-center gap-1 rounded-md px-4 py-2 text-white ${
-                (status === JobStatus.PENDING || job?.status === "รอการตรวจสอบ")
+              className={`flex items-center gap-1 rounded-md px-4 py-2 text-white ${(status === JobStatus.PENDING || job?.status === "รอการตรวจสอบ")
                   ? "bg-red-600 hover:bg-red-700"
                   : "cursor-not-allowed bg-gray-300"
-              }`}
+                }`}
             >
               <Trash className="h-4 w-4" />
               ลบงาน
