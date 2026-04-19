@@ -123,6 +123,9 @@ export const getJobById = async (req, res) => {
               },
             },
             images: true,
+            itemUsages: {
+              include: { item: true }
+            },
           },
           orderBy: { createdAt: "desc" },
         },
@@ -786,6 +789,9 @@ export const getMyJobDetail = async (req, res) => {
         reports: {
           include: {
             images: true,
+            itemUsages: {
+              include: { item: true }
+            },
             createdBy: {
               include: {
                 profile: true,

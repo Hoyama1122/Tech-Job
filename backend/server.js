@@ -10,6 +10,7 @@ import jobRouter from "./routes/job.routes.js";
 import jobReportRouter from "./routes/jobReport.routes.js";
 import userRouter from "./routes/user.routes.js";
 import routerProfile from "./routes/profile.routes.js";
+import itemRouter from "./routes/item.routes.js";
 import { swaggerSpec } from "./swagger.js";
 import { createServer } from "http";
 import { initSocket } from "./lib/socket.js";
@@ -54,7 +55,8 @@ app.use("/api/jobs", jobRouter);
 app.use("/api/job-reports", jobReportRouter);
 app.use("/api/users", userRouter);
 app.use("/api/profile", routerProfile);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api/items", itemRouter);
+
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

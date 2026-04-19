@@ -169,6 +169,7 @@ enum Role {
   ADMIN
   SUPERVISOR
   TECHNICIAN
+  EXECUTIVE
 }
 
 enum JobStatus {

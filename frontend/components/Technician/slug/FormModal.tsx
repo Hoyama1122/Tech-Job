@@ -4,11 +4,16 @@ import {
   XCircle,
   Image as ImageIcon,
   AlertCircle,
+  PlusCircle,
+  Trash2,
+  Package,
+  Search,
 } from "lucide-react";
-import { useRef, useState, Dispatch, SetStateAction } from "react";
+import { useRef, useState, Dispatch, SetStateAction, useEffect } from "react";
 import SignatureField from "./SignatureField";
 import { compressImage } from "@/lib/compressImage";
 import { TechnicianReportForm } from "@/lib/Validations/technicianReportSchema";
+import { itemService } from "@/services/item.service";
 
 interface FormModalProps {
   formData: TechnicianReportForm;
@@ -34,8 +39,62 @@ const FormModal = ({
   errors,
 }: FormModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allItems, setAllItems] = useState<any[]>([]);
+  const [itemSearch, setItemSearch] = useState("");
   const uploadBeforeRef = useRef<HTMLInputElement>(null);
   const uploadAfterRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const data = await itemService.getItems();
+        setAllItems(data);
+      } catch (error) {
+        console.error("Failed to fetch items:", error);
+      }
+    };
+    fetchItems();
+  }, []);
+
+  const handleAddItem = (item: any) => {
+    if (formData.items?.some((i) => i.id === item.id)) return;
+    const newItem = {
+      id: item.id,
+      name: item.name,
+      code: item.code,
+      quantity: 1,
+      unit: item.unit,
+      type: item.type,
+    };
+    setFormData((prev) => ({
+      ...prev,
+      items: [...(prev.items || []), newItem],
+    }));
+    setItemSearch("");
+  };
+
+  const handleUpdateItemQuantity = (id: number, qty: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      items: prev.items?.map((i) =>
+        i.id === id ? { ...i, quantity: Math.max(1, qty) } : i
+      ),
+    }));
+  };
+
+  const handleRemoveItem = (id: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      items: prev.items?.filter((i) => i.id !== id),
+    }));
+  };
+
+  const filteredSearchItems = allItems.filter(
+    (item) =>
+      (item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
+        item.code.toLowerCase().includes(itemSearch.toLowerCase())) &&
+      !formData.items?.some((i) => i.id === item.id),
+  );
 
   const handleUploadBefore = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -275,6 +334,134 @@ const FormModal = ({
                 <div className="mt-1 flex items-center gap-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
                   <AlertCircle className="w-4 h-4" />
                   {errors.summaryOfOperatingResults}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ITEM USAGE SECTION */}
+          <div className="space-y-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <Package className="w-4 h-4 text-primary" />
+                การเบิกใช้วัสดุและอุปกรณ์
+              </label>
+              <span className="text-xs text-gray-400">
+                ({formData.items?.length || 0} รายการ)
+              </span>
+            </div>
+
+            {/* Search items */}
+            <div className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="ค้นหาพัสดุหรืออุปกรณ์..."
+                  className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none transition-all"
+                  value={itemSearch}
+                  onChange={(e) => setItemSearch(e.target.value)}
+                />
+              </div>
+
+              {/* Search Results Dropdown */}
+              {itemSearch && (
+                <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                  {filteredSearchItems.length > 0 ? (
+                    filteredSearchItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleAddItem(item)}
+                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-100 text-left"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-gray-800">
+                            {item.name}
+                          </p>
+                          <p className="text-[11px] text-gray-500">
+                            {item.code} • {item.brand} {item.model}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                            item.type === 'EQUIPMENT' 
+                              ? 'text-primary' 
+                              : 'text-accent'
+                          }`}>
+                            {item.type === 'EQUIPMENT' ? 'อุปกรณ์' : 'วัสดุ'}
+                          </span>
+                          <PlusCircle size={18} className="text-primary" />
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-gray-400 text-sm">
+                      ไม่พบพัสดุที่คุณค้นหา
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Selected Items List */}
+            <div className="space-y-2">
+              {formData.items && formData.items.length > 0 ? (
+                formData.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:shadow-sm transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${
+                        item.type === 'EQUIPMENT' ? 'bg-blue-50 text-blue-500' : 'bg-green-50 text-green-500'
+                      }`}>
+                        <Package size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-gray-800">
+                          {item.name}
+                        </p>
+                        <p className="text-[11px] text-gray-500">
+                          {item.type === 'EQUIPMENT' ? 'อุปกรณ์ (ไม่หักสต็อก)' : 'วัสดุ (หักสต็อก)'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                        <button
+                          onClick={() => handleUpdateItemQuantity(item.id, item.quantity - 1)}
+                          className="w-6 h-6 flex items-center justify-center hover:bg-white rounded-md transition-all text-gray-500"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          className="w-10 bg-transparent text-center text-sm font-bold outline-none"
+                          value={item.quantity}
+                          onChange={(e) => handleUpdateItemQuantity(item.id, parseInt(e.target.value) || 1)}
+                        />
+                        <button
+                          onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1)}
+                          className="w-6 h-6 flex items-center justify-center hover:bg-white rounded-md transition-all text-gray-500"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="text-xs text-gray-400 w-10">{item.unit}</span>
+                      <button
+                        onClick={() => handleRemoveItem(item.id)}
+                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-400">
+                  <Package size={32} className="mb-2 opacity-20" />
+                  <p className="text-xs">ยังไม่มีการเลือกวัสดุหรืออุปกรณ์</p>
                 </div>
               )}
             </div>
