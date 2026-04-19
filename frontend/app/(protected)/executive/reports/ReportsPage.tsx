@@ -16,6 +16,18 @@ import DepartmentChart from "@/components/Executive/DepartmentChart";
 
 const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
+import { jobService } from "@/services/job.service";
+
+const statusMap: Record<string, string> = {
+  "PENDING": "รอดำเนินการ",
+  "IN_PROGRESS": "กำลังทำงาน",
+  "COMPLETED": "สำเร็จ",
+  "CANCELLED": "ยกเลิก",
+  "SUBMITTED": "รอการตรวจสอบ",
+  "APPROVED": "สำเร็จ",
+  "REJECTED": "ยกเลิก"
+};
+
 export default function ReportsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,22 +37,30 @@ export default function ReportsPage() {
     new Date().getFullYear().toString()
   );
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("all"); // 1. เพิ่ม State แผนก
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
 
   useEffect(() => {
-    try {
-      setIsLoading(true);
-      setTimeout(() => {
-        const jobsData = localStorage.getItem("CardWork");
-        if (jobsData) {
-          setJobs(JSON.parse(jobsData));
-        }
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await jobService.getJobs();
+        const rawJobs = res.jobs || [];
+
+        // Map statuses to Thai and ensure category exists
+        const mappedJobs = rawJobs.map((job: any) => ({
+          ...job,
+          status: statusMap[job.status] || job.status,
+          category: job.category || "ไม่ระบุ"
+        }));
+
+        setJobs(mappedJobs);
+      } catch (error) {
+        console.error("Failed to load data", error);
+      } finally {
         setIsLoading(false);
-      }, 800);
-    } catch (error) {
-      console.error("Failed to load data", error);
-      setIsLoading(false);
-    }
+      }
+    };
+    fetchData();
   }, []);
 
   // --- Helpers ---

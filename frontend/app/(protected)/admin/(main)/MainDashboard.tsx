@@ -17,10 +17,12 @@ import CardWork from "@/components/Dashboard/CardWork";
 import Activities from "@/components/Dashboard/Activities";
 import Summary from "@/components/Dashboard/Summary/Summary";
 import RenderModal from "@/components/Dashboard/Summary/RenderModal";
+import TeamMap from '@/components/Supervisor/Map/MapContainer';
 import { useJobStore } from "@/store/useJobStore";
 import { userService } from "@/services/user.service";
 import { useAuthStore } from "@/store/useAuthStore";
 import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
+import { MapPin } from "lucide-react";
 
 const MainDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -257,7 +259,18 @@ const MainDashboard = () => {
           </div>
         </div>
 
-        <Activities />
+        <div>
+          {/* Map */}
+          <div className="bg-white/90 rounded-lg shadow-md p-4">
+            <h1 className="text-base md:text-lg font-bold text-text mb-4 flex items-center gap-2">
+              <MapPin size={20} /> แผนที่ภาพรวม
+            </h1>
+            <TeamMap jobs={filteredCard} users={users} />
+          </div>
+
+          {/* Activities (Log) - Hidden or Optional */}
+          {/* <Activities /> */}
+        </div>
       </div>
     </div>
   );
