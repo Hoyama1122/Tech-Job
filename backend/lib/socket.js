@@ -17,7 +17,7 @@ export const initSocket = (server) => {
     const cookies = socket.handshake.headers.cookie;
     const authHeader = socket.handshake.headers.authorization;
     let token = socket.handshake.auth.token;
-    
+
     // Fallback 1: Authorization Header (Bearer)
     if (!token && authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
@@ -30,7 +30,9 @@ export const initSocket = (server) => {
     }
 
     if (!token) {
-      console.warn(`Socket Auth Warning: No token provided for transport ${socket.conn.transport.name}`);
+      console.warn(
+        `Socket Auth Warning: No token provided for transport ${socket.conn.transport.name}`,
+      );
       return next(new Error("Authentication error: No token provided"));
     }
 
@@ -39,7 +41,9 @@ export const initSocket = (server) => {
       socket.user = decoded;
       next();
     } catch (err) {
-      console.error(`Socket Auth Failed: Invalid token for user on transport ${socket.conn.transport.name} - ${err.message}`);
+      console.error(
+        `Socket Auth Failed: Invalid token for user on transport ${socket.conn.transport.name} - ${err.message}`,
+      );
       next(new Error("Authentication error: Invalid token"));
     }
   });
@@ -62,7 +66,12 @@ export const initSocket = (server) => {
       const userId = Number(socket.user.id);
 
       try {
-       
+        // SAFETY CHECK: Ensure model exists in Prisma client
+        if (!prisma.technicianLocation) {
+          console.error("Prisma Error: technicianLocation model is missing from generated client. Run 'npx prisma generate'");
+          return;
+        }
+
         const updatedLocation = await prisma.technicianLocation.upsert({
           where: { userId: userId },
           update: {
@@ -105,8 +114,10 @@ export const initSocket = (server) => {
           departmentId: updatedLocation.user.departmentId,
         };
 
-        io.to("admin-room").emit("technician:location:broadcast", broadcastData);
-
+        io.to("admin-room").emit(
+          "technician:location:broadcast",
+          broadcastData,
+        );
       } catch (error) {
         console.error("Error updating location:", error);
       }
@@ -114,10 +125,10 @@ export const initSocket = (server) => {
 
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.user.id}`);
-      
+
       if (socket.user?.role === "TECHNICIAN") {
         const userId = Number(socket.user.id);
-        
+
         // Broadcast immediately
         io.to("admin-room").emit("technician:location:broadcast", {
           userId: userId,
@@ -126,18 +137,25 @@ export const initSocket = (server) => {
         });
 
         // Also update DB to "old" time so refresh shows offline
-        // (Set to 11 minutes ago to exceed the 10-minute threshold)
         const offlineTime = new Date(Date.now() - 11 * 60 * 1000);
-        prisma.technicianLocation.upsert({
-          where: { userId: userId },
-          update: { updatedAt: offlineTime },
-          create: {
-            userId: userId,
-            latitude: 0,
-            longitude: 0,
-            updatedAt: offlineTime
-          }
-        }).catch(err => console.error("Error updating offline status in DB:", err));
+        
+        // SAFETY CHECK
+        if (prisma.technicianLocation) {
+          prisma.technicianLocation
+            .upsert({
+              where: { userId: userId },
+              update: { updatedAt: offlineTime },
+              create: {
+                userId: userId,
+                latitude: 0,
+                longitude: 0,
+                updatedAt: offlineTime,
+              },
+            })
+            .catch((err) =>
+              console.error("Error updating offline status in DB:", err),
+            );
+        }
       }
     });
   });
