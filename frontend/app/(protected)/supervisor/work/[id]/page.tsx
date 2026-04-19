@@ -14,6 +14,7 @@ import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
 import { jobService } from "@/services/job.service";
+import { reportService } from "@/services/report.service";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
@@ -81,12 +82,13 @@ export default function WorkDetailPage({ params }: PageProps) {
     statusStr === JobStatus.PENDING;
 
   const handleApprove = async () => {
-    if (!canApproveOrReject) {
+    if (!canApproveOrReject || !job?.technicianReport?.id) {
       toast.error("ไม่สามารถอนุมัติใบงานนี้ได้");
       return;
     }
 
     try {
+      await reportService.approveReport(job.technicianReport.id);
       setJob((prev: any) => ({
         ...prev,
         status: JobStatus.COMPLETED,
@@ -100,7 +102,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   };
 
   const handleRejectClick = () => {
-    if (!canApproveOrReject) {
+    if (!canApproveOrReject || !job?.technicianReport?.id) {
       toast.error("ไม่สามารถตีกลับใบงานนี้ได้");
       return;
     }
@@ -110,6 +112,7 @@ export default function WorkDetailPage({ params }: PageProps) {
 
   const onConfirmReject = async (reason: string) => {
     try {
+      await reportService.rejectReport(job.technicianReport.id, reason);
       setJob((prev: any) => ({
         ...prev,
         status: JobStatus.REJECTED,

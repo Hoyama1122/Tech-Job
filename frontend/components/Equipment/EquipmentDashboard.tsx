@@ -22,6 +22,7 @@ const EquipmentDashboard = () => {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [deletingItem, setDeletingItem] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("ALL");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,11 +57,15 @@ const EquipmentDashboard = () => {
     fetchData();
   }, []);
 
-  const filteredItems = items.filter(
-    (item) =>
+  const filteredItems = items.filter((item) => {
+    const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.code.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+      item.code.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesType = filterType === "ALL" || item.type === filterType;
+
+    return matchesSearch && matchesType;
+  });
 
   // Pagination Logic
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -68,10 +73,10 @@ const EquipmentDashboard = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Reset to page 1 when searching
+  // Reset to page 1 when searching or filtering
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, filterType]);
 
   const PaginationControls = () => (
     <div className="flex justify-center items-center gap-2 mt-6">
@@ -148,10 +153,14 @@ const EquipmentDashboard = () => {
             </div>
             <div className="flex items-center gap-2 w-full md:w-auto">
               <Filter className="text-gray-400" size={18} />
-              <select className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm text-gray-700 outline-none focus:border-gray-400 flex-1 md:w-40 appearance-none cursor-pointer">
-                <option>ทุกประเภท</option>
-                <option>อุปกรณ์</option>
-                <option>วัสดุสิ้นเปลือง</option>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm text-gray-700 outline-none focus:border-gray-400 flex-1 md:w-44 appearance-none cursor-pointer"
+              >
+                <option value="ALL">ทุกประเภท</option>
+                <option value="EQUIPMENT">อุปกรณ์</option>
+                <option value="MATERIAL">วัสดุสิ้นเปลือง</option>
               </select>
             </div>
           </div>

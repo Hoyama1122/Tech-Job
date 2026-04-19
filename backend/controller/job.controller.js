@@ -210,6 +210,7 @@ export const getJobById = async (req, res) => {
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
         images: r.images,
+        itemUsages: r.itemUsages || [],
         reportedBy: {
           id: r.createdBy?.id,
           fullname:
@@ -243,6 +244,7 @@ export const getJobById = async (req, res) => {
                 `${job.reports[0].createdBy?.profile?.firstname || ""} ${job.reports[0].createdBy?.profile?.lastname || ""}`.trim(),
             },
             images: job.reports[0].images,
+            itemUsages: job.reports[0].itemUsages || [],
           }
         : null,
     };
@@ -874,6 +876,7 @@ export const getMyJobDetail = async (req, res) => {
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
         images: r.images,
+        itemUsages: r.itemUsages || [],
         reportedBy: {
           id: r.createdBy?.id,
           fullname:
@@ -916,6 +919,7 @@ export const getMyJobDetail = async (req, res) => {
                 `${job.reports[0].createdBy?.profile?.firstname || ""} ${job.reports[0].createdBy?.profile?.lastname || ""}`.trim(),
             },
             images: job.reports[0].images,
+            itemUsages: job.reports[0].itemUsages || [],
           }
         : null,
     };

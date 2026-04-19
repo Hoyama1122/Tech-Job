@@ -2,35 +2,59 @@ import { prisma } from "../lib/prisma.js";
 
 export const createItem = async (req, res) => {
   try {
-    const { code, name, model, brand, type, quantity, unit, note } = req.body;
+    const itemsData = Array.isArray(req.body) ? req.body : [req.body];
     const createdBy = req.user.id;
 
-    const existingItem = await prisma.item.findUnique({
-      where: { code },
-    });
-
-    if (existingItem) {
-      return res.status(400).json({ message: "รหัสอุปกรณ์นี้มีอยู่ในระบบแล้ว" });
+    if (itemsData.length === 0) {
+      return res.status(400).json({ message: "กรุณาระบุข้อมูลอุปกรณ์" });
     }
 
-    const item = await prisma.item.create({
-      data: {
-        code,
-        name,
-        model,
-        brand,
-        type,
-        quantity: Number(quantity),
-        unit,
-        note,
-        createdBy,
-      },
+   
+    for (const data of itemsData) {
+      if (!data.code || !data.name) {
+        return res.status(400).json({ message: "กรุณาระบุรหัสและชื่ออุปกรณ์ให้ครบทุกรายการ" });
+      }
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const createdItems = [];
+      
+      for (const data of itemsData) {
+        const { code, name, model, brand, type, quantity, unit, note } = data;
+
+        const existingItem = await tx.item.findUnique({
+          where: { code },
+        });
+
+        if (existingItem) {
+          throw new Error(`รหัสอุปกรณ์ "${code}" มีอยู่ในระบบแล้ว`);
+        }
+
+        const newItem = await tx.item.create({
+          data: {
+            code,
+            name,
+            model,
+            brand,
+            type,
+            quantity: Number(quantity) || 0,
+            unit,
+            note,
+            createdBy,
+          },
+        });
+        createdItems.push(newItem);
+      }
+      return createdItems;
     });
 
-    res.status(201).json({ message: "เพิ่มอุปกรณ์สำเร็จ", item });
+    res.status(201).json({ 
+      message: itemsData.length > 1 ? `เพิ่มอุปกรณ์ ${itemsData.length} รายการสำเร็จ` : "เพิ่มอุปกรณ์สำเร็จ", 
+      items: result 
+    });
   } catch (error) {
     console.error("Create item error:", error);
-    res.status(500).json({ error: error.message || "Internal server error" });
+    res.status(400).json({ error: error.message || "Internal server error" });
   }
 };
 

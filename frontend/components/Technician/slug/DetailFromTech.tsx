@@ -17,6 +17,17 @@ interface ReportImage {
   type: "BEFORE" | "AFTER";
 }
 
+interface ItemUsage {
+  id: number;
+  item: {
+    name: string;
+    code: string;
+    unit: string;
+    type: "EQUIPMENT" | "MATERIAL";
+  };
+  usedQuantity: number | string;
+}
+
 interface TechnicianReport {
   detail: string;
   inspectionResults: string;
@@ -25,6 +36,7 @@ interface TechnicianReport {
   technicianSignature: string;
   customerSignature: string;
   images?: ReportImage[];
+  itemUsages?: ItemUsage[];
 }
 
 interface DetailFromTechProps {
@@ -112,10 +124,7 @@ export default function DetailFromTech({
       {/* Report Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {sections.map((section) => (
-          <div
-            key={section.title}
-            className=""
-          >
+          <div key={section.title} className="">
             <div className="flex items-center gap-2 mb-3">
               {section.icon}
               <h3 className="font-semibold text-gray-900 text-base">
@@ -128,6 +137,55 @@ export default function DetailFromTech({
           </div>
         ))}
       </div>
+
+      {/* Materials and Equipment Used */}
+      {report?.itemUsages && report.itemUsages.length > 0 && (
+        <div className="border-t border-gray-100 pt-6">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+            <ClipboardList className="w-5 h-5 text-indigo-600" />
+            พัสดุและอุปกรณ์ที่ใช้
+            <span className="text-xs font-normal text-gray-500 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+              {report.itemUsages.length} รายการ
+            </span>
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {report.itemUsages.map((usage) => (
+              <div
+                key={usage.id}
+                className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50/50"
+              >
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-gray-900">
+                    {usage.item.name}
+                  </span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] text-gray-500 font-mono">
+                      {usage.item.code}
+                    </span>
+                    <span
+                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                        usage.item.type === "EQUIPMENT"
+                          ? " text-primary"
+                          : " text-accent"
+                      }`}
+                    >
+                      {usage.item.type === "EQUIPMENT" ? "อุปกรณ์" : "วัสดุ"}
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm font-black text-primary">
+                    {Number(usage.usedQuantity).toLocaleString()}
+                  </span>
+                  <span className="text-[10px] text-gray-500 ml-1">
+                    {usage.item.unit}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Images Section */}
       {(displayBefore.length > 0 || displayAfter.length > 0) && (

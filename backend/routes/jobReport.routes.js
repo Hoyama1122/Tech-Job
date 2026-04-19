@@ -249,7 +249,7 @@ jobReportRouter.put(
  *       500:
  *         description: Server error
  */
-jobReportRouter.patch("/:id/approve", approveJobReport);
+jobReportRouter.patch("/:id/approve", verifyToken, approveJobReport);
 
 /**
  * @swagger
@@ -275,7 +275,7 @@ jobReportRouter.patch("/:id/approve", approveJobReport);
  *       500:
  *         description: Server error
  */
-jobReportRouter.patch("/:id/reject", rejectJobReport);
+jobReportRouter.patch("/:id/reject", verifyToken, rejectJobReport);
 
 jobReportRouter.get("/job/:jobId", getJobReportByJobId)
 

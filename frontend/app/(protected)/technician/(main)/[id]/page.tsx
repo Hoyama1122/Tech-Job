@@ -98,8 +98,6 @@ export default function Page({ params }: PageProps) {
       // Get the existing report (using the clean structure from backend)
       const report = found.technicianReport;
       if (report) {
-        // Extract images by type (if your backend includes type in images nested in report)
-        // or just use storedBeforeImages/storedAfterImages logic
         setStoredBeforeImages(
           report.images
             ?.filter((i: any) => i.type === "BEFORE" || !i.type)
@@ -107,25 +105,27 @@ export default function Page({ params }: PageProps) {
         );
         setStoredAfterImages(
           report.images
-            ?.filter((i: any) => i.type === "AFTER")
-            .map((i: any) => i.url) || []
+             ?.filter((i: any) => i.type === "AFTER")
+             .map((i: any) => i.url) || []
         );
 
-        setFormData({
-          detail: report.detail || "",
-          inspectionResults: report.inspectionResults || "",
-          repairOperations: report.repairOperations || "",
-          summaryOfOperatingResults: report.summaryOfOperatingResults || "",
-          customerSignature: report.customerSignature || "",
-          items: report.itemUsages?.map((u: any) => ({
-             id: u.item.id,
-             name: u.item.name,
-             code: u.item.code,
-             quantity: Number(u.usedQuantity),
-             unit: u.item.unit,
-             type: u.item.type,
-          })) || [],
-        });
+        if (report.status !== JobReportStatus.REJECTED) {
+           setFormData({
+             detail: report.detail || "",
+             inspectionResults: report.inspectionResults || "",
+             repairOperations: report.repairOperations || "",
+             summaryOfOperatingResults: report.summaryOfOperatingResults || "",
+             customerSignature: report.customerSignature || "",
+             items: report.itemUsages?.map((u: any) => ({
+                id: u.item.id,
+                name: u.item.name,
+                code: u.item.code,
+                quantity: Number(u.usedQuantity),
+                unit: u.item.unit,
+                type: u.item.type,
+             })) || [],
+           });
+        }
       }
     } catch (error: any) {
       console.error("โหลดรายละเอียดงานไม่สำเร็จ:", error);
@@ -228,9 +228,11 @@ export default function Page({ params }: PageProps) {
         }
       },
       (error) => {
-        console.error("Geolocation error:", error);
+        console.error("Geolocation error code:", error.code);
+        console.error("Geolocation error message:", error.message);
         let msg = "หาพิกัดไม่สำเร็จ กรุณาอนุญาตเข้าถึงตำแหน่งและลองอีกครั้ง";
         if (error.code === 1) msg = "กรุณาอนุญาตให้เข้าถึงตำแหน่งที่ตั้ง (Location Permission)";
+        if (error.code === 2) msg = "ไม่สามารถยืนยันตำแหน่งได้ (Position Unavailable) กรุณาตรวจสอบสัญญาณเน็ต/GPS";
         if (error.code === 3) msg = "หาพิกัดล่าช้าเกินไป (Timeout) กรุณาลองใหม่อีกครั้งในที่โล่ง";
         
         toast.update(toastId, {
@@ -241,23 +243,58 @@ export default function Page({ params }: PageProps) {
         });
         setIsStarting(false);
       },
-      { enableHighAccuracy: false, timeout: 20000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   };
 
   const openFormModal = () => {
-    if (job?.technicianReport) {
+    const report = job?.technicianReport;
+    if (report) {
+      if (report.status === JobReportStatus.REJECTED) {
+        // Clear all if rejected, as requested
+        setFormData({
+          detail: "",
+          inspectionResults: "",
+          repairOperations: "",
+          summaryOfOperatingResults: "",
+          customerSignature: "",
+          items: [],
+        });
+        setFormBeforeImages([]);
+        setFormAfterImages([]);
+      } else {
+        // Load existing for draft/in-progress
+        setFormData({
+          detail: report.detail || "",
+          inspectionResults: report.inspectionResults || "",
+          repairOperations: report.repairOperations || "",
+          summaryOfOperatingResults: report.summaryOfOperatingResults || "",
+          customerSignature: report.customerSignature || "",
+          items:
+            report.itemUsages?.map((u: any) => ({
+              id: u.item.id,
+              name: u.item.name,
+              code: u.item.code,
+              quantity: Number(u.usedQuantity),
+              unit: u.item.unit,
+              type: u.item.type,
+            })) || [],
+        });
+        setFormBeforeImages(storedBeforeImages);
+        setFormAfterImages(storedAfterImages);
+      }
+    } else {
+      // New report
       setFormData({
-        detail: job.technicianReport.detail || "",
-        inspectionResults: job.technicianReport.inspectionResults || "",
-        repairOperations: job.technicianReport.repairOperations || "",
-        summaryOfOperatingResults:
-          job.technicianReport.summaryOfOperatingResults || "",
-        customerSignature: job.technicianReport.customerSignature || "",
+        detail: "",
+        inspectionResults: "",
+        repairOperations: "",
+        summaryOfOperatingResults: "",
+        customerSignature: "",
+        items: [],
       });
-      // Load existing images if any
-      setFormBeforeImages(storedBeforeImages);
-      setFormAfterImages(storedAfterImages);
+      setFormBeforeImages([]);
+      setFormAfterImages([]);
     }
     setShowFormModal(true);
   };
