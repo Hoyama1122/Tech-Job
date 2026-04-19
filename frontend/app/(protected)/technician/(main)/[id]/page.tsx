@@ -54,7 +54,7 @@ export default function Page({ params }: PageProps) {
   });
 
   // form errors
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // form images
   const [formBeforeImages, setFormBeforeImages] = useState<string[]>([]);

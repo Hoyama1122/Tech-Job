@@ -5,9 +5,22 @@ import {
   Image as ImageIcon,
   AlertCircle,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, Dispatch, SetStateAction } from "react";
 import SignatureField from "./SignatureField";
 import { compressImage } from "@/lib/compressImage";
+import { TechnicianReportForm } from "@/lib/Validations/technicianReportSchema";
+
+interface FormModalProps {
+  formData: TechnicianReportForm;
+  setFormData: Dispatch<SetStateAction<TechnicianReportForm>>;
+  imagesBefore: string[];
+  setImagesBefore: Dispatch<SetStateAction<string[]>>;
+  imagesAfter: string[];
+  setImagesAfter: Dispatch<SetStateAction<string[]>>;
+  handleSubmit: () => Promise<void>;
+  setShowFormModal: (show: boolean) => void;
+  errors: Record<string, string>;
+}
 
 const FormModal = ({
   formData,
@@ -19,7 +32,7 @@ const FormModal = ({
   handleSubmit,
   setShowFormModal,
   errors,
-}) => {
+}: FormModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const uploadBeforeRef = useRef<HTMLInputElement>(null);
   const uploadAfterRef = useRef<HTMLInputElement>(null);
@@ -270,7 +283,7 @@ const FormModal = ({
           {/* Signatures */}
           <SignatureField
             label="ลายเซ็นลูกค้า"
-            setValue={(base64) =>
+            setValue={(base64:any) =>
               setFormData((prev) => ({
                 ...prev,
                 customerSignature: base64,
