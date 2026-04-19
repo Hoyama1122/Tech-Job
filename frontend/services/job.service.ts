@@ -158,4 +158,8 @@ export const jobService = {
     const res = await api.patch(`/jobs/my/${id}/status`, { status });
     return res.data;
   },
+  async getJobsWithLocation() {
+  const res = await api.get("/jobs/with-location");
+  return res.data; // { jobs: JobLocation[] }
+},
 };

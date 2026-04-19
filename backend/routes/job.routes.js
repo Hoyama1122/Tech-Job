@@ -8,6 +8,7 @@ import {
   getMyJobDetail,
   updateMyJobStatus,
   updateJob,
+  getJobsWithLocation,
 } from "../controller/job.controller.js";
 import { upload } from "../lib/upload.js";
 import { allowRoles, authCheck, verifyToken } from "../lib/middleware.js";
@@ -21,6 +22,7 @@ const jobRouter = Router();
  *   - name: Jobs
  *     description: Job management endpoints จ้าาาาาาาาาาาาาาาาาา
  */
+jobRouter.get("/with-location", getJobsWithLocation)
 
 /**
  * @swagger
@@ -249,5 +251,6 @@ jobRouter.put(
  *         description: Server error
  */
 jobRouter.delete("/:id", deleteJob);
+
 
 export default jobRouter;

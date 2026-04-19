@@ -1,7 +1,5 @@
 import api from "@/lib/axiosClient";
 
-
-
 export type UserItem = {
   id: number;
   empno: string;
@@ -53,29 +51,39 @@ export type UpdateUserPayload = {
   avatar?: string;
 };
 
+type ApiListResponse<T> = {
+  message?: string;
+  data?: T[];
+};
+
+type ApiItemResponse<T> = {
+  message?: string;
+  data?: T;
+};
+
 export const userService = {
-  async getUsers() {
-    const res = await api.get("/users");
-    return res.data;
+  async getUsers(): Promise<UserItem[]> {
+    const res = await api.get<ApiListResponse<UserItem>>("/users");
+    return Array.isArray(res.data?.data) ? res.data.data : [];
   },
 
-  async getUserById(id: number | string) {
-    const res = await api.get(`/users/${id}`);
-    return res.data;
+  async getUserById(id: number | string): Promise<UserItem | null> {
+    const res = await api.get<ApiItemResponse<UserItem>>(`/users/${id}`);
+    return res.data?.data ?? null;
   },
 
   async createUser(payload: CreateUserPayload) {
-    const res = await api.post("/users", payload);
+    const res = await api.post<ApiItemResponse<UserItem>>("/users", payload);
     return res.data;
   },
 
   async updateUser(payload: UpdateUserPayload) {
-    const res = await api.put("/users", payload);
+    const res = await api.put<ApiItemResponse<UserItem>>("/users", payload);
     return res.data;
   },
 
   async deleteUser(id: number | string) {
-    const res = await api.delete(`/users/${id}`);
+    const res = await api.delete<{ message?: string }>(`/users/${id}`);
     return res.data;
   },
 };

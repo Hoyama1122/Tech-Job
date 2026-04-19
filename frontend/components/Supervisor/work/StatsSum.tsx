@@ -1,5 +1,5 @@
-// components/Dashboard/Work/StatsSummary.tsx
-import { Clock, FileText, User } from "lucide-react";
+// components/Supervisor/work/StatsSum.tsx
+import { Clock, FileText, XCircle } from "lucide-react";
 
 interface Props {
   stats: {
@@ -67,7 +67,7 @@ const STATUS_ITEMS = [
   {
     key: "ตีกลับ",
     label: "ตีกลับ",
-    Icon: User,
+    Icon: XCircle,
     style: {
       bg: "bg-red-50",
       border: "border-red-200",
@@ -77,10 +77,9 @@ const STATUS_ITEMS = [
       icon: "text-red-600",
     },
   },
-];
+] as const;
 
 export default function StatsSummary({ stats }: Props) {
-
   return (
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
       {STATUS_ITEMS.map(({ key, label, Icon, style }) => (
@@ -92,7 +91,7 @@ export default function StatsSummary({ stats }: Props) {
             <div>
               <p className={`text-sm ${style.text} font-medium`}>{label}</p>
               <p className={`text-2xl font-bold ${style.textDark}`}>
-                {stats[key] || 0}
+                {stats[key] ?? 0}
               </p>
             </div>
             <div className={`p-2 ${style.iconBg} rounded-lg`}>

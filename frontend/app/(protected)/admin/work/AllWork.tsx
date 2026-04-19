@@ -30,7 +30,6 @@ export default function Work() {
   useEffect(() => {
     const fetchJobs = async () => {
       setIsLoading(true);
-
       try {
         const res = await jobService.getJobs();
         const data = res.jobs || [];
@@ -72,10 +71,13 @@ export default function Work() {
 
   const stats = useMemo(
     () => ({
-      PENDING: jobs.filter((j) => j.status === "PENDING").length,
-      IN_PROGRESS: jobs.filter((j) => j.status === "IN_PROGRESS").length,
-      COMPLETED: jobs.filter((j) => j.status === "COMPLETED").length,
-      REJECTED: jobs.filter((j) => j.status === "REJECTED").length,
+      "รอการตรวจสอบ": jobs.filter((j) => j.status === "SUBMITTED").length,
+      "รอการดำเนินงาน": jobs.filter((j) => j.status === "PENDING").length,
+      "กำลังทำงาน": jobs.filter((j) => j.status === "IN_PROGRESS").length,
+      "สำเร็จ": jobs.filter(
+        (j) => j.status === "APPROVED" || j.status === "COMPLETED"
+      ).length,
+      "ตีกลับ": jobs.filter((j) => j.status === "REJECTED").length,
     }),
     [jobs]
   );
@@ -89,7 +91,9 @@ export default function Work() {
               <ClipboardList className="w-8 h-8" />
               All Jobs
             </h1>
-            <p className="text-sm text-gray-500 mt-1">Track all jobs in system</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Track all jobs in system
+            </p>
           </div>
 
           <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm">

@@ -938,3 +938,49 @@ export const updateMyJobStatus = async (req, res) => {
     });
   }
 };
+
+export const getJobsWithLocation = async (req, res) => {
+  try {
+    const jobs = await prisma.job.findMany({
+      where: {
+        latitude: { not: null },
+        longitude: { not: null },
+      },
+      include: {
+        assignments: {
+          where: { role: "TECHNICIAN" },
+          include: {
+            user: {
+              include: { profile: true },
+            },
+          },
+        },
+        reports: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
+    });
+
+    const result = jobs.map((job) => ({
+      id: job.id,
+      title: job.title,
+      description: job.description,
+      status: job.status,
+      lat: job.latitude,
+      lng: job.longitude,
+      location_name: job.location_name,
+      reports: job.reports,
+      technicians: job.assignments.map((a) => ({
+        id: a.user.id,
+        name: `${a.user.profile?.firstname ?? ""} ${a.user.profile?.lastname ?? ""}`.trim(),
+        phone: a.user.profile?.phone ?? "-",
+      })),
+    }));
+
+    res.json({ jobs: result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch jobs with location" });
+  }
+};
