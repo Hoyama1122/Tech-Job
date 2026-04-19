@@ -64,7 +64,6 @@ export const navLinkExecutive: NavItem[] = [
   { name: "โปรไฟล์", path: "/profile", icon: Users2 },
 ];
 export const navLinkSuperadmin: NavItem[] = [
-  { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
   { name: "ภาพรวมแผนที่", path: "/map", icon: MapIcon },
   { name: "ผู้ใช้งาน", path: "/user", icon: Users },
   { name: "คลังพัสดุ", path: "/equipment", icon: Box },
