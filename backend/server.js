@@ -56,7 +56,7 @@ app.use("/api/job-reports", jobReportRouter);
 app.use("/api/users", userRouter);
 app.use("/api/profile", routerProfile);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use("/api/dashboard", dashboardRoute)
+app.use("/api/dashboard", dashboardRoute);
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
