@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import JobWork from "@/components/Supervisor/work/JobWork";
 import { jobService } from "@/services/job.service";
 
+
 interface Job {
   id: string;
   JobId: string;
@@ -30,21 +31,16 @@ export default function Work() {
   useEffect(() => {
     const fetchJobs = async () => {
       setIsLoading(true);
-
       try {
         const res = await jobService.getJobs();
         const data = res.jobs || [];
         setJobs(data);
       } catch (error: any) {
-        console.error(
-          "โหลด job ไม่สำเร็จ:",
-          error.response?.data || error.message
-        );
+        console.error("โหลด job ไม่สำเร็จ:", error.response?.data || error.message);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchJobs();
   }, []);
 
@@ -70,15 +66,17 @@ export default function Work() {
     });
   }, [jobs, search, filterStatus]);
 
-  const stats = useMemo(
-    () => ({
-      PENDING: jobs.filter((j) => j.status === "PENDING").length,
-      IN_PROGRESS: jobs.filter((j) => j.status === "IN_PROGRESS").length,
-      COMPLETED: jobs.filter((j) => j.status === "COMPLETED").length,
-      REJECTED: jobs.filter((j) => j.status === "REJECTED").length,
-    }),
-    [jobs]
-  );
+  // แปลง status enum เป็น Thai key ให้ตรงกับ StatsSummary
+const stats = useMemo(
+  () => ({
+    รอการตรวจสอบ: jobs.filter((j) => j.status === "SUBMITTED").length,
+    รอการดำเนินงาน: jobs.filter((j) => j.status === "PENDING").length,
+    กำลังทำงาน: jobs.filter((j) => j.status === "IN_PROGRESS").length,
+    สำเร็จ: jobs.filter((j) => ["COMPLETED", "APPROVED"].includes(j.status)).length,
+    ตีกลับ: jobs.filter((j) => ["REJECTED", "CANCELLED"].includes(j.status)).length,
+  }),
+  [jobs]
+);
 
   return (
     <div className="p-4">
