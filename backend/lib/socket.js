@@ -30,7 +30,7 @@ export const initSocket = (server) => {
     }
 
     if (!token) {
-      console.log(`Socket Auth Failed: No token found for transport ${socket.conn.transport.name}`);
+      console.warn(`Socket Auth Warning: No token provided for transport ${socket.conn.transport.name}`);
       return next(new Error("Authentication error: No token provided"));
     }
 
@@ -39,7 +39,7 @@ export const initSocket = (server) => {
       socket.user = decoded;
       next();
     } catch (err) {
-      console.log("Socket Connection Failed: Invalid token");
+      console.error(`Socket Auth Failed: Invalid token for user on transport ${socket.conn.transport.name} - ${err.message}`);
       next(new Error("Authentication error: Invalid token"));
     }
   });
@@ -128,9 +128,15 @@ export const initSocket = (server) => {
         // Also update DB to "old" time so refresh shows offline
         // (Set to 11 minutes ago to exceed the 10-minute threshold)
         const offlineTime = new Date(Date.now() - 11 * 60 * 1000);
-        prisma.technicianLocation.update({
+        prisma.technicianLocation.upsert({
           where: { userId: userId },
-          data: { updatedAt: offlineTime }
+          update: { updatedAt: offlineTime },
+          create: {
+            userId: userId,
+            latitude: 0,
+            longitude: 0,
+            updatedAt: offlineTime
+          }
         }).catch(err => console.error("Error updating offline status in DB:", err));
       }
     });
