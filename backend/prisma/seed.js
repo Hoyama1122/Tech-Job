@@ -3,10 +3,9 @@ import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 
 async function main() {
-  // 1. Clean Up (ลบข้อมูลเก่าก่อนเพื่อป้องกัน ID ซ้ำ)
-  await prisma.message.deleteMany({});
-  await prisma.participant.deleteMany({});
-  await prisma.conversation.deleteMany({});
+  // 1. Clean Up
+  await prisma.itemUsage.deleteMany({});
+  await prisma.item.deleteMany({});
   await prisma.jobAssignment.deleteMany({});
   await prisma.reportImage.deleteMany({});
   await prisma.jobReport.deleteMany({});
@@ -148,7 +147,8 @@ async function main() {
   await prisma.jobReport.create({
     data: {
       jobId: job.id,
-      status: "PENDING",
+      createdById: tech1.id,
+      status: "APPROVED",
       detail: "เปลี่ยนหลอดไฟ LED ใหม่ และซ่อมรอยรั่วของท่อ PVC เรียบร้อย",
       summary: "งานเสร็จสิ้น ระบบกลับมาใช้งานได้ปกติ",
       images: {

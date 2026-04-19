@@ -3,6 +3,15 @@ import bcrypt from "bcrypt";
 
 async function main() {
   const passHash = await bcrypt.hash("123456", 10);
+  
+  // Ensure department exists
+  let dept = await prisma.department.findFirst();
+  if (!dept) {
+    dept = await prisma.department.create({
+      data: { name: "Default Department" }
+    });
+  }
+  const departmentId = dept.id;
 
 
   await prisma.user.create({
@@ -11,7 +20,7 @@ async function main() {
       email: "admin@techjob.com",
       password: passHash,
       role: "ADMIN",
-      departmentId: 1,
+      departmentId: departmentId,
       profile: {
         create: {
           firstname: "สมหญิง",
@@ -33,7 +42,7 @@ async function main() {
       email: "supervisor@techjob.com",
       password: passHash,
       role: "SUPERVISOR",
-      departmentId: 1,
+      departmentId: departmentId,
       profile: {
         create: {
           firstname: "สมชาย",
@@ -55,7 +64,7 @@ async function main() {
       email: "tech1@techjob.com",
       password: passHash,
       role: "TECHNICIAN",
-      departmentId: 1,
+      departmentId: departmentId,
       profile: {
         create: {
           firstname: "วิชัย",
@@ -77,7 +86,7 @@ async function main() {
       email: "tech2@techjob.com",
       password: passHash,
       role: "TECHNICIAN",
-      departmentId: 1,
+      departmentId: departmentId,
       profile: {
         create: {
           firstname: "อนงค์",
@@ -97,7 +106,7 @@ async function main() {
       email: "tech3@techjob.com",
       password: passHash,
       role: "TECHNICIAN",
-      departmentId: 1,
+      departmentId: departmentId,
       profile: {
         create: {
           firstname: "อนงค์",
