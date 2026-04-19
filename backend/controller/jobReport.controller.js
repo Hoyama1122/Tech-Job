@@ -52,13 +52,12 @@ export const createJobReport = async (req, res) => {
       });
     }
 
-    const imageFiles = req.files?.images || [];
+    const beforeFiles = req.files?.beforeImages || [];
+    const afterFiles = req.files?.afterImages || [];
     const signFile = req.files?.cus_sign?.[0];
 
-    const uploadedImages = await uploadImages(
-      imageFiles,
-      "techjob/job-reports"
-    );
+    const uploadedBefore = await uploadImages(beforeFiles, "techjob/job-reports/before");
+    const uploadedAfter = await uploadImages(afterFiles, "techjob/job-reports/after");
 
     const uploadedSignature = await uploadSingleImage(
       signFile,
@@ -145,7 +144,15 @@ export const createJobReport = async (req, res) => {
       await insertReportImages({
         tx,
         reportId,
-        uploadedImages,
+        uploadedImages: uploadedBefore,
+        type: "BEFORE"
+      });
+
+      await insertReportImages({
+        tx,
+        reportId,
+        uploadedImages: uploadedAfter,
+        type: "AFTER"
       });
 
       // Update Job status to SUBMITTED
@@ -197,6 +204,7 @@ export const createJobReport = async (req, res) => {
           ri.id AS image_id,
           ri.url AS image_url,
           ri."publicId" AS image_public_id,
+          ri.type AS image_type,
           ri."createdAt" AS image_created_at
 
         FROM "JobReport" jr
@@ -269,6 +277,7 @@ export const getJobReports = async (req, res) => {
         ri.id AS image_id,
         ri.url AS image_url,
         ri."publicId" AS image_public_id,
+        ri.type AS image_type,
         ri."createdAt" AS image_created_at
 
       FROM "JobReport" jr
@@ -350,6 +359,7 @@ export const getJobReportById = async (req, res) => {
         ri.id AS image_id,
         ri.url AS image_url,
         ri."publicId" AS image_public_id,
+        ri.type AS image_type,
         ri."createdAt" AS image_created_at
 
       FROM "JobReport" jr
@@ -432,6 +442,7 @@ export const getJobReportByJobId = async (req, res) => {
         ri.id AS image_id,
         ri.url AS image_url,
         ri."publicId" AS image_public_id,
+        ri.type AS image_type,
         ri."createdAt" AS image_created_at
 
       FROM "JobReport" jr
@@ -518,20 +529,19 @@ export const updateJobReport = async (req, res) => {
       });
     }
 
-    const imageFiles = req.files?.images || [];
+    const beforeFiles = req.files?.beforeImages || [];
+    const afterFiles = req.files?.afterImages || [];
     const signFile = req.files?.cus_sign?.[0];
 
-    const uploadedImages = await uploadImages(
-      imageFiles,
-      "techjob/job-reports"
-    );
+    const uploadedBefore = await uploadImages(beforeFiles, "techjob/job-reports/before");
+    const uploadedAfter = await uploadImages(afterFiles, "techjob/job-reports/after");
 
     const uploadedSignature = await uploadSingleImage(
       signFile,
       "techjob/job-reports/sign"
     );
 
-    const isImageUpdate = req.files?.images !== undefined;
+    const isImageUpdate = req.files?.beforeImages !== undefined || req.files?.afterImages !== undefined;
 
     let oldImagePublicIds = [];
     let oldSignaturePublicIds = [];
@@ -576,11 +586,21 @@ export const updateJobReport = async (req, res) => {
         `;
       }
 
-      if (uploadedImages.length > 0) {
+      if (uploadedBefore.length > 0) {
         await insertReportImages({
           tx,
           reportId: id,
-          uploadedImages,
+          uploadedImages: uploadedBefore,
+          type: "BEFORE"
+        });
+      }
+
+      if (uploadedAfter.length > 0) {
+        await insertReportImages({
+          tx,
+          reportId: id,
+          uploadedImages: uploadedAfter,
+          type: "AFTER"
         });
       }
 
@@ -634,6 +654,7 @@ export const updateJobReport = async (req, res) => {
           ri.id AS image_id,
           ri.url AS image_url,
           ri."publicId" AS image_public_id,
+          ri.type AS image_type,
           ri."createdAt" AS image_created_at
 
         FROM "JobReport" jr
@@ -709,6 +730,7 @@ export const deleteJobReport = async (req, res) => {
         ri.id AS image_id,
         ri.url AS image_url,
         ri."publicId" AS image_public_id,
+        ri.type AS image_type,
         ri."createdAt" AS image_created_at
       FROM "JobReport" jr
       LEFT JOIN "ReportImage" ri

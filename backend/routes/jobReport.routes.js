@@ -145,7 +145,8 @@ jobReportRouter.delete("/:id", deleteJobReport);
 jobReportRouter.post(
   "/",
   upload.fields([
-    { name: "images", maxCount: 10 },
+    { name: "beforeImages", maxCount: 10 },
+    { name: "afterImages", maxCount: 10 },
     { name: "cus_sign", maxCount: 1 },
   ]),
   verifyToken,
@@ -217,7 +218,8 @@ jobReportRouter.post(
 jobReportRouter.put(
   "/:id",
   upload.fields([
-    { name: "images", maxCount: 10 },
+    { name: "beforeImages", maxCount: 10 },
+    { name: "afterImages", maxCount: 10 },
     { name: "cus_sign", maxCount: 1 },
   ]),
   updateJobReport

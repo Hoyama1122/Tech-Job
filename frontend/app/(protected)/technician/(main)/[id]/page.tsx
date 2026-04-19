@@ -59,12 +59,6 @@ export default function Page({ params }: PageProps) {
   const [formBeforeImages, setFormBeforeImages] = useState<string[]>([]);
   const [formAfterImages, setFormAfterImages] = useState<string[]>([]);
 
-  const saveImagesToStore = (key: string, images: string[]) => {
-    const store = JSON.parse(localStorage.getItem(LS.IMAGES) || "{}");
-    store[key] = images;
-    localStorage.setItem(LS.IMAGES, JSON.stringify(store));
-  };
-
   const getDistanceMeters = (
     lat1: number,
     lon1: number,
@@ -99,12 +93,30 @@ export default function Page({ params }: PageProps) {
       setCurrentStatus(found.status);
       setAdminImages(found.images?.map((img: any) => img.url) || []);
 
+      // Get the existing report (using the clean structure from backend)
+      const report = found.technicianReport;
+      if (report) {
+        // Extract images by type (if your backend includes type in images nested in report)
+        // or just use storedBeforeImages/storedAfterImages logic
+        setStoredBeforeImages(
+          report.images
+            ?.filter((i: any) => i.type === "BEFORE" || !i.type)
+            .map((i: any) => i.url) || []
+        );
+        setStoredAfterImages(
+          report.images
+            ?.filter((i: any) => i.type === "AFTER")
+            .map((i: any) => i.url) || []
+        );
 
-      const report = found.reports?.[0];
-      setStoredBeforeImages(report?.images?.filter((i: any) => i.type === 'BEFORE' || !i.type).map((i: any) => i.url) || []);
-      setStoredAfterImages(report?.images?.filter((i: any) => i.type === 'AFTER').map((i: any) => i.url) || []);
-  
-    
+        setFormData({
+          detail: report.detail || "",
+          inspectionResults: report.inspectionResults || "",
+          repairOperations: report.repairOperations || "",
+          summaryOfOperatingResults: report.summaryOfOperatingResults || "",
+          customerSignature: report.customerSignature || "",
+        });
+      }
     } catch (error: any) {
       console.error("โหลดรายละเอียดงานไม่สำเร็จ:", error);
       setJob(null);
@@ -222,7 +234,8 @@ export default function Page({ params }: PageProps) {
         repair_operations: formData.repairOperations,
         inspection_results: formData.inspectionResults,
         summary: formData.summaryOfOperatingResults,
-        images: [...beforeFiles, ...afterFiles],
+        beforeImages: beforeFiles,
+        afterImages: afterFiles,
         cus_sign: signFile || undefined,
         start_time: job?.technicianReport?.startTime,
         end_time: new Date().toISOString(),

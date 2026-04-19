@@ -135,12 +135,18 @@ model JobImage {
   job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
+enum ReportImageType {
+  BEFORE
+  AFTER
+}
+
 model ReportImage {
-  id        Int       @id @default(autoincrement())
+  id        Int             @id @default(autoincrement())
   url       String?
   publicId  String?
   reportId  Int
-  createdAt DateTime  @default(now())
+  type      ReportImageType @default(BEFORE)
+  createdAt DateTime        @default(now())
 
   report    JobReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
 }

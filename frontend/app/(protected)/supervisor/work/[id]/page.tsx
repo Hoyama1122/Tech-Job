@@ -15,8 +15,9 @@ import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
 import { jobService } from "@/services/job.service";
 import { useAuthStore } from "@/store/useAuthStore";
-import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
+
 import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
+import { PDFWorkOrder } from "@/app/(protected)/admin/workorder/PDFWorkOrder";
 
 interface PageProps {
   params: Promise<{ id: string }>;

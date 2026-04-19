@@ -72,6 +72,7 @@ export const mapJobReportDetailRows = (rows = []) => {
         id: row.image_id,
         url: row.image_url,
         publicId: row.image_public_id ?? null,
+        type: row.image_type || "BEFORE",
         createdAt: row.image_created_at,
       })),
   };
@@ -133,6 +134,7 @@ export const mapJobReportListRows = (rows = []) => {
         id: row.image_id,
         url: row.image_url,
         publicId: row.image_public_id ?? null,
+        type: row.image_type || "BEFORE",
         createdAt: row.image_created_at,
       });
     }
@@ -243,15 +245,17 @@ export const insertReportImages = async ({
   tx,
   reportId,
   uploadedImages,
+  type = "BEFORE",
 }) => {
   for (const img of uploadedImages) {
     await tx.$executeRaw`
       INSERT INTO "ReportImage"
-      ("reportId", url, "publicId", "createdAt")
+      ("reportId", url, "publicId", "type", "createdAt")
       VALUES (
         ${reportId},
         ${img.url},
         ${img.publicId},
+        ${type}::"ReportImageType",
         NOW()
       )
     `;
