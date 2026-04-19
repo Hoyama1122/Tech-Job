@@ -3,7 +3,11 @@ import { prisma } from "../lib/prisma.js";
 export const getDepartments = async (req, res) => {
   try {
     const departments =
-      await prisma.$queryRaw`SELECT * FROM "Department" ORDER BY id ASC`;
+      await prisma.$queryRaw`
+        SELECT d.*, (SELECT COUNT(*)::int FROM "User" u WHERE u."departmentId" = d.id) as "totalUsers"
+        FROM "Department" d 
+        ORDER BY d.id ASC
+      `;
     res.json(departments);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -14,7 +18,12 @@ export const getDepartmentById = async (req, res) => {
   try {
     const { id } = req.params;
     const departments =
-      await prisma.$queryRaw`SELECT * FROM "Department" WHERE id = ${Number(id)} LIMIT 1`;
+      await prisma.$queryRaw`
+        SELECT d.*, (SELECT COUNT(*)::int FROM "User" u WHERE u."departmentId" = d.id) as "totalUsers"
+        FROM "Department" d 
+        WHERE d.id = ${Number(id)} 
+        LIMIT 1
+      `;
     const department = departments[0];
 
     if (!department) {
