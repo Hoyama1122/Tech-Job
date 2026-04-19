@@ -247,18 +247,27 @@ export const insertReportImages = async ({
   uploadedImages,
   type = "BEFORE",
 }) => {
-  for (const img of uploadedImages) {
-    await tx.$executeRaw`
-      INSERT INTO "ReportImage"
-      ("reportId", url, "publicId", "type", "createdAt")
-      VALUES (
-        ${reportId},
-        ${img.url},
-        ${img.publicId},
-        ${type}::"ReportImageType",
-        NOW()
-      )
-    `;
+  if (!uploadedImages || uploadedImages.length === 0) {
+    console.log(`No ${type} images to insert for report ${reportId}`);
+    return;
+  }
+
+  console.log(`Inserting ${uploadedImages.length} ${type} images for report ${reportId}`);
+
+  try {
+    for (const img of uploadedImages) {
+      await tx.reportImage.create({
+        data: {
+          reportId: Number(reportId),
+          url: img.url,
+          publicId: img.publicId,
+          type: type,
+        },
+      });
+    }
+  } catch (error) {
+    console.error(`Error inserting ${type} images for report ${reportId}:`, error);
+    throw error;
   }
 };
 

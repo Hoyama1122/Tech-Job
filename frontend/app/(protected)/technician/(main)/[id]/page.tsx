@@ -42,6 +42,7 @@ export default function Page({ params }: PageProps) {
 
   // technician form modal
   const [showFormModal, setShowFormModal] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   // data in modal
   const [formData, setFormData] = useState<TechnicianReportForm>({
@@ -158,10 +159,20 @@ export default function Page({ params }: PageProps) {
 
   //  start job
   const handleStartJob = async () => {
+    if (isStarting) return;
+
     if (!navigator.geolocation) {
       toast.error("ไม่รองรับการหาตำแหน่ง");
       return;
     }
+
+    if (!job?.latitude || !job?.longitude) {
+      toast.error("บันทึกพิกัดใบงานไม่สมบูรณ์ ไม่สามารถตรวจสอบระยะทางได้");
+      return;
+    }
+
+    setIsStarting(true);
+    const toastId = toast.loading("กำลังตรวจสอบพิกัด...");
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -172,8 +183,15 @@ export default function Page({ params }: PageProps) {
           job.longitude
         );
 
-        if (distance > 10000000) {
-          toast.error(`คุณอยู่ห่างจากจุดงาน ${Math.floor(distance)} เมตร`);
+        // Limit to 100km for example or keep it large but check if logic holds
+        if (distance > 500000) {
+          toast.update(toastId, {
+            render: `คุณอยู่ห่างจากจุดงานมากเกินไป (${Math.floor(distance / 1000)} กม.)`,
+            type: "error",
+            isLoading: false,
+            autoClose: 3000,
+          });
+          setIsStarting(false);
           return;
         }
 
@@ -181,15 +199,58 @@ export default function Page({ params }: PageProps) {
           await jobService.updateMyJobStatus(id, JobStatus.IN_PROGRESS);
           updateJobStateLocally(JobStatus.IN_PROGRESS, {
             ...(job.technicianReport || {}),
-            startTime: new Date().toISOString(),
+            start_time: new Date().toISOString(),
           });
-          toast.success("เริ่มงานสำเร็จ!");
+          toast.update(toastId, {
+            render: "เริ่มงานสำเร็จ!",
+            type: "success",
+            isLoading: false,
+            autoClose: 3000,
+          });
         } catch (err: any) {
-          toast.error(err.response?.data?.message || "ไม่สามารถเริ่มงานได้");
+          toast.update(toastId, {
+            render: err.response?.data?.message || "ไม่สามารถเริ่มงานได้",
+            type: "error",
+            isLoading: false,
+            autoClose: 3000,
+          });
+        } finally {
+          setIsStarting(false);
         }
       },
-      () => toast.error("เปิดพิกัดไม่สำเร็จ กรุณาอนุญาต Location")
+      (error) => {
+        console.error("Geolocation error:", error);
+        let msg = "หาพิกัดไม่สำเร็จ กรุณาอนุญาตเข้าถึงตำแหน่งและลองอีกครั้ง";
+        if (error.code === 1) msg = "กรุณาอนุญาตให้เข้าถึงตำแหน่งที่ตั้ง (Location Permission)";
+        if (error.code === 3) msg = "หาพิกัดล่าช้าเกินไป (Timeout) กรุณาลองใหม่อีกครั้งในที่โล่ง";
+        
+        toast.update(toastId, {
+          render: msg,
+          type: "error",
+          isLoading: false,
+          autoClose: 3000,
+        });
+        setIsStarting(false);
+      },
+      { enableHighAccuracy: false, timeout: 20000, maximumAge: 0 }
     );
+  };
+
+  const openFormModal = () => {
+    if (job?.technicianReport) {
+      setFormData({
+        detail: job.technicianReport.detail || "",
+        inspectionResults: job.technicianReport.inspectionResults || "",
+        repairOperations: job.technicianReport.repairOperations || "",
+        summaryOfOperatingResults:
+          job.technicianReport.summaryOfOperatingResults || "",
+        customerSignature: job.technicianReport.customerSignature || "",
+      });
+      // Load existing images if any
+      setFormBeforeImages(storedBeforeImages);
+      setFormAfterImages(storedAfterImages);
+    }
+    setShowFormModal(true);
   };
 
   //  sumbit report
@@ -213,18 +274,20 @@ export default function Page({ params }: PageProps) {
     setErrors({});
     
     try {
-      // Prepare files
+      // Filter only NEW images (base64) to upload. Ignore existing URLs.
       const beforeFiles = formBeforeImages
-        .map((base64, i) => dataURLtoFile(base64, `before_${i}.jpg`))
+        .filter((img) => img.startsWith("data:"))
+        .map((base64, i) => dataURLtoFile(base64, `before_${Date.now()}_${i}.jpg`))
         .filter((f): f is File => !!f);
       
       const afterFiles = formAfterImages
-        .map((base64, i) => dataURLtoFile(base64, `after_${i}.jpg`))
+        .filter((img) => img.startsWith("data:"))
+        .map((base64, i) => dataURLtoFile(base64, `after_${Date.now()}_${i}.jpg`))
         .filter((f): f is File => !!f);
 
-      const signFile = formData.customerSignature 
+      const signFile = formData.customerSignature && formData.customerSignature.startsWith("data:")
         ? dataURLtoFile(formData.customerSignature, "customer_sign.png")
-        : undefined;
+        : null;
 
       
       const payload: CreateReportPayload = {
@@ -237,24 +300,37 @@ export default function Page({ params }: PageProps) {
         beforeImages: beforeFiles,
         afterImages: afterFiles,
         cus_sign: signFile || undefined,
-        start_time: job?.technicianReport?.startTime,
+        start_time: job?.technicianReport?.start_time,
         end_time: new Date().toISOString(),
       };
 
       await reportService.createReport(payload);
       
-      updateJobStateLocally(JobStatus.IN_PROGRESS, { 
-        ...job.technicianReport, 
-        status: JobReportStatus.SUBMITTED 
-      });
-      setShowFormModal(false);
-      toast.success("บันทึกรายงานปิดงานสำเร็จ!");
+      // Refresh job data to see the new submitted status and all images
+      const freshJob = await jobService.getMyJobDetail(id);
+      const found = freshJob.job;
+      if (found) {
+        setJob(found);
+        setCurrentStatus(found.status);
+        if (found.technicianReport?.images) {
+          setStoredBeforeImages(
+            found.technicianReport.images
+              ?.filter((i: any) => i.type === "BEFORE")
+              .map((i: any) => i.url) || []
+          );
+          setStoredAfterImages(
+            found.technicianReport.images
+              ?.filter((i: any) => i.type === "AFTER")
+              .map((i: any) => i.url) || []
+          );
+        }
+      }
       
-      // Refresh data
-      fetchJobDetail();
+      setShowFormModal(false);
+      toast.success("ส่งรายงานสำเร็จ!");
     } catch (err: any) {
       console.error("Submit error:", err);
-      toast.error(err.response?.data?.message || "บันทึกรายงานไม่สำเร็จ");
+      toast.error(err.response?.data?.message || "ไม่สามารถส่งรายงานได้");
     }
   };
 
@@ -285,8 +361,11 @@ export default function Page({ params }: PageProps) {
 
   if (isLoading)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600 animate-pulse">กำลังโหลดข้อมูลงาน...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-gray-500 animate-pulse font-medium">
+          กำลังโหลดรายละเอียดงาน...
+        </p>
       </div>
     );
 
@@ -296,7 +375,7 @@ export default function Page({ params }: PageProps) {
         ไม่พบข้อมูลงานหมายเลข {id}
       </div>
     );
-
+    
   return (
     <div className="max-w-4xl mx-auto p-2">
       <HeaderSlugTechni job={job} getStatusBadge={getStatusBadge} />
@@ -319,12 +398,15 @@ export default function Page({ params }: PageProps) {
         </button>
       )}
 
-      {currentStatus === JobStatus.IN_PROGRESS && (!job.technicianReport?.status || job.technicianReport.status === JobReportStatus.REJECTED) && (
+      {currentStatus === JobStatus.IN_PROGRESS && 
+        (!job.technicianReport?.status || 
+         job.technicianReport.status === JobReportStatus.IN_PROGRESS || 
+         job.technicianReport.status === JobReportStatus.REJECTED) && (
         <button
-          onClick={() => setShowFormModal(true)}
-          className="fixed bottom-6 right-6 px-4 py-2.5 bg-green-600 text-white rounded-full shadow-lg font-medium flex items-center gap-2"
+          onClick={openFormModal}
+          className="fixed bottom-6 right-8 px-5 py-3 bg-green-600 text-white rounded-full shadow-2xl font-bold flex items-center gap-2 hover:bg-green-700 transition-all z-40 animate-bounce-subtle"
         >
-          ส่งรายงานปิดงาน
+          สรุปงานและส่งรายงาน
         </button>
       )}
 

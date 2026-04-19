@@ -28,214 +28,142 @@ export const createJobReport = async (req, res) => {
     } = req.body;
 
     if (!jobId) {
-      return res.status(400).json({
-        message: "กรุณาระบุ jobId",
-      });
+      return res.status(400).json({ message: "กรุณาระบุ jobId" });
     }
 
     const createdById = req.user?.id;
-
     if (!createdById) {
-      return res.status(401).json({
-        message: "กรุณาเข้าสู่ระบบก่อนส่งรายงาน",
-      });
+      return res.status(401).json({ message: "กรุณาเข้าสู่ระบบก่อนส่งรายงาน" });
     }
 
-    const rangeValidation = validateReportTimeRange({
-      start_time,
-      end_time,
-    });
-
+    const rangeValidation = validateReportTimeRange({ start_time, end_time });
     if (!rangeValidation.valid) {
-      return res.status(400).json({
-        message: rangeValidation.message,
-      });
+      return res.status(400).json({ message: rangeValidation.message });
     }
 
     const beforeFiles = req.files?.beforeImages || [];
     const afterFiles = req.files?.afterImages || [];
     const signFile = req.files?.cus_sign?.[0];
 
-    const uploadedBefore = await uploadImages(beforeFiles, "techjob/job-reports/before");
-    const uploadedAfter = await uploadImages(afterFiles, "techjob/job-reports/after");
+    // Upload to Cloudinary
+    const [uploadedBefore, uploadedAfter, uploadedSignature] = await Promise.all([
+      uploadImages(beforeFiles, "techjob/job-reports/before"),
+      uploadImages(afterFiles, "techjob/job-reports/after"),
+      uploadSingleImage(signFile, "techjob/job-reports/sign")
+    ]);
 
-    const uploadedSignature = await uploadSingleImage(
-      signFile,
-      "techjob/job-reports/sign"
-    );
+    const reportResult = await prisma.$transaction(async (tx) => {
+      // 1. Verify Job existence
+      const job = await tx.job.findUnique({
+        where: { id: Number(jobId) }
+      });
 
-    const report = await prisma.$transaction(async (tx) => {
-      const existingJobRows = await tx.$queryRaw`
-        SELECT id
-        FROM "Job"
-        WHERE id = ${Number(jobId)}
-        LIMIT 1;
-      `;
-
-      if (!existingJobRows.length) {
+      if (!job) {
         throw new Error("ไม่พบใบงาน");
       }
 
-      // Check if an IN_PROGRESS report already exists for this technician
-      const existingInProgress = await tx.$queryRaw`
-        SELECT id FROM "JobReport"
-        WHERE "jobId" = ${Number(jobId)}
-        AND "createdById" = ${Number(createdById)}
-        AND status = 'IN_PROGRESS'
-        LIMIT 1;
-      `;
+      // 2. Check for existing 'IN_PROGRESS' report by this user
+      const existingReport = await tx.jobReport.findFirst({
+        where: {
+          jobId: Number(jobId),
+          createdById: Number(createdById),
+          status: 'IN_PROGRESS'
+        }
+      });
 
-      let reportId;
+      let report;
+      const reportData = {
+        status: (status || 'SUBMITTED'),
+        start_time: start_time ? new Date(start_time) : (existingReport?.start_time || new Date()),
+        end_time: end_time ? new Date(end_time) : new Date(),
+        detail: detail || null,
+        repair_operations: repair_operations || null,
+        inspection_results: inspection_results || null,
+        summary: summary || null,
+        cus_sign: uploadedSignature?.url || existingReport?.cus_sign || null,
+        updatedAt: new Date(),
+      };
 
-      if (existingInProgress.length > 0) {
-        reportId = existingInProgress[0].id;
-        await tx.$executeRaw`
-          UPDATE "JobReport"
-          SET
-            "status" = ${status ?? "SUBMITTED"},
-            "end_time" = ${end_time ? new Date(end_time) : new Date()},
-            "detail" = ${detail ?? null},
-            "repair_operations" = ${repair_operations ?? null},
-            "inspection_results" = ${inspection_results ?? null},
-            "summary" = ${summary ?? null},
-            "cus_sign" = ${uploadedSignature?.secure_url || uploadedSignature?.url || null},
-            "updatedAt" = NOW()
-          WHERE id = ${reportId};
-        `;
+      if (existingReport) {
+        // Update existing draft
+        report = await tx.jobReport.update({
+          where: { id: existingReport.id },
+          data: reportData,
+        });
       } else {
-        const insertedReports = await tx.$queryRaw`
-          INSERT INTO "JobReport" (
-            "jobId",
-            "status",
-            "start_time",
-            "end_time",
-            "detail",
-            "repair_operations",
-            "inspection_results",
-            "summary",
-            "cus_sign",
-            "createdById",
-            "createdAt",
-            "updatedAt"
-          )
-          VALUES (
-            ${Number(jobId)},
-            ${status ?? "SUBMITTED"},
-            ${start_time ? new Date(start_time) : null},
-            ${end_time ? new Date(end_time) : new Date()},
-            ${detail ?? null},
-            ${repair_operations ?? null},
-            ${inspection_results ?? null},
-            ${summary ?? null},
-            ${uploadedSignature?.secure_url || uploadedSignature?.url || null},
-            ${Number(createdById)},
-            NOW(),
-            NOW()
-          )
-          RETURNING id;
-        `;
-        reportId = insertedReports?.[0]?.id;
+        // Create new report
+        report = await tx.jobReport.create({
+          data: {
+            ...reportData,
+            jobId: Number(jobId),
+            createdById: Number(createdById),
+            createdAt: new Date(),
+          },
+        });
       }
 
-      if (!reportId) {
-        throw new Error("ไม่สามารถสร้างรายงานได้");
-      }
-
+      // 3. Insert Images
       await insertReportImages({
         tx,
-        reportId,
+        reportId: report.id,
         uploadedImages: uploadedBefore,
         type: "BEFORE"
       });
 
       await insertReportImages({
         tx,
-        reportId,
+        reportId: report.id,
         uploadedImages: uploadedAfter,
         type: "AFTER"
       });
 
-      // Update Job status to SUBMITTED
-      await tx.$executeRaw`
-        UPDATE "Job"
-        SET status = 'SUBMITTED',
-            "updatedAt" = NOW()
-        WHERE id = ${Number(jobId)};
-      `;
+      // 4. Update Job Status to SUBMITTED if status matches
+      if (report.status === 'SUBMITTED') {
+        await tx.job.update({
+          where: { id: Number(jobId) },
+          data: { 
+            status: 'SUBMITTED',
+            updatedAt: new Date()
+          }
+        });
+      }
 
-      const rows = await tx.$queryRaw`
-        SELECT
-          jr.id,
-          jr."jobId",
-          jr.status,
-          jr.start_time,
-          jr.end_time,
-          jr.detail,
-          jr.repair_operations,
-          jr.inspection_results,
-          jr.summary,
-          jr.cus_sign,
-          jr."createdById",
-          jr."createdAt",
-          jr."updatedAt",
+      // 5. Return full report details
+      const reportFull = await tx.jobReport.findUnique({
+        where: { id: report.id },
+        include: {
+          images: true,
+          createdBy: {
+            include: { profile: true }
+          },
+          job: {
+            include: {
+              department: true,
+              createdBy: { include: { profile: true } }
+            }
+          }
+        }
+      });
 
-          j.id AS job_id,
-          j.title AS job_title,
-          j.description AS job_description,
-          j.status AS job_status,
-          j.start_available_at,
-          j.end_available_at,
-          j.latitude,
-          j.longitude,
-          j.location_name,
-
-          d.name AS department_name,
-
-          cb.id AS created_by_id,
-          cb.empno AS created_by_empno,
-          cbp.firstname AS created_by_firstname,
-          cbp.lastname AS created_by_lastname,
-
-          ru.id AS report_user_id,
-          ru.empno AS report_user_empno,
-          rup.firstname AS report_user_firstname,
-          rup.lastname AS report_user_lastname,
-
-          ri.id AS image_id,
-          ri.url AS image_url,
-          ri."publicId" AS image_public_id,
-          ri.type AS image_type,
-          ri."createdAt" AS image_created_at
-
-        FROM "JobReport" jr
-        LEFT JOIN "Job" j
-          ON j.id = jr."jobId"
-        LEFT JOIN "Department" d
-          ON d.id = j."departmentId"
-
-        LEFT JOIN "User" cb
-          ON cb.id = j."createdById"
-        LEFT JOIN "Profile" cbp
-          ON cbp."userId" = cb.id
-
-        LEFT JOIN "User" ru
-          ON ru.id = jr."createdById"
-        LEFT JOIN "Profile" rup
-          ON rup."userId" = ru.id
-
-        LEFT JOIN "ReportImage" ri
-          ON ri."reportId" = jr.id
-        WHERE jr.id = ${reportId}
-        ORDER BY ri.id ASC;
-      `;
-
-      return mapJobReportDetailRows(rows);
+      // Map to camelCase for frontend consistency
+      return {
+        ...reportFull,
+        repairOperations: reportFull.repair_operations,
+        inspectionResults: reportFull.inspection_results,
+        summaryOfOperatingResults: reportFull.summary,
+        customerSignature: reportFull.cus_sign,
+        reportedBy: {
+          id: reportFull.createdBy?.id,
+          fullname: `${reportFull.createdBy?.profile?.firstname || ""} ${reportFull.createdBy?.profile?.lastname || ""}`.trim()
+        }
+      };
     });
 
     return res.json({
-      message: "สร้างรายงานสำเร็จ",
-      report,
+      message: "สรุปงานสำเร็จ",
+      report: reportResult,
     });
+
   } catch (error) {
     console.error("createJobReport error:", error);
     return res.status(500).json({

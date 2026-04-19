@@ -42,14 +42,14 @@ export default function Sidebar({ job }: any) {
             >
               {/* Avatar */}
               <div className="h-11 w-11 rounded-full bg-primary/80 flex items-center justify-center text-white font-semibold shadow">
-                {job.supervisor.name?.charAt(0)}
+                {(job.supervisor.fullname || job.supervisor.name || "?").charAt(0)}
               </div>
 
               {/* Info */}
               <div className="flex-1 flex flex-col gap-1">
                 {/* name + department */}
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold text-gray-900">{job.supervisor.name}</p>
+                  <p className="font-semibold text-gray-900">{job.supervisor.fullname || job.supervisor.name}</p>
 
                   <span className="flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-600">
                     {getDepartmentIcon(job.supervisor.department)}
@@ -61,12 +61,12 @@ export default function Sidebar({ job }: any) {
                 <div className="flex flex-wrap gap-4 mt-1 text-sm text-gray-600">
                   <p className="flex items-center gap-1">
                     <Phone size={14} className="text-primary" />
-                    {job.supervisor.phone}
+                    {job.supervisor.phone || "-"}
                   </p>
 
                   <p className="flex items-center gap-1">
                     <Mail size={14} className="text-primary" />
-                    {job.supervisor.email}
+                    {job.supervisor.email || "-"}
                   </p>
                 </div>
               </div>
@@ -86,14 +86,14 @@ export default function Sidebar({ job }: any) {
             >
               {/* Avatar */}
               <div className="h-11 w-11 rounded-full bg-primary/80 flex items-center justify-center text-white font-semibold shadow">
-                {t.name?.charAt(0)}
+                {(t.fullname || t.name || "?").charAt(0)}
               </div>
 
               {/* Info */}
               <div className="flex-1 flex flex-col gap-1">
                 {/* name + department */}
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold text-gray-900">{t.name}</p>
+                  <p className="font-semibold text-gray-900">{t.fullname || t.name}</p>
 
                   <span className="flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-600">
                     {getDepartmentIcon(t.department)}
@@ -105,12 +105,12 @@ export default function Sidebar({ job }: any) {
                 <div className="flex flex-wrap gap-4 mt-1 text-sm text-gray-600">
                   <p className="flex items-center gap-1">
                     <Phone size={14} className="text-primary" />
-                    {t.phone}
+                    {t.phone || "-"}
                   </p>
 
                   <p className="flex items-center gap-1">
                     <Mail size={14} className="text-primary" />
-                    {t.email}
+                    {t.email || "-"}
                   </p>
                 </div>
               </div>

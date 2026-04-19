@@ -5,13 +5,17 @@ interface EvidenceCardProps {
 }
 
 export default function EvidenceCard({ job }: EvidenceCardProps) {
-  const adminImages = job?.images?.map((item: any) => item.url).filter(Boolean) || [];
-  const latestReport = job?.reports?.[0] || null;
+  const adminImages =
+    job?.images?.map((item: any) => item.url).filter(Boolean) || [];
+  const latestReport = job?.technicianReport || job?.reports?.[0] || null;
 
   const hasAdmin = adminImages.length > 0;
-  const hasCustomerSign = !!latestReport?.cus_sign;
+  const hasCustomerSign = !!(
+    latestReport?.customerSignature || latestReport?.cus_sign
+  );
 
-  const hasAnyEvidence = hasAdmin || hasCustomerSign;
+  const hasAnyEvidence =
+    hasAdmin || hasCustomerSign || latestReport?.images?.length > 0;
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6">
@@ -44,15 +48,63 @@ export default function EvidenceCard({ job }: EvidenceCardProps) {
             </div>
           )}
 
+          {latestReport?.images?.length > 0 && (
+            <div className="space-y-6">
+              {latestReport.images.some(
+                (img: any) => img.type === "BEFORE",
+              ) && (
+                <div>
+                  <p className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    รูปก่อนทำงาน (ช่าง)
+                  </p>
+                  <div className="flex gap-4 flex-wrap">
+                    {latestReport.images
+                      .filter((img: any) => img.type === "BEFORE")
+                      .map((img: any, i: number) => (
+                        <img
+                          key={i}
+                          src={img.url}
+                          alt={`before-image-${i + 1}`}
+                          className="w-36 h-36 object-cover shadow rounded-lg cursor-pointer hover:opacity-90 transition-opacity border"
+                          onClick={() => window.open(img.url, "_blank")}
+                        />
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {latestReport.images.some((img: any) => img.type === "AFTER") && (
+                <div>
+                  <p className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    รูปหลังทำงาน (ช่าง)
+                  </p>
+                  <div className="flex gap-4 flex-wrap">
+                    {latestReport.images
+                      .filter((img: any) => img.type === "AFTER")
+                      .map((img: any, i: number) => (
+                        <img
+                          key={i}
+                          src={img.url}
+                          alt={`after-image-${i + 1}`}
+                          className="w-36 h-36 object-cover shadow rounded-lg cursor-pointer hover:opacity-90 transition-opacity border"
+                          onClick={() => window.open(img.url, "_blank")}
+                        />
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {hasCustomerSign && (
-            <div className="flex items-start gap-8 flex-wrap">
+            <div className="flex items-start gap-8 flex-wrap pt-4 border-t border-gray-100">
               <div>
                 <p className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <Signature className="w-6 h-6 text-green-700" />
                   ลายเซ็นลูกค้า
                 </p>
                 <img
-                  src={latestReport.cus_sign}
+                  src={latestReport.customerSignature || latestReport.cus_sign}
                   alt="customer-signature"
                   className="w-56 h-auto object-contain bg-gray-50 rounded-lg p-3 shadow"
                 />
