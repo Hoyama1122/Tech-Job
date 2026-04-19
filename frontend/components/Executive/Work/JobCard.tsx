@@ -114,7 +114,7 @@ export default function JobCard({ job }: Props) {
 
      
         <Link
-          href={`/executive/work/${job.JobId}`}
+          href={`/executive/work/${job.id}`}
           className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-md hover:shadow-lg mt-auto"
         >
           ดูรายละเอียด

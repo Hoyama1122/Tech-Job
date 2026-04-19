@@ -7,11 +7,15 @@ import Summary from '@/components/Dashboard/Summary/Summary';
 import TeamMap from '@/components/Supervisor/Map/MapContainer';
 import { ClipboardList, Clock, File, FileClock, Filter, MapPin, Users } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react'
+import { useJobStore } from '@/store/useJobStore';
+import { JobStatus, JobStatusThai, getStatusThai } from '@/types/job';
 
 
 
 export default function MainSupervisor() {
-  const [card, setCard] = useState([]);
+  const card = useJobStore((state) => state.jobs);
+  const storeLoading = useJobStore((state) => state.isLoading);
+  const fetchJobs = useJobStore((state) => state.fetchJobs);
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -20,64 +24,37 @@ export default function MainSupervisor() {
   const [detail, setDetail] = useState(null);
   const [supervisorsDepartment, setSupervisorsDepartment] = useState(null);
 
-
   useEffect(() => {
-    try {
+    const loadData = async () => {
       setIsLoading(true);
+      try {
+        await fetchJobs();
 
-      const cardData = localStorage.getItem("CardWork");
-      const usersData = localStorage.getItem("Users");
-      const auth = localStorage.getItem("auth-storage");
+        const usersData = localStorage.getItem("Users");
+        if (usersData) {
+          const parsedUsersData = JSON.parse(usersData);
+          setUsers(parsedUsersData);
 
-      if (!cardData || !usersData) {
-        console.warn("ไม่พบข้อมูลใน loacalStorage")
-        setCard([]);
-        setUsers([]);
-        return;
+          const auth = localStorage.getItem("auth-storage");
+          if (auth) {
+            const parsedAuth = JSON.parse(auth);
+            const currentSupervisor = parsedUsersData.find(
+              (u: any) => String(u.id) === String(parsedAuth.state.userId)
+            );
+            if (currentSupervisor) {
+              setSupervisorsDepartment(currentSupervisor.department);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("โหลดข้อมูลล้มเหลว:", error);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      const parsedCardsData = JSON.parse(cardData);
-      const parsedUsersData = JSON.parse(usersData);
-      const parsedAuth = auth ? JSON.parse(auth) : []
-
-      const currentSupervisor = parsedUsersData.find(
-        (u: any) => String(u.id) === String(parsedAuth.state.userId)
-      )
-
-      if (currentSupervisor) {
-        setSupervisorsDepartment(currentSupervisor.department);
-      }
-
-      const supervisorJobs = parsedCardsData.filter((job: any) =>
-        String(job.supervisorId) === String(parsedAuth.state.userId)
-      );
-
-      setUsers(parsedUsersData);
-
-      const joined = supervisorJobs.map((job: any) => {
-        const supervisor = parsedUsersData.find(
-          (u: any) => u.role === "supervisor" && String(u.id) === String(job.supervisorId)
-        );
-
-        const technicians = parsedUsersData.filter(
-          (u: any) => u.role === "technician" &&
-            Array.isArray(job.technicianId) &&
-            job.technicianId.some((tid: any) => String(tid) === String(u.id))
-        );
-
-        return {
-          ...job,
-          supervisor: supervisor || null,
-          technicians: technicians || [],
-        };
-      });
-      setCard(joined);
-    } catch (error) {
-      console.error("โหลดข้อมูลล้มเหลว:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    loadData();
+  }, [fetchJobs]);
 
   const filteredCard = useMemo(() => {
     return card.filter((job: any) => {
@@ -87,10 +64,10 @@ export default function MainSupervisor() {
       const searchLower = searchTerm.toLowerCase().trim();
       const matchesSearch =
         !searchTerm ||
-        job.title.toLowerCase().includes(searchLower) ||
-        job.description.toLowerCase().includes(searchLower) ||
-        job.JobId.toLowerCase().includes(searchLower) ||
-        job.technicians?.some((t: any) => t.name.toLowerCase().includes(searchLower));
+        job.title?.toLowerCase().includes(searchLower) ||
+        job.description?.toLowerCase().includes(searchLower) ||
+        job.JobId?.toLowerCase().includes(searchLower) ||
+        job.technicians?.some((t: any) => t.name?.toLowerCase().includes(searchLower));
 
       return matchesStatus && matchesSearch;
 
@@ -105,7 +82,11 @@ export default function MainSupervisor() {
 
     const technicians = users.filter((u: any) => u.role === "technician").length;
 
-    const waitingJobs = card.filter((j: any) => j.status === "รอการตรวจสอบ").length;
+    const waitingJobs = card.filter((j: any) => {
+      const s = j.status?.toUpperCase();
+      return s === JobStatus.SUBMITTED || s === JobStatus.PENDING ||
+        j.status === "ส่งงานแล้ว" || j.status === "รอการตรวจสอบ";
+    }).length;
 
     const inProgressJobs = card.filter((j: any) => j.status === "กำลังทำงาน").length;
 
@@ -231,16 +212,15 @@ export default function MainSupervisor() {
                 <Filter className='w-5 h-5 text-gray-500' />
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as "all")}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                   className='px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all bg-white'
                 >
                   <option value="all">ทุกสถานะ</option>
-                  <option value="สำเร็จ">สำเร็จ</option>
-                  <option value="กำลังทำงาน">กำลังทำงาน</option>
-                  <option value="รอการตรวจสอบ">รอการตรวจสอบ</option>
-                  <option value="รอการดำเนินงาน">รอการดำเนินงาน</option>
-                  <option value="ตีกลับ">ตีกลับ</option>
-
+                  {Object.values(JobStatus).map((status) => (
+                    <option key={status} value={JobStatusThai[status as JobStatus]}>
+                      {JobStatusThai[status as JobStatus]}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -269,7 +249,7 @@ export default function MainSupervisor() {
           </div>
 
         </div>
-        
+
         {/* Right Bar */}
         <div>
           {/* Map */}
@@ -280,7 +260,7 @@ export default function MainSupervisor() {
             <TeamMap jobs={filteredCard} users={users} />
           </div>
 
-            {/* log */}
+          {/* log */}
           <div>
             {/* <Activities/> */}
           </div>

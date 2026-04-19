@@ -2,26 +2,29 @@ import formatThaiDateTime from "@/lib/Format/DateFormatThai";
 import { ChevronRight, FileText, MapPin, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
 
 const Jobs = ({ displayJobs, activeTab }) => {
   const getStatusBadge = (status: string) => {
-    const styles = {
-      กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      สำเร็จ: "bg-green-100 text-green-700 border-green-200",
-      รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
-      รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
-       ตีกลับ: "bg-red-100 text-red-700 border-red-200",
-    };
+    const s = status?.toUpperCase();
+    const displayStatus = getStatusThai(status);
 
-    const defaultStyle = "bg-gray-100 text-gray-700 border-gray-200";
+    let style = "bg-gray-100 text-gray-700 border-gray-200";
+    if (s === JobStatus.PENDING || status === "รอการดำเนินงาน")
+      style = "bg-blue-100 text-blue-700 border-blue-200";
+    else if (s === JobStatus.IN_PROGRESS || status === "กำลังทำงาน")
+      style = "bg-yellow-100 text-yellow-700 border-yellow-200";
+    else if (s === JobStatus.SUBMITTED || status === "รอการตรวจสอบ")
+      style = "bg-indigo-100 text-indigo-700 border-indigo-200";
+    else if (s === JobStatus.COMPLETED || status === "สำเร็จ") style = "bg-green-100 text-green-700 border-green-200";
+    else if (s === JobStatus.REJECTED || status === "ตีกลับ") style = "bg-red-100 text-red-700 border-red-200";
+    else if (status === "รอการดำเนินงาน") style = "bg-orange-100 text-orange-700 border-orange-200";
 
     return (
       <span
-        className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-          styles[status] || defaultStyle
-        }`}
+        className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${style}`}
       >
-        {status}
+        {displayStatus}
       </span>
     );
   };
@@ -30,7 +33,7 @@ const Jobs = ({ displayJobs, activeTab }) => {
   return (
     <div className="space-y-3">
       {displayJobs.length === 0 ? (
-        <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-gray-200">
+        <div className="bg-white rounded-[8px] p-8 text-center shadow-sm border border-gray-200">
           <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">
             {activeTab === "today" ? "ไม่มีงานในวันนี้" : "ไม่พบงานที่มอบหมาย"}
@@ -40,7 +43,7 @@ const Jobs = ({ displayJobs, activeTab }) => {
         displayJobs.map((job: any) => (
           <div
             key={job.id}
-            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer"
+            className="bg-white rounded-[8px] p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer"
             onClick={() => router.push(`/technician/${job.JobId}`)}
           >
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -76,7 +79,7 @@ const Jobs = ({ displayJobs, activeTab }) => {
                 <div className="flex items-center gap-1 mt-1">
                   <Users className="w-4 h-4 text-gray-400" />
                   <span className="text-xs text-gray-500">
-                    {job.technicianId?.length} ช่าง
+                    {(job.technicians?.length || job.technicianId?.length || 0)} ช่าง
                   </span>
                 </div>
                 <div className="flex items-center">

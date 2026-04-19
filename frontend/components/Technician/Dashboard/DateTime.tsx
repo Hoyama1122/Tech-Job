@@ -3,7 +3,7 @@ import React from "react";
 
 const DateTime = ({ time }) => {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-lg">
+    <div className="bg-white rounded-[8px] p-6 shadow-lg">
       <div className="flex items-start justify-between h-full">
         <div>
           <p className="text-gray-500 text-sm mb-1">

@@ -31,9 +31,9 @@ const JobsDetail = ({ job, adminImages }) => {
             ระยะเวลาการทำงาน
           </h1>
           <div className="flex space-x-2">
-            <p>{DateFormatWork(job.dateRange?.startAt)}</p>
+            <p>{DateFormatWork(job.start_available_at)}</p>
             <p>-</p>
-            <p>{DateFormatWork(job.dateRange?.endAt)}</p>
+            <p>{DateFormatWork(job.end_available_at)}</p>
           </div>
         </div>
         {/* Admin Images */}

@@ -10,24 +10,29 @@ import jobRouter from "./routes/job.routes.js";
 import jobReportRouter from "./routes/jobReport.routes.js";
 import userRouter from "./routes/user.routes.js";
 import routerProfile from "./routes/profile.routes.js";
-import chatRouter from "./routes/chat.routes.js";
 import { swaggerSpec } from "./swagger.js";
-const PORT = process.env.PORT || 5000;
-
 import { createServer } from "http";
-import setupSocket from "./lib/socket.js";
+import { initSocket } from "./lib/socket.js";
 
+const PORT = process.env.PORT || 5000;
 const app = express();
 const httpServer = createServer(app);
 
-// Initialize Socket.io
-setupSocket(httpServer);
+// Initialize Socket.IO
+initSocket(httpServer);
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ระบุ Method ให้ชัดเจน
-    allowedHeaders: ["Content-Type", "Authorization"], // ระบุ Header ที่อนุญาต
+    origin: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: [
+      "Content-Type", 
+      "Authorization", 
+      "X-Requested-With", 
+      "Accept", 
+      "Origin",
+      "ngrok-skip-browser-warning"
+    ],
     preflightContinue: false,
     optionsSuccessStatus: 204,
     credentials: true,
@@ -49,7 +54,6 @@ app.use("/api/jobs", jobRouter);
 app.use("/api/job-reports", jobReportRouter);
 app.use("/api/users", userRouter);
 app.use("/api/profile", routerProfile);
-app.use("/api/chat", chatRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 httpServer.listen(PORT, () => {

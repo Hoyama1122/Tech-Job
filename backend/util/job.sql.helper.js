@@ -20,6 +20,12 @@ export const mapJobsRows = (rows = [], formatJobId) => {
         start_available_at: row.start_available_at,
         end_available_at: row.end_available_at,
         createdAt: row.createdAt,
+        location_name: row.location_name,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        customer: {
+            address: row.location_name || "ไม่ระบุสถานที่"
+        },
         supervisor: null,
         technicians: [], // del
       });
@@ -50,6 +56,7 @@ export const mapJobsRows = (rows = [], formatJobId) => {
         job.technicians.push({
           id: row.assignment_user_id,
           name: fullName,
+          phone: row.assignment_user_phone,
         });
       }
     }
@@ -152,6 +159,12 @@ export const mapJobDetailRows = (rows = [], formatJobId) => {
         status: row.report_status,
         detail: row.report_detail,
         summary: row.report_summary,
+        repair_operations: row.report_repair_operations,
+        inspection_results: row.report_inspection_results,
+        cus_sign: row.report_cus_sign,
+        rejectReason: row.report_reject_reason,
+        start_time: row.report_start_time,
+        end_time: row.report_end_time,
         createdAt: row.report_created_at,
       });
     }

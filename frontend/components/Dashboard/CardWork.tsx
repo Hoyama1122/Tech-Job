@@ -2,6 +2,7 @@
 import { Eye } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export const getBadgeStatusClass = (status): string => {
   const statusMap = {
@@ -20,22 +21,14 @@ export const getStatusClass = (status: JobStatus): string => {
 };
 
 const CardWork = ({ card }) => {
-  const [role, setRole] = useState<string | null>(null);
+  const { user } = useAuthStore();
+  const getDetailPath = (id: number) => {
+    if (!user?.role) return "#";
+    return `/${user.role.toLowerCase()}/work/${id}`;
+  };
   
 
-  useEffect(() => {
-    try {
-      const auth = localStorage.getItem("auth-storage");
-      if (auth) {
-        const parsedAuth = JSON.parse(auth);
-        if (parsedAuth?.state?.role) {
-          setRole(parsedAuth.state.role);
-        }
-      }
-    } catch (error) {
-      console.error("Error parsing auth storage:", error);
-    }
-  }, []);
+
 
   const DesktopView = () => (
     <div className="hidden md:block overflow-x-auto">
@@ -100,7 +93,7 @@ const CardWork = ({ card }) => {
                 <td className="px-4 py-2 text-sm text-gray-700 text-center">
 
                   <Link
-                    href={`/${role}/work/${work.JobId}`}
+                    href={getDetailPath(work.id)}
                     className="flex items-center justify-center">
                     <Eye className="w-6 h-6 text-primary cursor-pointer" />
                   </Link>
@@ -127,9 +120,10 @@ const CardWork = ({ card }) => {
     <div className="md:hidden space-y-3 mt-4">
       {card.length > 0 ? (
         card.map((work) => (
-          <div
+          <Link
+            href={getDetailPath(work.id)}
             key={work.id}
-            className="bg-white p-4 rounded-lg shadow border border-gray-200"
+            className="block bg-white p-4 rounded-lg shadow border border-gray-200 hover:border-primary/50 transition-colors"
           >
             <div className="flex justify-between items-start mb-3">
               <span className="font-bold text-sm text-primary">
@@ -161,7 +155,7 @@ const CardWork = ({ card }) => {
                 </span>
               </div>
             </div>
-          </div>
+          </Link>
         ))
       ) : (
         <div className="text-center text-gray-400 py-8 text-sm italic">

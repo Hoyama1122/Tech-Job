@@ -16,6 +16,7 @@ import {
   BarChart3,
   Warehouse,
   Briefcase,
+  Map as MapIcon,
 } from "lucide-react";
 
 type NavItem = {
@@ -26,6 +27,7 @@ type NavItem = {
 
 export const navLinkAdmin: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: HomeIcon },
+  { name: "ภาพรวมแผนที่", path: "/map", icon: MapIcon },
   { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck },
   { name: "สร้างใบงาน", path: "/add-work", icon: FileText },
   { name: "โปรไฟล์", path: "/profile", icon: Users2 },
@@ -40,6 +42,7 @@ export const navLinkTechnician: NavItem[] = [
 
 export const navLinkSupervisor: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
+  { name: "ภาพรวมแผนที่", path: "/map", icon: MapIcon },
   { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck },
   // { name: "มอบหมายงาน", path: "/assign", icon: UserCog },
   // { name: "ตรวจงาน", path: "/review", icon: Wrench },
@@ -59,6 +62,7 @@ export const navLinkExecutive: NavItem[] = [
 ];
 export const navLinkSuperadmin: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
+  { name: "ภาพรวมแผนที่", path: "/map", icon: MapIcon },
   { name: "ผู้ใช้งาน", path: "/user", icon: Users },
   { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck },
   { name: "สร้างใบงาน", path: "/add-work", icon: FileText },

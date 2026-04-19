@@ -1,3 +1,4 @@
+// frontend/components/Supervisor/ReviewChart.tsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -14,36 +15,32 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { CardWorkTypes } from "@/lib/Mock/Jobs";
 import { ClipboardList, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { jobService } from "@/services/job.service";
+import { JobStatus, JobReportStatus } from "@/types/job";
 
 // สีสำหรับกราฟ Pie
-const COLORS = ["#00C49F", "#FFBB28", "#FF8042", "#FF0000"];
+const COLORS = ["#22c55e", "#6366f1", "#f97316", "#ef4444", "#3b82f6"];
 
 export default function ReviewCharts() {
-  const [jobs, setJobs] = useState<CardWorkTypes[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // โหลดข้อมูล
   useEffect(() => {
-    try {
-      const cardData = localStorage.getItem("CardWork");
-      const authData = localStorage.getItem("auth-storage");
-      
-      if (cardData && authData) {
-        const allJobs = JSON.parse(cardData);
-        const auth = JSON.parse(authData);
-        const supervisorId = auth.state?.userId;
-
-        // กรองเฉพาะงานของ Supervisor คนนี้
-        const myJobs = allJobs.filter((j: any) => String(j.supervisorId) === String(supervisorId));
-        setJobs(myJobs);
+    const fetchJobs = async () => {
+      try {
+        const response = await jobService.getJobs();
+        if (response && response.jobs) {
+          setJobs(response.jobs);
+        }
+      } catch (error) {
+        console.error("Load data error", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Load data error", error);
-    } finally {
-      setLoading(false);
-    }
+    };
+    fetchJobs();
   }, []);
 
   // --- คำนวณข้อมูล ---
@@ -55,13 +52,13 @@ export default function ReviewCharts() {
 
     return {
       total: todaysJobs.length,
-      completed: todaysJobs.filter((j) => j.status === "สำเร็จ").length,
-      pending: todaysJobs.filter((j) => j.status === "รอการตรวจสอบ").length,
-      working: todaysJobs.filter((j) => j.status === "กำลังทำงาน").length,
+      completed: todaysJobs.filter((j) => j.status === JobStatus.COMPLETED).length,
+      pending: todaysJobs.filter((j) => j.reports && j.reports[0]?.status === JobReportStatus.SUBMITTED).length,
+      working: todaysJobs.filter((j) => j.status === JobStatus.IN_PROGRESS).length,
     };
   }, [jobs]);
 
-  // 2. ข้อมูลต่อเดือน (Monthly) - นับจำนวนงานในแต่ละเดือนของปีปัจจุบัน
+  // 2. ข้อมูลต่อเดือน (Monthly)
   const monthlyData = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const months = [
@@ -69,7 +66,6 @@ export default function ReviewCharts() {
       "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
     ];
     
-    // สร้างโครงข้อมูลเริ่มต้น
     const data = months.map(m => ({ name: m, งานทั้งหมด: 0, สำเร็จ: 0 }));
 
     jobs.forEach((job) => {
@@ -77,7 +73,7 @@ export default function ReviewCharts() {
       if (date.getFullYear() === currentYear) {
         const monthIdx = date.getMonth();
         data[monthIdx].งานทั้งหมด += 1;
-        if (job.status === "สำเร็จ") {
+        if (job.status === JobStatus.COMPLETED) {
           data[monthIdx].สำเร็จ += 1;
         }
       }
@@ -92,25 +88,29 @@ export default function ReviewCharts() {
       สำเร็จ: 0,
       รอตรวจสอบ: 0,
       กำลังทำ: 0,
-      ตีกลับ: 0
+      ตีกลับ: 0,
+      รอมอบหมาย: 0
     };
 
     jobs.forEach(j => {
-      if (j.status === "สำเร็จ") statusCount.สำเร็จ++;
-      else if (j.status === "รอการตรวจสอบ") statusCount.รอตรวจสอบ++;
-      else if (j.status === "กำลังทำงาน") statusCount.กำลังทำ++;
-      else if (j.status === "ตีกลับ") statusCount.ตีกลับ++;
+      const report = j.reports && j.reports[0];
+      if (j.status === JobStatus.COMPLETED) statusCount.สำเร็จ++;
+      else if (report?.status === JobReportStatus.SUBMITTED) statusCount.รอตรวจสอบ++;
+      else if (j.status === JobStatus.IN_PROGRESS) statusCount.กำลังทำ++;
+      else if (report?.status === JobReportStatus.REJECTED) statusCount.ตีกลับ++;
+      else if (j.status === JobStatus.PENDING) statusCount.รอมอบหมาย++;
     });
 
     return [
       { name: "สำเร็จ", value: statusCount.สำเร็จ },
       { name: "รอตรวจสอบ", value: statusCount.รอตรวจสอบ },
-      { name: "กำลังทำ", value: statusCount.กำลังทำ },
-      { name: "ตีกลับ", value: statusCount.ตีกลับ },
+      { name: "กำลังเดินการ", value: statusCount.กำลังทำ },
+      { name: "ตีกลับแก้ไข", value: statusCount.ตีกลับ },
+      { name: "รอดำเนินการ", value: statusCount.รอมอบหมาย },
     ].filter(i => i.value > 0);
   }, [jobs]);
 
-  if (loading) return <div className="p-4 text-center">กำลังโหลดข้อมูล...</div>;
+  if (loading) return <div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>;
 
   return (
     <div className="space-y-6 mb-6">
@@ -121,73 +121,77 @@ export default function ReviewCharts() {
           value={todayStats.total} 
           icon={<ClipboardList size={24} />} 
           color="text-blue-600" 
-          bg="bg-blue-100" 
+          bg="bg-blue-50" 
         />
         <StatCard 
           title="รอตรวจสอบ (วันนี้)" 
           value={todayStats.pending} 
           icon={<Clock size={24} />} 
-          color="text-yellow-600" 
-          bg="bg-yellow-100" 
+          color="text-indigo-600" 
+          bg="bg-indigo-50" 
         />
         <StatCard 
-          title="กำลังทำ (วันนี้)" 
+          title="เดินการอยู่ (วันนี้)" 
           value={todayStats.working} 
           icon={<AlertCircle size={24} />} 
           color="text-orange-600" 
-          bg="bg-orange-100" 
+          bg="bg-orange-50" 
         />
         <StatCard 
           title="สำเร็จ (วันนี้)" 
           value={todayStats.completed} 
           icon={<CheckCircle size={24} />} 
           color="text-green-600" 
-          bg="bg-green-100" 
+          bg="bg-green-50" 
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 2. กราฟแท่ง รายเดือน */}
-        <div className="lg:col-span-2 bg-white p-4 rounded-xl shadow-md">
-          <h3 className="text-lg font-bold text-gray-700 mb-4">สถิติงานรายเดือน (ปี {new Date().getFullYear() + 543})</h3>
+        <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">สถิติงานรายเดือน (ปี {new Date().getFullYear() + 543})</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" style={{ fontSize: '12px' }} />
-                <YAxis allowDecimals={false} style={{ fontSize: '12px' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" style={{ fontSize: '11px', fontWeight: 500 }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} style={{ fontSize: '11px' }} axisLine={false} tickLine={false} />
                 <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  cursor={{ fill: '#f8fafc' }}
                 />
-                <Legend />
-                <Bar dataKey="งานทั้งหมด" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
-                <Bar dataKey="สำเร็จ" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={20} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                <Bar dataKey="งานทั้งหมด" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={18} name="มอบหมายแล้ว" />
+                <Bar dataKey="สำเร็จ" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={18} name="ปิดงานสำเร็จ" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* 3. กราฟวงกลม สถานะรวม */}
-        <div className="bg-white p-4 rounded-xl shadow-md">
-          <h3 className="text-lg font-bold text-gray-700 mb-4">สัดส่วนสถานะงานทั้งหมด</h3>
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">สัดส่วนสถานะงานทั้งหมด</h3>
           <div className="h-[300px] flex justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={statusData}
                   cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
+                  cy="45%"
+                  innerRadius={70}
+                  outerRadius={95}
+                  paddingAngle={8}
                   dataKey="value"
+                  stroke="none"
                 >
                   {statusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                <Tooltip 
+                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -200,13 +204,13 @@ export default function ReviewCharts() {
 // Sub-component สำหรับ Card
 function StatCard({ title, value, icon, color, bg }: any) {
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-      <div className={`p-3 rounded-full ${bg} ${color}`}>
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+      <div className={`p-4 rounded-2xl ${bg} ${color} flex-shrink-0`}>
         {icon}
       </div>
-      <div>
-        <p className="text-sm text-gray-500">{title}</p>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider truncate">{title}</p>
+        <p className="text-2xl font-black text-gray-900 leading-tight">{value}</p>
       </div>
     </div>
   );

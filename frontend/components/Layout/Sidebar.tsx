@@ -16,11 +16,12 @@ import {
 import { toast } from "react-toastify";
 import ModalSerach from "../Modal/ModalSerach";
 import LogoutModal from "../Modal/LogoutModal";
-import api from "@/lib/axiosClient";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
   const pathname = usePathname();
   const router = useRouter();
+  const { logout } = useAuthStore();
   const [borderStyle, setBorderStyle] = useState({ top: 0, height: 0 });
   const itemsRef = useRef<(HTMLLIElement | null)[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -47,10 +48,8 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
 
   const confirmLogout = async () => {
     try {
-      await api.post("/auth/logout");
-      setTimeout(() => {
-        router.push("/");
-      }, 500);
+      await logout();
+      router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("เกิดข้อผิดพลาดในการออกจากระบบ", {

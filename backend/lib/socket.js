@@ -1,195 +1,137 @@
 import { Server } from "socket.io";
-import { prisma } from "./prisma.js";
 import jwt from "jsonwebtoken";
+import { prisma } from "./prisma.js";
 
-const setupSocket = (server) => {
-  const io = new Server(server, {
+let io;
+
+export const initSocket = (server) => {
+  io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000",
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      origin: true,
+      methods: ["GET", "POST"],
       credentials: true,
     },
   });
 
   io.use((socket, next) => {
-    // try to get from header cookie
-    const cookieStr = socket.request.headers.cookie;
-    let token = null;
-    if (cookieStr) {
-      const tokenMatch = cookieStr.match(/token=([^;]+)/);
-      if (tokenMatch) token = tokenMatch[1];
+    const cookies = socket.handshake.headers.cookie;
+    const authHeader = socket.handshake.headers.authorization;
+    let token = socket.handshake.auth.token;
+    
+    // Fallback 1: Authorization Header (Bearer)
+    if (!token && authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
     }
-    
-    // fallback to handshake payload if exist
-    if (!token) token = socket.handshake.auth?.token;
-    
-    if (!token) return next(new Error("Authentication error"));
+
+    // Fallback 2: Cookies
+    if (!token && cookies) {
+      const match = cookies.match(/token=([^;]+)/);
+      if (match) token = match[1];
+    }
+
+    if (!token) {
+      console.log(`Socket Auth Failed: No token found for transport ${socket.conn.transport.name}`);
+      return next(new Error("Authentication error: No token provided"));
+    }
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.user = decoded;
       next();
     } catch (err) {
-      next(new Error("Authentication error"));
+      console.log("Socket Connection Failed: Invalid token");
+      next(new Error("Authentication error: Invalid token"));
     }
   });
 
-  const userSockets = new Map();
-
   io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id, "UserId:", socket.user?.id);
-    const userId = Number(socket.user.id);
-    
-    // Store user socket
-    userSockets.set(userId, socket.id);
-    socket.join(`user_${userId}`);
-    io.emit("user_status", { userId, status: "online" });
+    console.log(`User connected: ${socket.user.id} (${socket.user.role})`);
 
-    socket.on("join_room", (room) => {
-      socket.join(room);
-      console.log(`User ${socket.id} joined room: ${room}`);
-    });
+    // Join room based on role or specific requirements
+    if (["ADMIN", "SUPERVISOR", "SUPERADMIN"].includes(socket.user.role)) {
+      socket.join("admin-room");
+    }
 
-    socket.on("send_message", async (data, callback) => {
-      // data: { receiverId, conversationId, content }
+    socket.on("technician:location:update", async (data) => {
+      // Security: Only allow TECHNICIAN to update their own location
+      if (socket.user.role !== "TECHNICIAN") {
+        return;
+      }
+
+      const { latitude, longitude, accuracy } = data;
+      const userId = Number(socket.user.id);
+
       try {
-        const { receiverId, conversationId, content, room, clientTempId } = data;
-        
-        // Backward compatibility for original text rooms
-        if (room && !receiverId) {
-          io.to(room).emit("receive_message", data);
-          return;
-        }
-
-        let targetConversationId = conversationId;
-        const targetReceiverId = Number(receiverId);
-        
-        // If no conversationId yet, check or create
-        if (!targetConversationId && targetReceiverId) {
-          let conversation = await prisma.conversation.findFirst({
-            where: {
-              AND: [
-                { participants: { some: { userId: userId } } },
-                { participants: { some: { userId: targetReceiverId } } },
-              ],
-            },
-          });
-
-          if (!conversation) {
-            conversation = await prisma.conversation.create({
-              data: {
-                participants: {
-                  create: [
-                    { userId: userId },
-                    { userId: targetReceiverId },
-                  ]
-                }
-              }
-            });
-          }
-          targetConversationId = conversation.id;
-        }
-
-        const message = await prisma.message.create({
-          data: {
-            content,
-            senderId: userId,
-            conversationId: targetConversationId,
+       
+        const updatedLocation = await prisma.technicianLocation.upsert({
+          where: { userId: userId },
+          update: {
+            latitude,
+            longitude,
+            accuracy,
+            updatedAt: new Date(),
           },
-        });
-
-        const latestMessage = await prisma.message.findUnique({
-          where: { id: message.id },
+          create: {
+            userId: userId,
+            latitude,
+            longitude,
+            accuracy,
+          },
           include: {
-            sender: { select: { id: true, email: true, profile: true } }
-          }
-        });
-
-        // Attach clientTempId for the sender to de-duplicate
-        const messageWithTempId = { ...latestMessage, clientTempId, receiverId: targetReceiverId };
-
-        // Update target participant's unread count
-        if (targetReceiverId) {
-          const participant = await prisma.participant.findFirst({
-            where: { userId: targetReceiverId, conversationId: targetConversationId }
-          });
-          if (participant) {
-            await prisma.participant.update({
-              where: { id: participant.id },
-              data: { unreadCount: { increment: 1 } },
-            });
-          }
-          io.to(`user_${targetReceiverId}`).emit("receive_message", messageWithTempId);
-          io.to(`user_${userId}`).emit("receive_message", messageWithTempId); // Echo back to sender
-        }
-
-        if (typeof callback === "function") callback({ status: "sent", message: messageWithTempId });
-
-      } catch (err) {
-        console.error("Socket error on send_message:", err);
-        if (typeof callback === "function") callback({ status: "error", message: err.message });
-      }
-    });
-
-    socket.on("mark_as_read", async ({ conversationId }) => {
-      try {
-        const convId = Number(conversationId);
-        if (!convId) return;
-
-        // 1. Mark all messages from other user as read
-        await prisma.message.updateMany({
-          where: {
-            conversationId: convId,
-            senderId: { not: userId },
-            isRead: false,
+            user: {
+              select: {
+                id: true,
+                role: true,
+                profile: {
+                  select: {
+                    firstname: true,
+                    lastname: true,
+                  },
+                },
+                departmentId: true,
+              },
+            },
           },
-          data: { isRead: true },
         });
 
-        // 2. Update participant unread count and lastReadAt
-        const participant = await prisma.participant.findFirst({
-          where: { userId: userId, conversationId: convId }
-        });
-        if (participant) {
-          await prisma.participant.update({
-            where: { id: participant.id },
-            data: { unreadCount: 0, lastReadAt: new Date() }
-          });
-        }
+        const broadcastData = {
+          userId: Number(updatedLocation.userId),
+          name: `${updatedLocation.user.profile?.firstname || ""} ${updatedLocation.user.profile?.lastname || ""}`.trim(),
+          latitude: updatedLocation.latitude,
+          longitude: updatedLocation.longitude,
+          accuracy: updatedLocation.accuracy,
+          updatedAt: updatedLocation.updatedAt,
+          online: true,
+          departmentId: updatedLocation.user.departmentId,
+        };
 
-        // 3. Find other participant to notify them
-        const otherParticipant = await prisma.participant.findFirst({
-          where: { conversationId: convId, userId: { not: userId } }
-        });
+        io.to("admin-room").emit("technician:location:broadcast", broadcastData);
 
-        if (otherParticipant) {
-          // Emit to both users to update UI across all active sessions
-          const roomReader = `user_${userId}`;
-          const roomSender = `user_${otherParticipant.userId}`;
-
-          const payload = {
-            conversationId: convId,
-            readerId: userId
-          };
-
-          io.to(roomReader).to(roomSender).emit("messages_read", payload);
-          console.log(`[Socket] messages_read emitted to rooms: ${roomReader}, ${roomSender}`);
-        }
-      } catch (err) {
-        console.error("mark_as_read error", err);
+      } catch (error) {
+        console.error("Error updating location:", error);
       }
-    });
-
-    socket.on("typing", ({ receiverId, conversationId, isTyping }) => {
-      io.to(`user_${receiverId}`).emit("typing_status", { senderId: userId, conversationId, isTyping });
     });
 
     socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
-      const userId = Number(socket.user?.id);
-      if (userId) {
-        userSockets.delete(userId);
-        io.emit("user_status", { userId, status: "offline" });
+      console.log(`User disconnected: ${socket.user.id}`);
+      
+      if (socket.user?.role === "TECHNICIAN") {
+        const userId = Number(socket.user.id);
+        
+        // Broadcast immediately
+        io.to("admin-room").emit("technician:location:broadcast", {
+          userId: userId,
+          online: false,
+          updatedAt: new Date(),
+        });
+
+        // Also update DB to "old" time so refresh shows offline
+        // (Set to 11 minutes ago to exceed the 10-minute threshold)
+        const offlineTime = new Date(Date.now() - 11 * 60 * 1000);
+        prisma.technicianLocation.update({
+          where: { userId: userId },
+          data: { updatedAt: offlineTime }
+        }).catch(err => console.error("Error updating offline status in DB:", err));
       }
     });
   });
@@ -197,4 +139,9 @@ const setupSocket = (server) => {
   return io;
 };
 
-export default setupSocket;
+export const getIO = () => {
+  if (!io) {
+    throw new Error("Socket.io not initialized!");
+  }
+  return io;
+};

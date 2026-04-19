@@ -1,9 +1,7 @@
 import express from "express";
-import {
-  getMyProfile,
-  updateMyProfile,
-} from "../controller/profile.controller.js";
+
 import { authCheck, verifyToken } from "../lib/middleware.js";
+import { getMyProfile, updateMyProfile } from "../controller/profile.controller 2.js";
 
 const routerProfile = express.Router();
 

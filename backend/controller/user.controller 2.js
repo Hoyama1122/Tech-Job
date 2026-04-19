@@ -14,21 +14,21 @@ const mapUserRow = (user) => {
     updatedAt: user.updatedAt,
     department: user.department_id
       ? {
-          id: user.department_id,
-          name: user.department_name,
-        }
+        id: user.department_id,
+        name: user.department_name,
+      }
       : null,
     profile: user.profile_id
       ? {
-          id: user.profile_id,
-          firstname: user.firstname,
-          lastname: user.lastname,
-          phone: user.phone,
-          address: user.address,
-          avatar: user.avatar,
-          gender: user.gender,
-          birthday: user.birthday,
-        }
+        id: user.profile_id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        phone: user.phone,
+        address: user.address,
+        avatar: user.avatar,
+        gender: user.gender,
+        birthday: user.birthday,
+      }
       : null,
   };
 };
@@ -508,6 +508,64 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: "เกิดข้อผิดพลาดในการลบผู้ใช้งาน",
+      error: error.message,
+    });
+  }
+};
+
+// SELECT ดึงตำแหน่งช่างล่าสุด
+
+export const getTechnicianLocations = async (req, res) => {
+  try {
+    // Fetch all users with role TECHNICIAN
+    const technicians = await prisma.user.findMany({
+      where: {
+        role: "TECHNICIAN",
+      },
+      include: {
+        profile: {
+          select: {
+            firstname: true,
+            lastname: true,
+            phone: true,
+            avatar: true,
+          },
+        },
+        department: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        location: true, // Includes TechnicianLocation if it exists
+      },
+    });
+
+    const formattedData = technicians.map((tech) => ({
+      userId: tech.id,
+      empno: tech.empno,
+      email: tech.email,
+      name: `${tech.profile?.firstname || ""} ${tech.profile?.lastname || ""}`.trim() || tech.email,
+      phone: tech.profile?.phone || "",
+      avatar: tech.profile?.avatar || "",
+      latitude: tech.location?.latitude || null,
+      longitude: tech.location?.longitude || null,
+      accuracy: tech.location?.accuracy || null,
+      updatedAt: tech.location?.updatedAt || tech.updatedAt,
+      role: tech.role,
+      departmentId: tech.departmentId,
+      departmentName: tech.department?.name || "ไม่ระบุ",
+      hasLocation: !!tech.location,
+    }));
+
+    return res.json({
+      message: "ดึงรายชื่อช่างและตำแหน่งสำเร็จ",
+      data: formattedData,
+    });
+  } catch (error) {
+    console.error("getTechnicianLocations error:", error);
+    return res.status(500).json({
+      message: "เกิดข้อผิดพลาดในการดึงข้อมูลช่าง",
       error: error.message,
     });
   }

@@ -17,58 +17,69 @@ import CardWork from "@/components/Dashboard/CardWork";
 import Activities from "@/components/Dashboard/Activities";
 import Summary from "@/components/Dashboard/Summary/Summary";
 import RenderModal from "@/components/Dashboard/Summary/RenderModal";
+import { useJobStore } from "@/store/useJobStore";
+import { userService } from "@/services/user.service";
+import { useAuthStore } from "@/store/useAuthStore";
+import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
 
 const MainDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [card, setCard] = useState([]);
+  const card = useJobStore((state) => state.jobs);
+  const storeLoading = useJobStore((state) => state.isLoading);
+  const fetchJobs = useJobStore((state) => state.fetchJobs);
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [detail, setDetail] = useState(null);
+  const currentUser = useAuthStore((state) => state.user);
 
   useEffect(() => {
-    setIsLoading(true);
-    try {
-      const cardData = JSON.parse(localStorage.getItem("CardWork") || "[]");
-      const usersData = JSON.parse(localStorage.getItem("Users") || "[]");
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        // Parallel fetch for jobs and users
+        const [_, usersData] = await Promise.all([
+          fetchJobs(),
+          userService.getUsers()
+        ]);
 
-      setUsers(usersData);
+        // Map API users to dashboard format
+        const mappedUsers = (usersData.data || []).map((u: any) => ({
+          id: u.id,
+          empno: u.empno,
+          email: u.email,
+          role: u.role,
+          name: `${u.profile?.firstname || ""} ${u.profile?.lastname || ""}`.trim() || u.email,
+          phone: u.profile?.phone || "-",
+          department: u.department?.name || "-",
+          departmentId: u.departmentId,
+          team: u.department?.name || "-", // For now, use department as team
+        }));
 
-      const joined = cardData.map((job) => {
-        const supervisor = usersData.find(
-          (u) =>
-            u.role === "supervisor" && String(u.id) === String(job.supervisorId)
-        );
+        setUsers(mappedUsers);
+      } catch (err) {
+        console.error("โหลดข้อมูลล้มเหลว:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        const technicians = usersData.filter(
-          (u) =>
-            u.role === "technician" &&
-            job.technicianId?.some((tid) => String(tid) === String(u.id))
-        );
-
-        return { ...job, supervisor, technicians };
-      });
-
-      setCard(joined);
-    } catch (err) {
-      console.error("โหลดข้อมูลล้มเหลว:", err);
-    }
-    setIsLoading(false);
-  }, []);
+    loadData();
+  }, [fetchJobs]);
 
   // Filter Serach
   const filteredCard = card.filter((job) => {
     const search = searchTerm.toLowerCase();
 
     const matchSearch =
-      job.title.toLowerCase().includes(search) ||
-      job.description.toLowerCase().includes(search) ||
-      job.JobId.toLowerCase().includes(search) ||
+      job.title?.toLowerCase().includes(search) ||
+      job.description?.toLowerCase().includes(search) ||
+      job.JobId?.toLowerCase().includes(search) ||
       job.supervisor?.name?.toLowerCase().includes(search) ||
-      job.technicians?.some((t) => t.name.toLowerCase().includes(search));
+      job.technicians?.some((t) => t.name?.toLowerCase().includes(search));
 
-    const matchStatus = statusFilter === "all" || job.status === statusFilter;
+    const matchStatus = statusFilter === "all" || job.status === statusFilter || getStatusThai(job.status) === statusFilter;
 
     return matchSearch && matchStatus;
   });
@@ -77,7 +88,7 @@ const MainDashboard = () => {
     {
       type: "technicians",
       title: "จำนวนช่างทั้งหมด",
-      value: users.filter((u) => u.role === "technician").length,
+      value: users.filter((u) => u.role === "TECHNICIAN").length,
       icon: <Users className="w-8 h-8" />,
       bg: "bg-blue-200",
       iconColor: "text-blue-700",
@@ -85,7 +96,7 @@ const MainDashboard = () => {
     {
       type: "supervisors",
       title: "จำนวนหัวหน้าทีมทั้งหมด",
-      value: users.filter((u) => u.role === "supervisor").length,
+      value: users.filter((u) => u.role === "SUPERVISOR").length,
       icon: <UserCog className="w-8 h-8" />,
       bg: "bg-purple-100",
       iconColor: "text-purple-600",
@@ -101,7 +112,11 @@ const MainDashboard = () => {
     {
       type: "jobs_waiting",
       title: "ใบงานที่รอการตรวจสอบ",
-      value: card.filter((j) => j.status === "รอการตรวจสอบ").length,
+      value: card.filter((j) => {
+        const s = j.status?.toUpperCase();
+        return s === JobStatus.SUBMITTED || s === JobStatus.PENDING || 
+               j.status === "ส่งงานแล้ว" || j.status === "รอการตรวจสอบ";
+      }).length,
       icon: <Clock className="w-8 h-8" />,
       bg: "bg-orange-50",
       iconColor: "text-orange-600",
@@ -178,6 +193,7 @@ const MainDashboard = () => {
         detail={detail}
         users={users}
         card={card}
+        currentUser={currentUser}
         onClose={() => setDetail(null)}
       />
 
@@ -209,11 +225,11 @@ const MainDashboard = () => {
                   className="px-4 py-2.5 border rounded-lg"
                 >
                   <option value="all">ทุกสถานะ</option>
-                  <option value="สำเร็จ">สำเร็จ</option>
-                  <option value="กำลังทำงาน">กำลังทำงาน</option>
-                  <option value="ตีกลับ">ตีกลับ</option>
-                  <option value="รอการตรวจสอบ">รอการตรวจสอบ</option>
-                  <option value="รอการดำเนินงาน">รอการดำเนินงาน</option>
+                  {Object.values(JobStatus).map((status) => (
+                    <option key={status} value={JobStatusThai[status as JobStatus]}>
+                      {JobStatusThai[status as JobStatus]}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

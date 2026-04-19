@@ -11,22 +11,11 @@ import {
   Users,
 } from "lucide-react";
 
+import { jobService } from "@/services/job.service";
+import { JobStatus, getStatusThai } from "@/types/job";
 import DateFormatWork from "@/lib/Format/DateForWork";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useMemo } from "react";
-
-/*  Types  */
-type CardWork = {
-  id: number;
-  JobId: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  dateRange?: { startAt: string; endAt: string };
-  technicianId: number[];
-  customer: { name: string; phone: string; address: string };
-  status: string;
-};
 
 // yyyy-mm-dd
 const toDateString = (date: Date) =>
@@ -35,62 +24,42 @@ const toDateString = (date: Date) =>
     "0"
   )}-${String(date.getDate()).padStart(2, "0")}`;
 
-const getJobDate = (job: CardWork) =>
-  job.dateRange?.startAt?.slice(0, 10) || job.createdAt.slice(0, 10);
-
-const isInRange = (day: number, year: number, month: number, job: CardWork) => {
-  if (!job.dateRange) return false;
-
-  const current = new Date(year, month, day).getTime();
-  const start = new Date(job.dateRange.startAt).getTime();
-  const end = new Date(job.dateRange.endAt).getTime();
-
-  return current >= start && current <= end;
-};
-
-// Badge สีสถานะ
 const getStatusBadge = (status: string) => {
-  const colors: Record<string, string> = {
-    กำลังทำงาน: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    สำเร็จ: "bg-green-100 text-green-700 border-green-200",
-    รอการดำเนินงาน: "bg-orange-100 text-orange-700 border-orange-200",
-    รอการตรวจสอบ: "bg-blue-100 text-blue-700 border-blue-200",
+  const s = status?.toUpperCase();
+  const displayStatus = getStatusThai(status);
+  
+  const styles: Record<string, string> = {
+    [JobStatus.PENDING]: "bg-blue-100 text-blue-700 border-blue-200",
+    [JobStatus.IN_PROGRESS]: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    [JobStatus.SUBMITTED]: "bg-indigo-100 text-indigo-700 border-indigo-200",
+    [JobStatus.COMPLETED]: "bg-green-100 text-green-700 border-green-200",
+    [JobStatus.REJECTED]: "bg-red-100 text-red-700 border-red-200",
+    "รอการดำเนินงาน": "bg-orange-100 text-orange-700 border-orange-200",
   };
+
+  const style = styles[s] || styles[status] || "bg-gray-100 text-gray-700 border-gray-200";
 
   return (
     <span
-      className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-        colors[status] || "bg-gray-100 text-gray-700 border-gray-200"
-      }`}
+      className={`px-3 py-1 rounded-full text-xs font-semibold border ${style}`}
     >
-      {status}
+      {displayStatus}
     </span>
   );
 };
 
+import { useJobStore } from "@/store/useJobStore";
+
 export default function CalendarTechJob() {
   const router = useRouter();
+  const { myJobs: jobs, fetchMyJobs, isMyJobsLoading: isLoading } = useJobStore();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [jobs, setJobs] = useState<CardWork[]>([]);
-  const [techId, setTechId] = useState<number | null>(null);
 
   useEffect(() => {
-    const auth = JSON.parse(localStorage.getItem("auth-storage") || "{}");
-    const userId = auth?.state?.userId;
-    setTechId(userId);
-
-    const cardWorks = JSON.parse(localStorage.getItem("CardWork") || "[]");
-
-    // safe default values
-    const safeJobs = cardWorks.map((j: any) => ({
-      ...j,
-      technicianId: Array.isArray(j.technicianId) ? j.technicianId : [],
-    }));
-
-    setJobs(safeJobs);
-  }, []);
+    fetchMyJobs();
+  }, [fetchMyJobs]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -111,40 +80,35 @@ export default function CalendarTechJob() {
     setSelectedDate(null);
   };
 
+  const isInRange = (day: number, targetYear: number, targetMonth: number, job: any) => {
+    if (!job.start_available_at || !job.end_available_at) return false;
+
+    const current = new Date(targetYear, targetMonth, day);
+    current.setHours(0, 0, 0, 0);
+    
+    const start = new Date(job.start_available_at);
+    start.setHours(0, 0, 0, 0);
+    
+    const end = new Date(job.end_available_at);
+    end.setHours(23, 59, 59, 999);
+
+    return current >= start && current <= end;
+  };
+
   // event checker
   const isEventDay = (day: number | null) => {
-    if (!day || !techId) return false;
-
-    const dateStr = toDateString(new Date(year, month, day));
-
-    return jobs.some((job) => {
-      if (!Array.isArray(job.technicianId)) return false;
-      if (!job.technicianId.includes(techId)) return false;
-
-      if (getJobDate(job) === dateStr) return true;
-      if (isInRange(day, year, month, job)) return true;
-
-      return false;
-    });
+    if (!day) return false;
+    return jobs.some((job) => isInRange(day, year, month, job));
   };
 
   // selected day jobs
   const jobsOfSelectedDay = useMemo(() => {
-    if (!selectedDate || !techId) return [];
+    if (!selectedDate) return [];
 
-    const dateStr = toDateString(selectedDate);
-
-    return jobs.filter((job) => {
-      if (!Array.isArray(job.technicianId)) return false;
-      if (!job.technicianId.includes(techId)) return false;
-
-      if (getJobDate(job) === dateStr) return true;
-      if (selectedDate && isInRange(selectedDate.getDate(), year, month, job))
-        return true;
-
-      return false;
-    });
-  }, [selectedDate, jobs, techId, year, month]);
+    return jobs.filter((job) => 
+      isInRange(selectedDate.getDate(), selectedDate.getFullYear(), selectedDate.getMonth(), job)
+    );
+  }, [selectedDate, jobs]);
 
   return (
     <div className="p-4">
@@ -197,7 +161,7 @@ export default function CalendarTechJob() {
               {day}
 
               {isEventDay(day) && (
-                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-600 rounded-full"></div>
+                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-primary/80 rounded-full"></div>
               )}
             </div>
           ))}
@@ -244,8 +208,8 @@ export default function CalendarTechJob() {
                   </p>
 
                   <p className="mt-1 text-sm text-gray-700">
-                    {DateFormatWork(job.dateRange?.startAt)} -{" "}
-                    {DateFormatWork(job.dateRange?.endAt)}
+                    {DateFormatWork(job.start_available_at)} -{" "}
+                    {DateFormatWork(job.end_available_at)}
                   </p>
 
                   <span className="text-xs text-gray-500 block mt-1">
@@ -256,7 +220,7 @@ export default function CalendarTechJob() {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center text-xs text-gray-500">
                     <Users className="w-4 h-4 mr-1" />
-                    {job.technicianId?.length || 0} ช่าง
+                    {job.technicians?.length || 0} ช่าง
                   </div>
 
                   {getStatusBadge(job.status)}

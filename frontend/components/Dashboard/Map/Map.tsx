@@ -1,73 +1,37 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 
-const containerStyle = {
-  width: "100%",
-  height: "250px",
-  borderRadius: "8px",
-};
-
-const defaultCenter = {
-  lat: 13.855,
-  lng: 100.585,
-};
+const LeafletMapInnerSource = dynamic(
+  () => import("./LeafletMapInner"),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[250px] bg-gray-100 flex items-center justify-center rounded-lg">
+        <Loader2 className="animate-spin text-primary" size={40} />
+      </div>
+    )
+  }
+);
 
 export default function Map({
   onLocationSelect,
-  
+  initialPos,
+  height,
+  zoom
 }: {
-  onLocationSelect: (pos: { lat: number; lng: number }) => void;
+  onLocationSelect?: (pos: { lat: number; lng: number }) => void;
+  initialPos?: { lat: number; lng: number } | null;
+  height?: string;
+  zoom?: number;
 }) {
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-  });
-  
-
-  const [markerPos, setMarkerPos] = useState<any>(null);
-
-  const handleMapClick = useCallback(
-    (e: google.maps.MapMouseEvent) => {
-      if (!e.latLng) return;
-
-      const lat = e.latLng.lat();
-      const lng = e.latLng.lng();
-
-      const pos = { lat, lng };
-
-      setMarkerPos(pos);
-
-      if (onLocationSelect) {
-        onLocationSelect(pos);
-      }
-    },
-    [onLocationSelect]
-  );
-
-  if (loadError) return <div>เกิดข้อผิดพลาดในการโหลดแผนที่</div>;
-
-  if (!isLoaded)
-    return (
-      <div className="min-w-full h-[400px] bg-gray-100">
-        <Loader2 className="animate-spin text-primary" size={40} />
-      </div>
-    );
-
   return (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      center={markerPos || defaultCenter}
-      zoom={13.3}
-      onClick={handleMapClick}
-      options={{
-        streetViewControl: false,
-        mapTypeControl: false,
-        fullscreenControl: false,
-      }}
-    >
-      {markerPos && <Marker position={markerPos} />}
-    </GoogleMap>
+    <LeafletMapInnerSource 
+      onLocationSelect={onLocationSelect} 
+      initialPos={initialPos}
+      height={height}
+      zoom={zoom}
+    />
   );
 }

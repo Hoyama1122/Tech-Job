@@ -4,20 +4,10 @@ import { Users } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 const Team = ({ job }) => {
-  const [techList, setTechList] = useState([]);
+ 
+  const assignments = job.assignments || [];
 
-  useEffect(() => {
-    const users = JSON.parse(localStorage.getItem("Users") || "[]");
-
-    const selected = users.filter(
-      (u) =>
-        u.role === "technician" &&
-        Array.isArray(job.technicianId) &&
-        job.technicianId.includes(u.id)
-    );
-
-    setTechList(selected);
-  }, [job]);
+  const techList = assignments;
 
   return (
     <div className="mt-2">
@@ -38,9 +28,12 @@ const Team = ({ job }) => {
                 className="text-gray-700 text-sm flex items-center gap-2"
               >
                 <span className="w-6 h-6 bg-blue-100 text-primary rounded-full flex items-center justify-center text-xs font-semibold">
-                  {t.name?.charAt(0)}
+                  {t.fullname?.charAt(0)}
                 </span>
-                {t.name}
+                <span className="font-medium text-gray-900">{t.fullname}</span>
+                <span className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">
+                  {t.role === 'SUPERVISOR' ? 'หัวหน้า' : 'ช่าง'}
+                </span>
               </li>
             ))}
           </ul>
