@@ -31,6 +31,7 @@ export default function ProfileEditForm({
   });
 
   const [preview, setPreview] = useState(user?.profile?.avatar || "");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   const handleChange = (
@@ -47,27 +48,13 @@ export default function ProfileEditForm({
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setImageFile(file);
     const localPreview = URL.createObjectURL(file);
     setPreview(localPreview);
-
-    try {
-      // ตรงนี้ถ้ายังไม่มี upload จริง
-      // ให้เปลี่ยนเป็น service upload ของคุณภายหลัง
-      // ตัวอย่าง: const res = await uploadService.uploadImage(file);
-      // setFormData((prev) => ({ ...prev, avatar: res.url }));
-
-      // mock ชั่วคราว
-      setFormData((prev) => ({
-        ...prev,
-        avatar: localPreview,
-      }));
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,15 +62,26 @@ export default function ProfileEditForm({
     setSaving(true);
 
     try {
-      const payload = {
-        avatar: formData.avatar || undefined,
-        phone: formData.phone || undefined,
-        address: formData.address || undefined,
-      };
+      if (imageFile) {
+        // If there's a new file, we must use FormData
+        const updateData = new FormData();
+        updateData.append("phone", formData.phone);
+        updateData.append("address", formData.address);
+        updateData.append("avatar", imageFile);
 
-      const res = await profileService.updateMyProfile(payload);
+        const res = await profileService.updateMyProfile(updateData as any);
+        onUpdated?.(res.data);
+      } else {
+        // Normal JSON update
+        const payload = {
+          phone: formData.phone || undefined,
+          address: formData.address || undefined,
+          avatar: formData.avatar || undefined,
+        };
+        const res = await profileService.updateMyProfile(payload);
+        onUpdated?.(res.data);
+      }
 
-      onUpdated?.(res.data);
       toast.success("อัปเดตโปรไฟล์สำเร็จ");
     } catch (error: any) {
       console.error(error);

@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { v2 as cloudinary } from "cloudinary";
+import { uploadSingleImage } from "../util/upload.helper.js";
 
 // helper: แปลง row จาก raw SQL ให้เป็น object ที่ frontend ใช้ง่าย
 const mapProfileRow = (user) => {
@@ -33,24 +33,6 @@ const mapProfileRow = (user) => {
         }
       : null,
   };
-};
-
-// อัปโหลด buffer ไป Cloudinary
-const uploadBufferToCloudinary = (fileBuffer, folder = "techjob/avatars") => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        resource_type: "image",
-      },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-
-    stream.end(fileBuffer);
-  });
 };
 
 // =====================================
@@ -123,8 +105,8 @@ export const updateMyProfile = async (req, res) => {
 
     // กรณีมีการส่งไฟล์มา
     if (req.file) {
-      const uploaded = await uploadBufferToCloudinary(req.file.buffer);
-      avatarUrl = uploaded.secure_url;
+      const uploaded = await uploadSingleImage(req.file, "techjob/avatars");
+      avatarUrl = uploaded?.url;
     }
     // กรณี frontend ส่ง URL มาเลย
     else if (avatar && typeof avatar === "string") {
