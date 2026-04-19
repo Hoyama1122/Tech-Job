@@ -4,52 +4,64 @@ import { ClipboardList, Users, CheckCircle, Clock, Filter } from 'lucide-react';
 import Summary from '@/components/Dashboard/Summary/Summary';
 import DepartmentPerformanceChart from '@/components/Executive/DepartmentPerformanceChart';
 import JobStatusPieChart from '@/components/Executive/JobStatusPieChart';
-import JobGrowthLineChart from '@/components/Executive/JobGrowthLineChart'; // Import component ใหม่
+import JobGrowthLineChart from '@/components/Executive/JobGrowthLineChart';
+import { jobService } from '@/services/job.service';
+import { userService } from '@/services/user.service';
+import { department } from '@/services/depertmane.service';
+
+const statusMap: Record<string, string> = {
+    "PENDING": "รอดำเนินการ",
+    "IN_PROGRESS": "กำลังทำงาน",
+    "COMPLETED": "สำเร็จ",
+    "CANCELLED": "ยกเลิก",
+    "SUBMITTED": "รอการตรวจสอบ",
+    "APPROVED": "สำเร็จ",
+    "REJECTED": "ยกเลิก"
+};
 
 export default function MainExecutive() {
-  const [card, setCard] = useState([]); 
-  const [users, setUsers] = useState([]);
+  const [card, setCard] = useState<any[]>([]); 
+  const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // --- State สำหรับตัวกรอง ---
   const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState<string>(String(currentYear + 543)); // ปีหลัก (พ.ศ.)
-  // const [compareYear, setCompareYear] = useState<string>("none"); // ปีที่ต้องการเปรียบเทียบ
-  const [selectedMonth, setSelectedMonth] = useState<string>("all"); // เดือน
+  const [selectedYear, setSelectedYear] = useState<string>(String(currentYear + 543)); 
+  const [selectedMonth, setSelectedMonth] = useState<string>("all"); 
 
   const monthsTH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
   useEffect(() => {
-    try {
-        setIsLoading(true);
-        const cardData = localStorage.getItem("CardWork");
-        const usersData = localStorage.getItem("Users");
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const [jobsRes, usersRes, deptsRes] = await Promise.all([
+                jobService.getJobs(),
+                userService.getUsers(),
+                department.getDepartments()
+            ]);
 
-        if (!cardData || !usersData) {
+            const rawJobs = jobsRes.jobs || [];
+            const rawUsers = usersRes.data || [];
+
+            setUsers(rawUsers);
+            
+            // Map statuses to Thai to match existing UI logic
+            const mappedJobs = rawJobs.map((job: any) => ({
+                ...job,
+                status: statusMap[job.status] || job.status,
+            }));
+            
+            setCard(mappedJobs); 
+        } catch (error) {
+            console.error("Load failed:", error);
             setCard([]);
             setUsers([]);
-            return;
+        } finally {
+            setIsLoading(false);
         }
-
-        const parsedCardsData = JSON.parse(cardData);
-        const parsedUsersData = JSON.parse(usersData);
-        setUsers(parsedUsersData);
-        
-        // Join Users data
-        const joined = parsedCardsData.map((job: any) => {
-            const supervisor = parsedUsersData.find((u: any) => String(u.id) === String(job.supervisorId));
-            const technicians = parsedUsersData.filter((u: any) => 
-                Array.isArray(job.technicianId) && job.technicianId.some((tid: any) => String(tid) === String(u.id))
-            );
-            return { ...job, supervisor, technicians };
-        });
-        
-        setCard(joined); 
-    } catch (error) {
-        console.error("Load failed:", error);
-    } finally {
-        setIsLoading(false);
-    }
+    };
+    fetchData();
   }, []);
 
   // --- Helper: แปลงปี ค.ศ. เป็น พ.ศ. ---

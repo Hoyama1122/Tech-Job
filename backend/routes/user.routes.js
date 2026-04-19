@@ -24,31 +24,31 @@ userRouter.get(
   "/locations",
   verifyToken,
   authCheck,
-  allowRoles("SUPERADMIN", "ADMIN", "SUPERVISOR"),
+  allowRoles("SUPERADMIN", "ADMIN", "SUPERVISOR", "EXECUTIVE"),
   getTechnicianLocations
 );
 
 /**
  * ดูผู้ใช้ทั้งหมด
- * SUPERADMIN / ADMIN / SUPERVISOR
+ * SUPERADMIN / ADMIN / SUPERVISOR / EXECUTIVE
  */
 userRouter.get(
   "/",
   verifyToken,
   authCheck,
-  allowRoles("SUPERADMIN", "ADMIN", "SUPERVISOR"),
+  allowRoles("SUPERADMIN", "ADMIN", "SUPERVISOR", "EXECUTIVE"),
   getUsers
 );
 
 /**
  * ดูผู้ใช้ตาม id
- * SUPERADMIN / ADMIN
+ * SUPERADMIN / ADMIN / EXECUTIVE
  */
 userRouter.get(
   "/:id",
   verifyToken,
   authCheck,
-  allowRoles("SUPERADMIN", "ADMIN"),
+  allowRoles("SUPERADMIN", "ADMIN", "EXECUTIVE"),
   getUserById
 );
 

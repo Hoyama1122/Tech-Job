@@ -22,8 +22,8 @@ export const getJobs = async (req, res) => {
   try {
     const { role, departmentId } = req.user;
 
-    // Only ADMIN, SUPERADMIN, and SUPERVISOR can access this
-    if (!["ADMIN", "SUPERADMIN", "SUPERVISOR"].includes(role)) {
+    // Only ADMIN, SUPERADMIN, SUPERVISOR, and EXECUTIVE can access this
+    if (!["ADMIN", "SUPERADMIN", "SUPERVISOR", "EXECUTIVE"].includes(role)) {
       return res
         .status(403)
         .json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลส่วนนี้" });
@@ -42,6 +42,7 @@ export const getJobs = async (req, res) => {
         j.longitude,
         j.location_name,
         j."departmentId",
+        d.name AS department_name,
 
         ja.role AS assignment_role,
         au.id AS assignment_user_id,
@@ -51,6 +52,8 @@ export const getJobs = async (req, res) => {
         ap.phone AS assignment_user_phone
 
       FROM "Job" j
+      LEFT JOIN "Department" d
+        ON d.id = j."departmentId"
       LEFT JOIN "JobAssignment" ja
         ON ja."jobId" = j.id
       LEFT JOIN "User" au
@@ -59,10 +62,8 @@ export const getJobs = async (req, res) => {
         ON ap."userId" = au.id
     `;
 
-    // Filter by departmentId if it exists (for all roles as requested)
-    // Note: If SUPERADMIN should see all, we'd check if role !== 'SUPERADMIN'
-    // But user said: "fetch เฉพาะjob departmentId ตัวเอง" for all three roles.
-    if (departmentId) {
+    // Filter by departmentId if it exists, UNLESS role is ADMIN/SUPERADMIN/EXECUTIVE
+    if (departmentId && !["ADMIN", "SUPERADMIN", "EXECUTIVE"].includes(role)) {
       query = Prisma.sql`${query} WHERE j."departmentId" = ${departmentId}`;
     }
 

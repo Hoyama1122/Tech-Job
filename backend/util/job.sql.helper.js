@@ -26,6 +26,7 @@ export const mapJobsRows = (rows = [], formatJobId) => {
         customer: {
             address: row.location_name || "ไม่ระบุสถานที่"
         },
+        category: row.department_name || "ไม่ระบุ",
         supervisor: null,
         technicians: [], // del
       });

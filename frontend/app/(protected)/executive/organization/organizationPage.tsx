@@ -14,6 +14,8 @@ import {
   MapPin
 } from "lucide-react";
 
+import { userService, UserItem } from "@/services/user.service";
+
 export default function OrganizationPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,20 +23,32 @@ export default function OrganizationPage() {
 
   // โหลดข้อมูล
   useEffect(() => {
-    try {
-      setIsLoading(true);
-      // จำลองการโหลดนิดหน่อย
-      setTimeout(() => {
-        const usersData = localStorage.getItem("Users");
-        if (usersData) {
-          setUsers(JSON.parse(usersData));
-        }
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await userService.getUsers();
+        const rawUsers = res.data || [];
+
+        // Map API data to UI format
+        const mappedUsers = rawUsers.map((u: UserItem) => ({
+          id: u.id,
+          name: `${u.profile?.firstname || ""} ${u.profile?.lastname || ""}`.trim() || u.email,
+          email: u.email,
+          role: u.role.toLowerCase(),
+          department: u.department?.name || "ไม่ระบุ",
+          phone: u.profile?.phone || "-",
+          employeeCode: u.empno,
+          avatar: u.profile?.avatar
+        }));
+
+        setUsers(mappedUsers);
+      } catch (error) {
+        console.error("Failed to load user data", error);
+      } finally {
         setIsLoading(false);
-      }, 500);
-    } catch (error) {
-      console.error("Failed to load user data", error);
-      setIsLoading(false);
-    }
+      }
+    };
+    fetchData();
   }, []);
 
   // --- Logic การกรองและจัดกลุ่ม ---
