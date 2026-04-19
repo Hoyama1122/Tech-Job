@@ -26,6 +26,11 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
   const itemsRef = useRef<(HTMLLIElement | null)[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const activeIndex = navLinks.findIndex((link) => {
@@ -113,37 +118,38 @@ const Sidebar = ({ navLinks, basePath, isOpen, setIsOpen }: any) => {
           />
 
           <ul className="space-y-2 mt-4">
-            {navLinks.map((link, index) => {
-              const Icon = link.icon;
-              const fullPath =
-                link.path === "/" ? basePath : `${basePath}${link.path}`;
-              const isActive =
-                pathname.replace(/\/+$/, "") === fullPath.replace(/\/+$/, "");
-              return (
-                <li
-                  key={index}
-                  ref={(el) => {
-                    itemsRef.current[index] = el;
-                  }}
-                >
-                  <Link
-                    href={basePath + link.path}
-                    className={`flex items-center gap-3 px-4 py-3 text-lg transition-all duration-300 rounded-lg mx-2 ${
-                      isActive
-                        ? "bg-white/10 font-semibold text-white"
-                        : "text-white/70 hover:bg-white/20 hover:text-white"
-                    }`}
-                    onClick={() => setIsOpen(false)}
+            {mounted &&
+              navLinks.map((link, index) => {
+                const Icon = link.icon;
+                const fullPath =
+                  link.path === "/" ? basePath : `${basePath}${link.path}`;
+                const isActive =
+                  pathname.replace(/\/+$/, "") === fullPath.replace(/\/+$/, "");
+                return (
+                  <li
+                    key={index}
+                    ref={(el) => {
+                      itemsRef.current[index] = el;
+                    }}
                   >
-                    <Icon
-                      size={20}
-                      className={`${isActive ? "text-white" : "text-white/70"}`}
-                    />
-                    <span>{link.name}</span>
-                  </Link>
-                </li>
-              );
-            })}
+                    <Link
+                      href={basePath + link.path}
+                      className={`flex items-center gap-3 px-4 py-3 text-lg transition-all duration-300 rounded-lg mx-2 ${
+                        isActive
+                          ? "bg-white/10 font-semibold text-white"
+                          : "text-white/70 hover:bg-white/20 hover:text-white"
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Icon
+                        size={20}
+                        className={`${isActive ? "text-white" : "text-white/70"}`}
+                      />
+                      <span>{link.name}</span>
+                    </Link>
+                  </li>
+                );
+              })}
           </ul>
         </nav>
 

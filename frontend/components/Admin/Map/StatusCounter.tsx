@@ -49,7 +49,7 @@ export const StatusCounter = ({ jobs, onlineCount }: StatusCounterProps) => {
       />
       <StatusCard
         label="รอตรวจสอบ"
-        value={jobs.filter(j => j.reportStatus === "SUBMITTED").length}
+        value={jobs.filter(j => j.status === "SUBMITTED").length}
         icon={<Signal className="w-5 h-5" />}
         colorClass="sky"
       />

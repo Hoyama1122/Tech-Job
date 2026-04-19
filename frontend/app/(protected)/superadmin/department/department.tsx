@@ -22,19 +22,16 @@ const ITEMS_PER_PAGE = 10;
 type DepartmentItem = {
   id: number;
   name: string;
-  description?: string | null;
   totalUsers?: number;
   createdAt?: string;
 };
 
 type DepartmentFormData = {
   name: string;
-  description: string;
 };
 
 const initialForm: DepartmentFormData = {
   name: "",
-  description: "",
 };
 
 const Department = () => {
@@ -81,10 +78,7 @@ const Department = () => {
     const text = searchTerm.trim().toLowerCase();
 
     return departments.filter((item) => {
-      return (
-        item.name?.toLowerCase().includes(text) ||
-        (item.description || "").toLowerCase().includes(text)
-      );
+      return item.name?.toLowerCase().includes(text);
     });
   }, [departments, searchTerm]);
 
@@ -126,7 +120,6 @@ const Department = () => {
     setSelectedDepartment(departmentItem);
     setFormData({
       name: departmentItem.name || "",
-      description: departmentItem.description || "",
     });
     setOpenModal(true);
   };
@@ -156,7 +149,6 @@ const Department = () => {
 
     const payload = {
       name: formData.name.trim(),
-      description: formData.description.trim(),
     };
 
     if (!payload.name) {
@@ -274,7 +266,7 @@ const Department = () => {
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="ค้นหาชื่อแผนก หรือคำอธิบาย..."
+                placeholder="ค้นหาชื่อแผนก..."
                 className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -296,7 +288,6 @@ const Department = () => {
                   <th className="px-4 py-3 text-left">ลำดับ</th>
 
                   <th className="px-4 py-3 text-left">ชื่อแผนก</th>
-                  <th className="px-4 py-3 text-left">คำอธิบาย</th>
                   <th className="px-4 py-3 text-left">จำนวนผู้ใช้</th>
                   <th className="px-4 py-3 text-center">การจัดการ</th>
                 </tr>
@@ -323,10 +314,6 @@ const Department = () => {
 
                       <td className="px-4 py-3 font-medium text-slate-800">
                         {item.name}
-                      </td>
-
-                      <td className="px-4 py-3 text-slate-600">
-                        {item.description || "-"}
                       </td>
 
                       <td className="px-4 py-3">{item.totalUsers || 0}</td>
