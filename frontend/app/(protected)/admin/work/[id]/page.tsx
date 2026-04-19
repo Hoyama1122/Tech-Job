@@ -150,7 +150,7 @@ export default function WorkDetailPage({ params }: PageProps) {
   ), [job]);
 
   if (isLoading) return <LoadingSkeleton />;
-  if (!job) return <NotFoundPage jobId={slug} />;
+  if (!job) return <NotFoundPage jobId={id} />;
 
   return (
     <div className="p-4">

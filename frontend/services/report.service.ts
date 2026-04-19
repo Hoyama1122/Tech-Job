@@ -12,6 +12,7 @@ export interface CreateReportPayload {
   beforeImages?: File[];
   afterImages?: File[];
   cus_sign?: File | string;
+  items?: any[];
 }
 
 export const reportService = {
@@ -22,9 +23,15 @@ export const reportService = {
     if (payload.start_time) formData.append("start_time", payload.start_time);
     if (payload.end_time) formData.append("end_time", payload.end_time);
     if (payload.detail) formData.append("detail", payload.detail);
-    if (payload.repair_operations) formData.append("repair_operations", payload.repair_operations);
-    if (payload.inspection_results) formData.append("inspection_results", payload.inspection_results);
+    if (payload.repair_operations)
+      formData.append("repair_operations", payload.repair_operations);
+    if (payload.inspection_results)
+      formData.append("inspection_results", payload.inspection_results);
     if (payload.summary) formData.append("summary", payload.summary);
+
+    if (payload.items) {
+      formData.append("items", JSON.stringify(payload.items));
+    }
 
     if (payload.beforeImages && payload.beforeImages.length > 0) {
       payload.beforeImages.forEach((file) => {

@@ -1,4 +1,4 @@
-import { prisma, Prisma } from "../lib/prisma.js";
+import { prisma, Prisma } from "../lib/prisma.js"; // trigger restart
 import { uploadImages, deleteImages } from "../util/upload.helper.js";
 import {
   formatJobId,
@@ -123,6 +123,9 @@ export const getJobById = async (req, res) => {
               },
             },
             images: true,
+            itemUsages: {
+              include: { item: true }
+            },
           },
           orderBy: { createdAt: "desc" },
         },
@@ -786,6 +789,9 @@ export const getMyJobDetail = async (req, res) => {
         reports: {
           include: {
             images: true,
+            itemUsages: {
+              include: { item: true }
+            },
             createdBy: {
               include: {
                 profile: true,

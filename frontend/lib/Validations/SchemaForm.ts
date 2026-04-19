@@ -48,3 +48,18 @@ export const workSchema = z
   );
 
 export type WorkFormValues = z.infer<typeof workSchema>;
+
+export const equipmentSchema = z.object({
+  code: z.string().min(1, "กรุณากรอกรหัสอุปกรณ์ (Code)"),
+  name: z.string().min(1, "กรุณากรอกชื่ออุปกรณ์"),
+  model: z.string().optional(),
+  brand: z.string().optional(),
+  type: z.enum(["EQUIPMENT", "MATERIAL"], {
+    errorMap: () => ({ message: "กรุณาเลือกประเภทอุปกรณ์" }),
+  }),
+  quantity: z.coerce.number().min(0, "จำนวนต้องไม่ติดลบ"),
+  unit: z.string().min(1, "กรุณากรอกหน่วยนับ"),
+  note: z.string().optional(),
+});
+
+export type EquipmentFormValues = z.infer<typeof equipmentSchema>;

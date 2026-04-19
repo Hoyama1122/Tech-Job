@@ -17,6 +17,7 @@ import {
   Warehouse,
   Briefcase,
   Map as MapIcon,
+  Box,
 } from "lucide-react";
 
 type NavItem = {
@@ -31,6 +32,7 @@ export const navLinkAdmin: NavItem[] = [
   { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck },
   { name: "สร้างใบงาน", path: "/add-work", icon: FileText },
   { name: "โปรไฟล์", path: "/profile", icon: Users2 },
+  { name: "คลังพัสดุ", path: "/equipment", icon: Box },
 ];
 export const navLinkTechnician: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
@@ -47,9 +49,9 @@ export const navLinkSupervisor: NavItem[] = [
   // { name: "มอบหมายงาน", path: "/assign", icon: UserCog },
   // { name: "ตรวจงาน", path: "/review", icon: Wrench },
   { name: "สถิติทีม", path: "/review", icon: BarChart3 },
+  { name: "คลังพัสดุ", path: "/equipment", icon: Box },
   { name: "ทีมของฉัน", path: "/team", icon: Users2 },
   { name: "โปรไฟล์", path: "/profile", icon: Users2 },
-
   // { name: "ตั้งค่า", path: "/settings", icon: Settings },
 ];
 
@@ -64,6 +66,7 @@ export const navLinkSuperadmin: NavItem[] = [
   { name: "หน้าหลัก", path: "/", icon: LayoutDashboard },
   { name: "ภาพรวมแผนที่", path: "/map", icon: MapIcon },
   { name: "ผู้ใช้งาน", path: "/user", icon: Users },
+  { name: "คลังพัสดุ", path: "/equipment", icon: Box },
   { name: "ใบงานทั้งหมด", path: "/work", icon: ClipboardCheck },
   { name: "สร้างใบงาน", path: "/add-work", icon: FileText },
   { name: "แผนกทั้งหมด", path: "/department", icon: Warehouse },

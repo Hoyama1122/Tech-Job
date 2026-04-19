@@ -51,6 +51,7 @@ export default function Page({ params }: PageProps) {
     repairOperations: "",
     summaryOfOperatingResults: "",
     customerSignature: "",
+    items: [],
   });
 
   // form errors
@@ -116,6 +117,14 @@ export default function Page({ params }: PageProps) {
           repairOperations: report.repairOperations || "",
           summaryOfOperatingResults: report.summaryOfOperatingResults || "",
           customerSignature: report.customerSignature || "",
+          items: report.itemUsages?.map((u: any) => ({
+             id: u.item.id,
+             name: u.item.name,
+             code: u.item.code,
+             quantity: Number(u.usedQuantity),
+             unit: u.item.unit,
+             type: u.item.type,
+          })) || [],
         });
       }
     } catch (error: any) {
@@ -302,6 +311,7 @@ export default function Page({ params }: PageProps) {
         cus_sign: signFile || undefined,
         start_time: job?.technicianReport?.start_time,
         end_time: new Date().toISOString(),
+        items: formData.items,
       };
 
       await reportService.createReport(payload);

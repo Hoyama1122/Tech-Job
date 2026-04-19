@@ -1,4 +1,4 @@
-import { prisma, Prisma } from "../lib/prisma.js";
+import { prisma, Prisma } from "../lib/prisma.js"; // trigger restart
 import {
   uploadImages,
   uploadSingleImage,
@@ -25,7 +25,19 @@ export const createJobReport = async (req, res) => {
       repair_operations,
       inspection_results,
       summary,
+      items: rawItems,
     } = req.body;
+
+    let items = [];
+    if (typeof rawItems === 'string') {
+      try {
+        items = JSON.parse(rawItems);
+      } catch (e) {
+        console.error("Parse items error:", e);
+      }
+    } else if (Array.isArray(rawItems)) {
+      items = rawItems;
+    }
 
     if (!jobId) {
       return res.status(400).json({ message: "กรุณาระบุ jobId" });
@@ -117,7 +129,36 @@ export const createJobReport = async (req, res) => {
         type: "AFTER"
       });
 
-      // 4. Update Job Status to SUBMITTED if status matches
+      // 4. Handle Item Usages
+      if (items && Array.isArray(items)) {
+        for (const itemUsage of items) {
+          // Record usage
+          await tx.itemUsage.create({
+            data: {
+              itemId: Number(itemUsage.id),
+              userId: Number(createdById),
+              jobId: Number(jobId),
+              reportId: Number(report.id),
+              usedQuantity: Number(itemUsage.quantity),
+              usedAt: new Date(),
+            }
+          });
+
+          // Decrement quantity ONLY for MATERIAL
+          if (itemUsage.type === 'MATERIAL') {
+            await tx.item.update({
+              where: { id: Number(itemUsage.id) },
+              data: {
+                quantity: {
+                  decrement: Number(itemUsage.quantity)
+                }
+              }
+            });
+          }
+        }
+      }
+
+      // 5. Update Job Status to SUBMITTED if status matches
       if (report.status === 'SUBMITTED') {
         await tx.job.update({
           where: { id: Number(jobId) },
@@ -133,6 +174,9 @@ export const createJobReport = async (req, res) => {
         where: { id: report.id },
         include: {
           images: true,
+          itemUsages: {
+            include: { item: true }
+          },
           createdBy: {
             include: { profile: true }
           },
