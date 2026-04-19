@@ -72,6 +72,7 @@ export const mapJobReportDetailRows = (rows = []) => {
         id: row.image_id,
         url: row.image_url,
         publicId: row.image_public_id ?? null,
+        type: row.image_type || "BEFORE",
         createdAt: row.image_created_at,
       })),
   };
@@ -133,6 +134,7 @@ export const mapJobReportListRows = (rows = []) => {
         id: row.image_id,
         url: row.image_url,
         publicId: row.image_public_id ?? null,
+        type: row.image_type || "BEFORE",
         createdAt: row.image_created_at,
       });
     }
@@ -243,18 +245,29 @@ export const insertReportImages = async ({
   tx,
   reportId,
   uploadedImages,
+  type = "BEFORE",
 }) => {
-  for (const img of uploadedImages) {
-    await tx.$executeRaw`
-      INSERT INTO "ReportImage"
-      ("reportId", url, "publicId", "createdAt")
-      VALUES (
-        ${reportId},
-        ${img.url},
-        ${img.publicId},
-        NOW()
-      )
-    `;
+  if (!uploadedImages || uploadedImages.length === 0) {
+    console.log(`No ${type} images to insert for report ${reportId}`);
+    return;
+  }
+
+  console.log(`Inserting ${uploadedImages.length} ${type} images for report ${reportId}`);
+
+  try {
+    for (const img of uploadedImages) {
+      await tx.reportImage.create({
+        data: {
+          reportId: Number(reportId),
+          url: img.url,
+          publicId: img.publicId,
+          type: type,
+        },
+      });
+    }
+  } catch (error) {
+    console.error(`Error inserting ${type} images for report ${reportId}:`, error);
+    throw error;
   }
 };
 

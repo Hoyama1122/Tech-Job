@@ -24,7 +24,9 @@ export const getJobs = async (req, res) => {
 
     // Only ADMIN, SUPERADMIN, and SUPERVISOR can access this
     if (!["ADMIN", "SUPERADMIN", "SUPERVISOR"].includes(role)) {
-      return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลส่วนนี้" });
+      return res
+        .status(403)
+        .json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลส่วนนี้" });
     }
 
     let query = Prisma.sql`
@@ -93,87 +95,154 @@ export const getJobById = async (req, res) => {
       });
     }
 
-    const rows = await prisma.$queryRaw`
-      SELECT
-        j.id,
-        j.title,
-        j.description,
-        j.status,
-        j."createdAt",
-        j."updatedAt",
-        j.start_available_at,
-        j.end_available_at,
-        j.latitude,
-        j.longitude,
-        j.location_name,
+    const job = await prisma.job.findUnique({
+      where: { id },
+      include: {
+        department: true,
+        createdBy: {
+          include: {
+            profile: true,
+          },
+        },
+        assignments: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+                department: true,
+              },
+            },
+          },
+        },
+        images: true,
+        reports: {
+          include: {
+            createdBy: {
+              include: {
+                profile: true,
+              },
+            },
+            images: true,
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
 
-        d.id AS department_id,
-        d.name AS department_name,
-
-        cb.id AS created_by_id,
-        cb.empno AS created_by_empno,
-        cbp.firstname AS created_by_firstname,
-        cbp.lastname AS created_by_lastname,
-
-        ja.role AS assignment_role,
-        au.id AS assignment_user_id,
-        au.empno AS assignment_user_empno,
-        ad.name AS assignment_department_name,
-        ap.firstname AS assignment_user_firstname,
-        ap.lastname AS assignment_user_lastname,
-
-        ji.id AS image_id,
-        ji.url AS image_url,
-        ji."publicId" AS image_public_id,
-        ji."createdAt" AS image_created_at,
-
-        jr.id AS report_id,
-        jr.status AS report_status,
-        jr.detail AS report_detail,
-        jr.summary AS report_summary,
-        jr.repair_operations AS report_repair_operations,
-        jr.inspection_results AS report_inspection_results,
-        jr.cus_sign AS report_cus_sign,
-        jr."rejectReason" AS report_reject_reason,
-        jr.start_time AS report_start_time,
-        jr.end_time AS report_end_time,
-        jr."createdAt" AS report_created_at
-
-      FROM "Job" j
-      LEFT JOIN "Department" d
-        ON d.id = j."departmentId"
-
-      LEFT JOIN "User" cb
-        ON cb.id = j."createdById"
-      LEFT JOIN "Profile" cbp
-        ON cbp."userId" = cb.id
-
-      LEFT JOIN "JobAssignment" ja
-        ON ja."jobId" = j.id
-      LEFT JOIN "User" au
-        ON au.id = ja."userId"
-      LEFT JOIN "Profile" ap
-        ON ap."userId" = au.id
-      LEFT JOIN "Department" ad
-        ON ad.id = au."departmentId"
-
-      LEFT JOIN "JobImage" ji
-        ON ji."jobId" = j.id
-
-      LEFT JOIN "JobReport" jr
-        ON jr."jobId" = j.id
-
-      WHERE j.id = ${id}
-      ORDER BY j."createdAt" DESC
-    `;
-
-    if (!rows.length) {
-      return res.status(404).json({
-        error: "ไม่พบใบงาน",
-      });
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบใบงาน" });
     }
 
-    const formattedJob = mapJobDetailRows(rows, formatJobId);
+    // Transform to a clean, flat structure for the frontend
+    const formattedJob = {
+      id: job.id,
+      JobId: formatJobId(job.id),
+      title: job.title,
+      description: job.description,
+      status: job.status,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt,
+      start_available_at: job.start_available_at,
+      end_available_at: job.end_available_at,
+      latitude: job.latitude,
+      longitude: job.longitude,
+      location_name: job.location_name,
+
+      department: job.department,
+
+      createdBy: {
+        id: job.createdBy.id,
+        fullname:
+          `${job.createdBy.profile?.firstname || ""} ${job.createdBy.profile?.lastname || ""}`.trim(),
+      },
+
+      supervisor: job.assignments.find((a) => a.role === "SUPERVISOR")
+        ? {
+            id: job.assignments.find((a) => a.role === "SUPERVISOR").user.id,
+            fullname:
+              `${job.assignments.find((a) => a.role === "SUPERVISOR").user.profile?.firstname || ""} ${job.assignments.find((a) => a.role === "SUPERVISOR").user.profile?.lastname || ""}`.trim(),
+            phone: job.assignments.find((a) => a.role === "SUPERVISOR").user.profile?.phone || "-",
+            email: job.assignments.find((a) => a.role === "SUPERVISOR").user.email || "-",
+            department: job.assignments.find((a) => a.role === "SUPERVISOR")
+              .user.department?.name,
+            role: "SUPERVISOR",
+          }
+        : null,
+
+      technicians: job.assignments
+        .filter((a) => a.role === "TECHNICIAN")
+        .map((a) => ({
+          id: a.user.id,
+          fullname:
+            `${a.user.profile?.firstname || ""} ${a.user.profile?.lastname || ""}`.trim(),
+          phone: a.user.profile?.phone || "-",
+          email: a.user.email || "-",
+          department: a.user.department?.name,
+          role: "TECHNICIAN",
+        })),
+
+      assignments: job.assignments.map((a) => ({
+        id: a.user.id,
+        fullname:
+          `${a.user.profile?.firstname || ""} ${a.user.profile?.lastname || ""}`.trim(),
+        phone: a.user.profile?.phone || "-",
+        email: a.user.email || "-",
+        role: a.role,
+        department: a.user.department?.name,
+      })),
+
+      images: job.images,
+
+      reports: job.reports.map((r) => ({
+        id: r.id,
+        status: r.status,
+        start_time: r.start_time,
+        end_time: r.end_time,
+        detail: r.detail,
+        repairOperations: r.repair_operations,
+        inspectionResults: r.inspection_results,
+        summaryOfOperatingResults: r.summary,
+        customerSignature: r.cus_sign,
+        rejectReason: r.rejectReason,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+        images: r.images,
+        reportedBy: {
+          id: r.createdBy?.id,
+          fullname:
+            `${r.createdBy?.profile?.firstname || ""} ${r.createdBy?.profile?.lastname || ""}`.trim(),
+        },
+      })),
+
+      loc: {
+        lat: job.latitude,
+        lng: job.longitude,
+      },
+      customer: {
+        address: job.location_name || "ไม่ระบุสถานที่",
+      },
+      location: {
+        latitude: job.latitude,
+        longitude: job.longitude,
+        location_name: job.location_name,
+      },
+      // For Admin consistency (some screens might still look for technicianReport)
+      technicianReport: job.reports[0]
+        ? {
+            ...job.reports[0],
+            repairOperations: job.reports[0].repair_operations,
+            inspectionResults: job.reports[0].inspection_results,
+            summaryOfOperatingResults: job.reports[0].summary,
+            customerSignature: job.reports[0].cus_sign,
+            reportedBy: {
+              id: job.reports[0].createdBy?.id,
+              fullname:
+                `${job.reports[0].createdBy?.profile?.firstname || ""} ${job.reports[0].createdBy?.profile?.lastname || ""}`.trim(),
+            },
+            images: job.reports[0].images,
+          }
+        : null,
+    };
 
     res.json({
       message: "ดึงข้อมูลใบงานสำเร็จ",
@@ -239,10 +308,10 @@ export const createJob = async (req, res) => {
 
     console.log("createJob req.body:", req.body);
     console.log("createJob req.files:", req.files);
-    
+
     const imageFiles = req.files?.images || [];
     console.log("createJob imageFiles:", imageFiles.length);
-    
+
     const uploadedImages = await uploadImages(imageFiles, "techjob/jobs");
     const createdById = req.user?.id || 3;
 
@@ -687,7 +756,6 @@ export const getMyJobDetail = async (req, res) => {
       return res.status(400).json({ message: "รูปแบบรหัสใบงานไม่ถูกต้อง" });
     }
 
-    // Use Prisma Client findFirst to ensure assignment
     const job = await prisma.job.findFirst({
       where: {
         id: jobId,
@@ -735,44 +803,115 @@ export const getMyJobDetail = async (req, res) => {
       return res.status(404).json({ message: "ไม่พบใบงานที่ได้รับมอบหมาย" });
     }
 
-    // Map to a friendlier format for the frontend
-    // This transform aims to stay consistent with the existing app's structure
-    // Exclude the raw 'assignment' field to prevent leaking sensitive user data (like passwords)
-    const { assignments: rawAssignment, ...jobData } = job;
-
+    // Transform to a clean, flat structure for the frontend
     const formattedJob = {
-      ...jobData,
+      id: job.id,
       JobId: formatJobId(job.id),
+      title: job.title,
+      description: job.description,
+      status: job.status,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt,
+      start_available_at: job.start_available_at,
+      end_available_at: job.end_available_at,
+
+      department: job.department,
+
       createdBy: {
         id: job.createdBy.id,
-        empno: job.createdBy.empno,
-        fullname: `${job.createdBy.profile?.firstname || ""} ${job.createdBy.profile?.lastname || ""}`.trim(),
+        fullname:
+          `${job.createdBy.profile?.firstname || ""} ${job.createdBy.profile?.lastname || ""}`.trim(),
       },
-      department: job.department,
-      assignments: rawAssignment.map(a => ({
+
+      supervisor: job.assignments.find((a) => a.role === "SUPERVISOR")
+        ? {
+            id: job.assignments.find((a) => a.role === "SUPERVISOR").user.id,
+            fullname:
+              `${job.assignments.find((a) => a.role === "SUPERVISOR").user.profile?.firstname || ""} ${job.assignments.find((a) => a.role === "SUPERVISOR").user.profile?.lastname || ""}`.trim(),
+            department: job.assignments.find((a) => a.role === "SUPERVISOR")
+              .user.department?.name,
+            role: "SUPERVISOR",
+          }
+        : null,
+
+      technicians: job.assignments
+        .filter((a) => a.role === "TECHNICIAN")
+        .map((a) => ({
+          id: a.user.id,
+          fullname:
+            `${a.user.profile?.firstname || ""} ${a.user.profile?.lastname || ""}`.trim(),
+          department: a.user.department?.name,
+          role: "TECHNICIAN",
+        })),
+
+      assignments: job.assignments.map((a) => ({
         id: a.user.id,
-        empno: a.user.empno,
+        fullname:
+          `${a.user.profile?.firstname || ""} ${a.user.profile?.lastname || ""}`.trim(),
         role: a.role,
-        fullname: `${a.user.profile?.firstname || ""} ${a.user.profile?.lastname || ""}`.trim(),
-        departmentName: a.user.department?.name,
+        department: a.user.department?.name,
       })),
+
       images: job.images,
-      reports: job.reports.map(r => ({
-        ...r,
-        createdBy: {
-            id: r.createdBy?.id,
-            fullname: `${r.createdBy?.profile?.firstname || ""} ${r.createdBy?.profile?.lastname || ""}`.trim(),
-        }
+
+      reports: job.reports.map((r) => ({
+        id: r.id,
+        status: r.status,
+        start_time: r.start_time,
+        end_time: r.end_time,
+        detail: r.detail,
+        repairOperations: r.repair_operations,
+        inspectionResults: r.inspection_results,
+        summaryOfOperatingResults: r.summary,
+        customerSignature: r.cus_sign,
+        rejectReason: r.rejectReason,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+        images: r.images,
+        reportedBy: {
+          id: r.createdBy?.id,
+          fullname:
+            `${r.createdBy?.profile?.firstname || ""} ${r.createdBy?.profile?.lastname || ""}`.trim(),
+        },
       })),
+
+      latitude: job.latitude,
+      longitude: job.longitude,
+      location_name: job.location_name,
+
       loc: {
         lat: job.latitude,
-        lng: job.longitude
+        lng: job.longitude,
       },
       customer: {
-        address: job.location_name || "ไม่ระบุสถานที่"
+        address: job.location_name || "ไม่ระบุสถานที่",
       },
-      // Set single technicianReport if relevant for backward compatibility
-      technicianReport: job.reports[0] || null,
+      location: {
+        latitude: job.latitude,
+        longitude: job.longitude,
+        location_name: job.location_name,
+      },
+      // Backward compatibility
+      technicianReport: job.reports[0]
+        ? {
+            id: job.reports[0].id,
+            status: job.reports[0].status,
+            start_time: job.reports[0].start_time,
+            end_time: job.reports[0].end_time,
+            detail: job.reports[0].detail,
+            repairOperations: job.reports[0].repair_operations,
+            inspectionResults: job.reports[0].inspection_results,
+            summaryOfOperatingResults: job.reports[0].summary,
+            customerSignature: job.reports[0].cus_sign,
+            createdAt: job.reports[0].createdAt,
+            reportedBy: {
+              id: job.reports[0].createdBy?.id,
+              fullname:
+                `${job.reports[0].createdBy?.profile?.firstname || ""} ${job.reports[0].createdBy?.profile?.lastname || ""}`.trim(),
+            },
+            images: job.reports[0].images,
+          }
+        : null,
     };
 
     res.json({
@@ -780,6 +919,7 @@ export const getMyJobDetail = async (req, res) => {
       job: formattedJob,
     });
   } catch (error) {
+    console.error("getMyJobDetail error:", error);
     res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
     });
@@ -815,7 +955,9 @@ export const updateMyJobStatus = async (req, res) => {
     });
 
     if (!assignment) {
-      return res.status(403).json({ message: "คุณไม่มีสิทธิ์เข้าถึงหรือแก้ไขงานนี้" });
+      return res
+        .status(403)
+        .json({ message: "คุณไม่มีสิทธิ์เข้าถึงหรือแก้ไขงานนี้" });
     }
 
     const updatedJob = await prisma.job.update({

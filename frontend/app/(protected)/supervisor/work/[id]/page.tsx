@@ -15,8 +15,9 @@ import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
 import { jobService } from "@/services/job.service";
 import { useAuthStore } from "@/store/useAuthStore";
-import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
+
 import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
+import { PDFWorkOrder } from "@/app/(protected)/admin/workorder/PDFWorkOrder";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -73,10 +74,11 @@ export default function WorkDetailPage({ params }: PageProps) {
     fetchJob();
   }, [id]);
 
- 
-
   const statusStr = job?.status?.toUpperCase() || "";
-  const canApproveOrReject = statusStr === JobStatus.SUBMITTED || statusStr === "ส่งงานแล้ว" || statusStr === JobStatus.PENDING;
+  const canApproveOrReject =
+    statusStr === JobStatus.SUBMITTED ||
+    statusStr === "ส่งงานแล้ว" ||
+    statusStr === JobStatus.PENDING;
 
   const handleApprove = async () => {
     if (!canApproveOrReject) {
@@ -127,44 +129,48 @@ export default function WorkDetailPage({ params }: PageProps) {
   const adminImages = job?.images?.map((img: any) => img.url) || [];
 
   // Memoize detail cards to prevent lag during state updates
-  const DetailContent = useMemo(() => (
-    <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
-      <div className="space-y-4">
-        <BasicInfoCard job={job} />
-        <DescriptionCard job={job} />
-        <EvidenceCard
-          job={job}
-        />
+  const DetailContent = useMemo(
+    () => (
+      <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_1fr] gap-4 mt-6">
+        <div className="space-y-4">
+          <BasicInfoCard job={job} />
+          <DescriptionCard job={job} />
+          <EvidenceCard job={job} />
+        </div>
+        <Sidebar job={job} />
       </div>
-      <Sidebar job={job} />
-    </div>
-  ), [job, adminImages, imagesBefore, imagesAfter]);
+    ),
+    [job, adminImages, imagesBefore, imagesAfter],
+  );
 
   // Memoize PDF Generation Container above early returns to follow Rules of Hooks
-  const PDFContainer = useMemo(() => (
-    <div className="fixed left-[-9999px] top-0 -z-50 pointer-events-none opacity-0">
-      <div ref={pdfRef}>
-        <PDFWorkOrder job={job} />
+  const PDFContainer = useMemo(
+    () => (
+      <div className="fixed left-[-9999px] top-0 -z-50 pointer-events-none opacity-0">
+        <div ref={pdfRef}>
+          <PDFWorkOrder job={job} />
+        </div>
       </div>
-    </div>
-  ), [job]);
+    ),
+    [job],
+  );
 
   if (isLoading) return <LoadingSkeleton />;
-  if (!job) return <NotFoundPage jobId={slug} />;
+  if (!job) return <NotFoundPage jobId={id} />;
 
   return (
     <div className="p-4">
       <Header
-          job={job}
-          role={role}
-          pdfRef={pdfRef}
-          setShowEditModal={setShowEditModal}
-          setShowCancelModal={setShowCancelModal}
-          onApprove={handleApprove}
-          onReject={handleRejectClick}
-          canApproveOrReject={canApproveOrReject}
-        />
-        {DetailContent}
+        job={job}
+        role={role}
+        pdfRef={pdfRef}
+        setShowEditModal={setShowEditModal}
+        setShowCancelModal={setShowCancelModal}
+        onApprove={handleApprove}
+        onReject={handleRejectClick}
+        canApproveOrReject={canApproveOrReject}
+      />
+      {DetailContent}
 
       {showEditModal && (
         <EditWorkModal
@@ -185,9 +191,12 @@ export default function WorkDetailPage({ params }: PageProps) {
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-            <h2 className="mb-2 text-xl font-bold text-gray-900">ยืนยันการลบใบงาน</h2>
+            <h2 className="mb-2 text-xl font-bold text-gray-900">
+              ยืนยันการลบใบงาน
+            </h2>
             <p className="mb-6 text-sm text-gray-600">
-              คุณแน่ใจหรือไม่ว่าต้องการลบใบงานนี้? การกระทำนี้ไม่สามารถย้อนกลับได้
+              คุณแน่ใจหรือไม่ว่าต้องการลบใบงานนี้?
+              การกระทำนี้ไม่สามารถย้อนกลับได้
             </p>
             <div className="flex gap-3">
               <button
@@ -203,7 +212,9 @@ export default function WorkDetailPage({ params }: PageProps) {
                     toast.success("ลบใบงานสำเร็จ!");
                     router.push(`/${role.toLowerCase()}/work`);
                   } catch (err: any) {
-                    toast.error(err.response?.data?.message || "ลบใบงานไม่สำเร็จ");
+                    toast.error(
+                      err.response?.data?.message || "ลบใบงานไม่สำเร็จ",
+                    );
                   }
                 }}
                 className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700"

@@ -3,10 +3,12 @@ import { FileText, Search, Wrench, CheckCircle2 } from "lucide-react";
 
 export default function DescriptionCard({ job }: any) {
   const latestReport =
+    job?.technicianReport ||
     [...(job?.reports || [])].sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )[0] || null;
+    )[0] ||
+    null;
 
   const reportSections = [
     {
@@ -16,17 +18,17 @@ export default function DescriptionCard({ job }: any) {
     },
     {
       title: "ผลการตรวจสอบ",
-      key: "inspection_results",
+      key: "inspectionResults",
       icon: <Search className="w-5 h-5 text-green-600" />,
     },
     {
       title: "การดำเนินการซ่อม",
-      key: "repair_operations",
+      key: "repairOperations",
       icon: <Wrench className="w-5 h-5 text-yellow-600" />,
     },
     {
       title: "สรุปผลการดำเนินงาน",
-      key: "summary",
+      key: "summaryOfOperatingResults",
       icon: <CheckCircle2 className="w-5 h-5 text-purple-600" />,
     },
   ];
