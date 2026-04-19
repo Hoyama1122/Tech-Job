@@ -1,9 +1,25 @@
 import express from "express";
-import { verifyToken, authCheck, allowRoles } from "../lib/middleware.js";
-import { createUser, deleteUser, getTechnicianLocations, getUserById, getUsers, updateUser } from "../controller/user.controller 2.js";
+import {
+  verifyToken,
+  authCheck,
+  allowRoles,
+} from "../lib/middleware.js";
+
+import {
+  createUser,
+  deleteUser,
+  getTechnicianLocations,
+  getUserById,
+  getUsers,
+  updateUser,
+} from "../controller/user.controller 2.js";
 
 const userRouter = express.Router();
 
+/**
+ * ดูตำแหน่งช่างล่าสุด
+ * SUPERADMIN / ADMIN / SUPERVISOR
+ */
 userRouter.get(
   "/locations",
   verifyToken,
@@ -12,6 +28,10 @@ userRouter.get(
   getTechnicianLocations
 );
 
+/**
+ * ดูผู้ใช้ทั้งหมด
+ * SUPERADMIN / ADMIN / SUPERVISOR
+ */
 userRouter.get(
   "/",
   verifyToken,
@@ -20,7 +40,11 @@ userRouter.get(
   getUsers
 );
 
- userRouter.get(
+/**
+ * ดูผู้ใช้ตาม id
+ * SUPERADMIN / ADMIN
+ */
+userRouter.get(
   "/:id",
   verifyToken,
   authCheck,
@@ -28,27 +52,39 @@ userRouter.get(
   getUserById
 );
 
+/**
+ * สร้างผู้ใช้ใหม่
+ * SUPERADMIN เท่านั้น
+ */
 userRouter.post(
   "/",
   verifyToken,
   authCheck,
-  allowRoles("SUPERADMIN", "ADMIN"),
+  allowRoles("SUPERADMIN"),
   createUser
 );
 
+/**
+ * แก้ไขผู้ใช้ตาม id
+ * SUPERADMIN เท่านั้น
+ */
 userRouter.put(
-  "/",
+  "/:id",
   verifyToken,
   authCheck,
-  allowRoles("SUPERADMIN", "ADMIN"),
+  allowRoles("SUPERADMIN"),
   updateUser
 );
 
+/**
+ * ลบผู้ใช้ตาม id
+ * SUPERADMIN เท่านั้น
+ */
 userRouter.delete(
   "/:id",
   verifyToken,
   authCheck,
-  allowRoles("SUPERADMIN", "ADMIN"),
+  allowRoles("SUPERADMIN"),
   deleteUser
 );
 
