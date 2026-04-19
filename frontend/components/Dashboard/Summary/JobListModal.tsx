@@ -75,7 +75,7 @@ const JobListModal = ({ jobs, title, icon, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {jobs.map((job) => (
                 <Link 
-                  href={`/admin/work/${job.JobId || job.id}`}
+                  href={`/admin/work/${job.id}`}
                   key={job.id}
                   onClick={onClose}
                   className="group bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200"

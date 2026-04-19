@@ -15,15 +15,16 @@ import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
 import RejectModal from "@/components/Modal/RejectModal";
 import { jobService } from "@/services/job.service";
 import { useAuthStore } from "@/store/useAuthStore";
-import { PDFWorkOrder } from "../../workorder/PDFWorkOrder";
+
 import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
+import { PDFWorkOrder } from "@/app/(protected)/admin/workorder/PDFWorkOrder";
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default function WorkDetailPage({ params }: PageProps) {
-  const { slug } = use(params);
+  const { id } = use(params);
 
   const pdfRef = useRef<HTMLDivElement>(null);
   const [job, setJob] = useState<any>(null);
@@ -44,7 +45,7 @@ export default function WorkDetailPage({ params }: PageProps) {
       setIsLoading(true);
 
       try {
-        const res = await jobService.getJobById(slug);
+        const res = await jobService.getJobById(id);
         const found = res.job;
 
         console.log("FOUND:", found);
@@ -71,7 +72,7 @@ export default function WorkDetailPage({ params }: PageProps) {
     };
 
     fetchJob();
-  }, [slug]);
+  }, [id]);
 
  
 

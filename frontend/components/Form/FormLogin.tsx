@@ -9,6 +9,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 import logo from "@/public/Logo/Logotechjob.png";
 import { authService, UserRole } from "@/services/auth.service";
+import Cookies from "js-cookie";
 
 type LoginFormInputs = {
   email: string;
@@ -37,10 +38,17 @@ const FormLogin = () => {
     try {
       const res = await authService.login(data);
       const role = res.role;
+      const token = res.token;
 
       if (!role) {
         toast.error("ไม่พบ role");
         return;
+      }
+
+      // Set cookies on the frontend domain so middleware can see them
+      if (token) {
+        Cookies.set("token", token, { expires: 7, secure: true, sameSite: "none" });
+        Cookies.set("role", role, { expires: 7, secure: true, sameSite: "none" });
       }
 
       const path = rolePathMap[role];
@@ -53,8 +61,17 @@ const FormLogin = () => {
       toast.success("เข้าสู่ระบบสำเร็จ");
       router.push(path);
     } catch (error: any) {
-      const message =
-        error?.response?.data?.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+      console.error("Login Error:", error);
+      let message = "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์";
+      
+      if (error?.response) {
+        // Server responded with an error (e.g., 401 Unauthorized)
+        message = error.response.data?.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+      } else if (error?.request) {
+        // Request was made but no response received (Network error)
+        message = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่อหรือ API URL";
+      }
+
       toast.error(message);
     }
   };

@@ -30,7 +30,8 @@ app.use(
       "Authorization", 
       "X-Requested-With", 
       "Accept", 
-      "Origin"
+      "Origin",
+      "ngrok-skip-browser-warning"
     ],
     preflightContinue: false,
     optionsSuccessStatus: 204,

@@ -15,15 +15,22 @@ export const initSocket = (server) => {
 
   io.use((socket, next) => {
     const cookies = socket.handshake.headers.cookie;
+    const authHeader = socket.handshake.headers.authorization;
     let token = socket.handshake.auth.token;
     
+    // Fallback 1: Authorization Header (Bearer)
+    if (!token && authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+
+    // Fallback 2: Cookies
     if (!token && cookies) {
       const match = cookies.match(/token=([^;]+)/);
       if (match) token = match[1];
     }
 
     if (!token) {
-      console.log("Socket Connection Failed: No token");
+      console.log(`Socket Auth Failed: No token found for transport ${socket.conn.transport.name}`);
       return next(new Error("Authentication error: No token provided"));
     }
 

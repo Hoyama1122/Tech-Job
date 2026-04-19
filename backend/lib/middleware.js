@@ -2,7 +2,14 @@ import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
 
 export const verifyToken = (req, res, next) => {
-  const token = req.cookies.token;
+  let token = req.cookies.token;
+
+  // Fallback to Authorization header
+  if (!token && req.headers.authorization) {
+    if (req.headers.authorization.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+  }
 
   if (!token) {
     return res.status(401).json({ message: "ไม่ได้เข้าสู่ระบบ" });

@@ -11,7 +11,7 @@ export const useTechnicianTracking = (active: boolean = false) => {
   const lastSentTime = useRef<number>(0);
   const lastPosition = useRef<{ lat: number; lng: number } | null>(null);
 
-  const THROTTLE_MS = 10000; // Send every 10 seconds
+  const THROTTLE_MS = 10000;
   const DISTANCE_THRESHOLD = 0.0001; // Small movement threshold (~10-15 meters)
 
   useEffect(() => {
@@ -35,8 +35,8 @@ export const useTechnicianTracking = (active: boolean = false) => {
       const now = Date.now();
 
       // Check if we should send update (Throttle or Distance)
-      const shouldSend = 
-        now - lastSentTime.current > THROTTLE_MS || 
+      const shouldSend =
+        now - lastSentTime.current > THROTTLE_MS ||
         !lastPosition.current ||
         Math.abs(latitude - lastPosition.current.lat) > DISTANCE_THRESHOLD ||
         Math.abs(longitude - lastPosition.current.lng) > DISTANCE_THRESHOLD;
@@ -72,11 +72,15 @@ export const useTechnicianTracking = (active: boolean = false) => {
       console.error("Geolocation error:", error);
     };
 
-    watchId.current = navigator.geolocation.watchPosition(handleSuccess, handleError, {
-      enableHighAccuracy: true,
-      maximumAge: 5000,
-      timeout: 10000,
-    });
+    watchId.current = navigator.geolocation.watchPosition(
+      handleSuccess,
+      handleError,
+      {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+        timeout: 10000,
+      },
+    );
 
     return () => {
       if (watchId.current !== null) {

@@ -22,11 +22,11 @@ const LS = {
 };
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default function Page({ params }: PageProps) {
-  const { slug } = React.use(params);
+  const { id } = React.use(params);
 
   //  STATES
   const [job, setJob] = useState<any>(null);
@@ -87,7 +87,7 @@ export default function Page({ params }: PageProps) {
   const fetchJobDetail = async () => {
     try {
       setIsLoading(true);
-      const res = await jobService.getMyJobDetail(slug);
+      const res = await jobService.getMyJobDetail(id);
       const found = res.job;
 
       if (!found) {
@@ -115,7 +115,7 @@ export default function Page({ params }: PageProps) {
 
   useEffect(() => {
     fetchJobDetail();
-  }, [slug]);
+  }, [id]);
 
   // Helper to convert base64 to File for upload
   const dataURLtoFile = (dataurl: string, filename: string) => {
@@ -166,7 +166,7 @@ export default function Page({ params }: PageProps) {
         }
 
         try {
-          await jobService.updateMyJobStatus(slug, JobStatus.IN_PROGRESS);
+          await jobService.updateMyJobStatus(id, JobStatus.IN_PROGRESS);
           updateJobStateLocally(JobStatus.IN_PROGRESS, {
             ...(job.technicianReport || {}),
             startTime: new Date().toISOString(),
@@ -280,7 +280,7 @@ export default function Page({ params }: PageProps) {
   if (!job)
     return (
       <div className="p-6 text-center text-gray-600">
-        ไม่พบข้อมูลงานหมายเลข {slug}
+        ไม่พบข้อมูลงานหมายเลข {id}
       </div>
     );
 

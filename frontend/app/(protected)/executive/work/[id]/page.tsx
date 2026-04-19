@@ -14,7 +14,8 @@ import EvidenceCard from "@/components/Dashboard/Work/Slug/EvidenceCard";
 import Sidebar from "@/components/Dashboard/Work/Slug/Sidebar";
 import LoadingSkeleton from "@/components/Dashboard/Work/Slug/LoadingSkeleton";
 import EditWorkModal from "@/components/Dashboard/Work/Slug/EditJob";
-import { PDFWorkOrder } from "@/app/admin/workorder/PDFWorkOrder";
+import { PDFWorkOrder } from "@/app/(protected)/admin/workorder/PDFWorkOrder";
+
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -55,12 +56,12 @@ export default function WorkDetailPage({ params }: PageProps) {
           const supervisor = users.find(
             (u: any) =>
               u.role === "supervisor" &&
-              String(u.id) === String(found.supervisorId)
+              String(u.id) === String(found.supervisorId),
           );
 
           const technicians = users.filter(
             (u: any) =>
-              u.role === "technician" && found.technicianId?.includes(u.id)
+              u.role === "technician" && found.technicianId?.includes(u.id),
           );
 
           setJob({

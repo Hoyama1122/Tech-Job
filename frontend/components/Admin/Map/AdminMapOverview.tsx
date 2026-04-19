@@ -33,11 +33,14 @@ const TECH_ICON_ONLINE = L.divIcon({
 
 export default function AdminMapOverview() {
   const { user } = useAuthStore();
-  const [techLocations, setTechLocations] = useState<Record<number, TechnicianLocation>>({});
+  const [techLocations, setTechLocations] = useState<
+    Record<number, TechnicianLocation>
+  >({});
   const [jobs, setJobs] = useState<JobLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedProfile, setSelectedProfile] = useState<TechnicianLocation | null>(null);
+  const [selectedProfile, setSelectedProfile] =
+    useState<TechnicianLocation | null>(null);
 
   const OFFLINE_THRESHOLD_MINUTES = 10;
 
@@ -74,15 +77,18 @@ export default function AdminMapOverview() {
     if (user) {
       const socket = getSocket();
       if (socket) {
-        socket.on("technician:location:broadcast", (data: TechnicianLocation) => {
-          setTechLocations((prev) => ({
-            ...prev,
-            [data.userId]: {
-              ...(prev[data.userId] || {}),
-              ...data
-            },
-          }));
-        });
+        socket.on(
+          "technician:location:broadcast",
+          (data: TechnicianLocation) => {
+            setTechLocations((prev) => ({
+              ...prev,
+              [data.userId]: {
+                ...(prev[data.userId] || {}),
+                ...data,
+              },
+            }));
+          },
+        );
       }
 
       return () => {
@@ -100,12 +106,19 @@ export default function AdminMapOverview() {
   };
 
   const techList = useMemo(() => Object.values(techLocations), [techLocations]);
-  const onlineCount = techList.filter(t => t.online !== false && isTechOnline(t.updatedAt)).length;
+  const onlineCount = techList.filter(
+    (t) => t.online !== false && isTechOnline(t.updatedAt),
+  ).length;
 
   const groupedTechs = useMemo(() => {
     const groups: Record<string, TechnicianLocation[]> = {};
-    techList.forEach(tech => {
-      if (tech.latitude && tech.longitude && tech.online !== false && isTechOnline(tech.updatedAt)) {
+    techList.forEach((tech) => {
+      if (
+        tech.latitude &&
+        tech.longitude &&
+        tech.online !== false &&
+        isTechOnline(tech.updatedAt)
+      ) {
         const key = `${Number(tech.latitude).toFixed(6)},${Number(tech.longitude).toFixed(6)}`;
         if (!groups[key]) groups[key] = [];
         groups[key].push(tech);
@@ -136,54 +149,45 @@ export default function AdminMapOverview() {
     });
   };
 
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center h-[600px] bg-white rounded-lg border border-gray-100 shadow-sm transition-all duration-300">
-      <div className="w-10 h-10 border-2 border-gray-100 border-t-primary rounded-full animate-spin mb-4"></div>
-      <p className="text-gray-400 text-sm font-bold uppercase">กำลังเชื่อมต่อข้อมูลแผนที่...</p>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex flex-col items-center justify-center h-[600px] bg-white rounded-lg border border-gray-100 shadow-sm transition-all duration-300">
+        <div className="w-10 h-10 border-2 border-gray-100 border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-400 text-sm font-bold uppercase">
+          กำลังเชื่อมต่อข้อมูลแผนที่...
+        </p>
+      </div>
+    );
 
   return (
     <div className="space-y-4">
-      {/* Real-time Header Info */}
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-100 rounded-lg shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span className="text-[11px] font-bold text-gray-500 uppercase">ระบบกำลังติดตาม</span>
-          <div className="h-3 w-[1px] bg-gray-200 mx-1"></div>
-          <span className="text-base font-black text-gray-800 tabular-nums">
-            {currentTime.toLocaleTimeString('th-TH', { hour12: false })}
-          </span>
-        </div>
-      </div>
-
       <StatusCounter jobs={jobs} onlineCount={onlineCount} />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-3 h-[600px] bg-white rounded-xl shadow-sm border border-gray-100 p-2">
           <div className="h-full w-full rounded-lg overflow-hidden border border-gray-100 relative">
-            <MapLeaflet 
-              jobs={jobs} 
-              groupedTechs={groupedTechs} 
-              getGroupIcon={getGroupIcon} 
-              onSelectTech={setSelectedProfile} 
+            <MapLeaflet
+              jobs={jobs}
+              groupedTechs={groupedTechs}
+              getGroupIcon={getGroupIcon}
+              onSelectTech={setSelectedProfile}
             />
             <MapLegend />
           </div>
         </div>
 
-        <TechnicianSidebar 
-          techList={techList} 
-          onlineCount={onlineCount} 
-          isTechOnline={isTechOnline} 
-          onSelectTech={setSelectedProfile} 
+        <TechnicianSidebar
+          techList={techList}
+          onlineCount={onlineCount}
+          isTechOnline={isTechOnline}
+          onSelectTech={setSelectedProfile}
         />
       </div>
 
-      <ProfileModal 
-        tech={selectedProfile} 
-        onClose={() => setSelectedProfile(null)} 
-        isTechOnline={isTechOnline} 
+      <ProfileModal
+        tech={selectedProfile}
+        onClose={() => setSelectedProfile(null)}
+        isTechOnline={isTechOnline}
       />
     </div>
   );

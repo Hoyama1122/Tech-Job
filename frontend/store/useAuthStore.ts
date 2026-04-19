@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { authService, UserRole } from "@/services/auth.service";
 import { disconnectSocket } from "@/lib/socket";
+import Cookies from "js-cookie";
 
 let fetchMePromise: Promise<any> | null = null;
 
@@ -76,6 +77,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authService.logout();
     } finally {
+    
+      Cookies.remove("token", { path: "/", secure: true, sameSite: "none" });
+      Cookies.remove("role", { path: "/", secure: true, sameSite: "none" });
+      
       disconnectSocket();
       set({ user: null, hasFetched: false });
     }

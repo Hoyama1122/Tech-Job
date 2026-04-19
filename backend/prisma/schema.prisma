@@ -74,7 +74,7 @@ model Job {
   latitude           Float?
   longitude          Float?
   location_name      String?
-
+  
   status             JobStatus    @default(PENDING)
 
   createdAt          DateTime     @default(now())

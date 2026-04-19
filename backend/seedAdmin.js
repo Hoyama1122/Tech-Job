@@ -8,7 +8,7 @@ async function main() {
   let dept = await prisma.department.findFirst();
   if (!dept) {
     dept = await prisma.department.create({
-      data: { name: "Default Department" }
+      data: { name: "ประปา" }
     });
   }
   const departmentId = dept.id;
