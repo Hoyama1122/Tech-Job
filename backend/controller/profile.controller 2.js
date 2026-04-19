@@ -92,19 +92,12 @@ export const getMyProfile = async (req, res) => {
 
 // =====================================
 // UPDATE / UPSERT: แก้ไขโปรไฟล์ตัวเอง
+// แก้ได้เฉพาะ phone, address, avatar
 // =====================================
 export const updateMyProfile = async (req, res) => {
   try {
     const userId = Number(req.user.id);
-    const {
-      phone,
-      address,
-      avatar,
-      firstname,
-      lastname,
-      gender,
-      birthday,
-    } = req.body;
+    const { phone, address, avatar } = req.body;
 
     const existingUsers = await prisma.$queryRaw`
       SELECT
@@ -138,11 +131,7 @@ export const updateMyProfile = async (req, res) => {
           SET
             phone = COALESCE(${phone ?? null}, phone),
             address = COALESCE(${address ?? null}, address),
-            avatar = COALESCE(${avatar ?? null}, avatar),
-            firstname = COALESCE(${firstname ?? null}, firstname),
-            lastname = COALESCE(${lastname ?? null}, lastname),
-            gender = COALESCE(${gender ?? null}, gender),
-            birthday = COALESCE(${birthday ? new Date(birthday) : null}, birthday)
+            avatar = COALESCE(${avatar ?? null}, avatar)
           WHERE "userId" = ${userId}
         `;
       } else {
@@ -151,21 +140,13 @@ export const updateMyProfile = async (req, res) => {
             "userId",
             phone,
             address,
-            avatar,
-            firstname,
-            lastname,
-            gender,
-            birthday
+            avatar
           )
           VALUES (
             ${userId},
             ${phone ?? ""},
             ${address ?? ""},
-            ${avatar ?? ""},
-            ${firstname ?? ""},
-            ${lastname ?? ""},
-            ${gender ?? null},
-            ${birthday ? new Date(birthday) : null}
+            ${avatar ?? ""}
           )
         `;
       }

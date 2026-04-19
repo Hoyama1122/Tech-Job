@@ -14,21 +14,21 @@ const mapUserRow = (user) => {
     updatedAt: user.updatedAt,
     department: user.department_id
       ? {
-        id: user.department_id,
-        name: user.department_name,
-      }
+          id: user.department_id,
+          name: user.department_name,
+        }
       : null,
     profile: user.profile_id
       ? {
-        id: user.profile_id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        phone: user.phone,
-        address: user.address,
-        avatar: user.avatar,
-        gender: user.gender,
-        birthday: user.birthday,
-      }
+          id: user.profile_id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          phone: user.phone,
+          address: user.address,
+          avatar: user.avatar,
+          gender: user.gender,
+          birthday: user.birthday,
+        }
       : null,
   };
 };
@@ -134,6 +134,8 @@ export const getUserById = async (req, res) => {
 
 // =====================================
 // INSERT: สร้างผู้ใช้งาน
+// SUPERADMIN เท่านั้น
+// ต้องกรอกครบตาม requirement
 // =====================================
 export const createUser = async (req, res) => {
   try {
@@ -152,9 +154,22 @@ export const createUser = async (req, res) => {
       avatar,
     } = req.body;
 
-    if (!email || !password || !empno || !role) {
+    if (
+      !empno ||
+      !email ||
+      !password ||
+      !role ||
+      !firstname ||
+      !lastname ||
+      !phone ||
+      !departmentId ||
+      !gender ||
+      !birthday ||
+      !address
+    ) {
       return res.status(400).json({
-        message: "กรุณากรอกข้อมูลจำเป็นให้ครบ",
+        message:
+          "กรุณากรอกข้อมูลให้ครบ: รหัสพนักงาน, อีเมล, รหัสผ่าน, สิทธิ์ผู้ใช้งาน, ชื่อ, นามสกุล, เบอร์โทร, แผนก, เพศ, วันเกิด, ที่อยู่",
       });
     }
 
@@ -184,6 +199,19 @@ export const createUser = async (req, res) => {
       });
     }
 
+    const departmentExists = await prisma.$queryRaw`
+      SELECT id
+      FROM "Department"
+      WHERE id = ${Number(departmentId)}
+      LIMIT 1
+    `;
+
+    if (departmentExists.length === 0) {
+      return res.status(400).json({
+        message: "ไม่พบแผนกที่เลือก",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await prisma.$transaction(async (tx) => {
@@ -202,7 +230,7 @@ export const createUser = async (req, res) => {
           ${hashedPassword},
           ${empno},
           ${role},
-          ${departmentId ? Number(departmentId) : null},
+          ${Number(departmentId)},
           NOW(),
           NOW()
         )
@@ -231,13 +259,13 @@ export const createUser = async (req, res) => {
         )
         VALUES (
           ${userId},
-          ${firstname ?? ""},
-          ${lastname ?? ""},
-          ${phone ?? ""},
-          ${address ?? ""},
+          ${firstname},
+          ${lastname},
+          ${phone},
+          ${address},
           ${avatar ?? ""},
-          ${gender ?? null},
-          ${birthday ? new Date(birthday) : null}
+          ${gender},
+          ${new Date(birthday)}
         )
       `;
 
@@ -286,11 +314,13 @@ export const createUser = async (req, res) => {
 
 // =====================================
 // UPDATE: แก้ไขผู้ใช้งาน
+// SUPERADMIN เท่านั้น
 // =====================================
 export const updateUser = async (req, res) => {
   try {
+    const userId = Number(req.params.id);
+
     const {
-      id,
       email,
       password,
       empno,
@@ -304,8 +334,6 @@ export const updateUser = async (req, res) => {
       phone,
       avatar,
     } = req.body;
-
-    const userId = Number(id);
 
     if (!userId) {
       return res.status(400).json({
@@ -361,6 +389,21 @@ export const updateUser = async (req, res) => {
       }
     }
 
+    if (departmentId !== undefined && departmentId !== null) {
+      const departmentExists = await prisma.$queryRaw`
+        SELECT id
+        FROM "Department"
+        WHERE id = ${Number(departmentId)}
+        LIMIT 1
+      `;
+
+      if (departmentExists.length === 0) {
+        return res.status(400).json({
+          message: "ไม่พบแผนกที่เลือก",
+        });
+      }
+    }
+
     let hashedPassword = null;
     if (password) {
       hashedPassword = await bcrypt.hash(password, 10);
@@ -373,7 +416,10 @@ export const updateUser = async (req, res) => {
           email = COALESCE(${email ?? null}, email),
           empno = COALESCE(${empno ?? null}, empno),
           role = COALESCE(${role ?? null}, role),
-          "departmentId" = COALESCE(${departmentId !== undefined && departmentId !== null ? Number(departmentId) : null}, "departmentId"),
+          "departmentId" = COALESCE(
+            ${departmentId !== undefined && departmentId !== null ? Number(departmentId) : null},
+            "departmentId"
+          ),
           password = COALESCE(${hashedPassword ?? null}, password),
           "updatedAt" = NOW()
         WHERE id = ${userId}
@@ -469,6 +515,7 @@ export const updateUser = async (req, res) => {
 
 // =====================================
 // DELETE: ลบผู้ใช้งาน
+// SUPERADMIN เท่านั้น
 // =====================================
 export const deleteUser = async (req, res) => {
   try {
@@ -513,11 +560,11 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+// =====================================
 // SELECT ดึงตำแหน่งช่างล่าสุด
-
+// =====================================
 export const getTechnicianLocations = async (req, res) => {
   try {
-    // Fetch all users with role TECHNICIAN
     const technicians = await prisma.user.findMany({
       where: {
         role: "TECHNICIAN",
@@ -535,9 +582,9 @@ export const getTechnicianLocations = async (req, res) => {
           select: {
             id: true,
             name: true,
-          }
+          },
         },
-        location: true, // Includes TechnicianLocation if it exists
+        location: true,
       },
     });
 
@@ -545,7 +592,9 @@ export const getTechnicianLocations = async (req, res) => {
       userId: tech.id,
       empno: tech.empno,
       email: tech.email,
-      name: `${tech.profile?.firstname || ""} ${tech.profile?.lastname || ""}`.trim() || tech.email,
+      name:
+        `${tech.profile?.firstname || ""} ${tech.profile?.lastname || ""}`.trim() ||
+        tech.email,
       phone: tech.profile?.phone || "",
       avatar: tech.profile?.avatar || "",
       latitude: tech.location?.latitude || null,

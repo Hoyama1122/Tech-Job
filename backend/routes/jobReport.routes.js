@@ -218,8 +218,8 @@ jobReportRouter.post(
 jobReportRouter.put(
   "/:id",
   upload.fields([
-    { name: "beforeImages", maxCount: 10 },
-    { name: "afterImages", maxCount: 10 },
+    { name: "beforeImages", maxCount: 5 },
+    { name: "afterImages", maxCount: 5 },
     { name: "cus_sign", maxCount: 1 },
   ]),
   updateJobReport
