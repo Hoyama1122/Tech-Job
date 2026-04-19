@@ -1,4 +1,4 @@
-import { prisma, Prisma } from "../lib/prisma.js";
+import { prisma, Prisma } from "../lib/prisma.js"; // trigger restart
 import {
   uploadImages,
   uploadSingleImage,
@@ -138,6 +138,7 @@ export const createJobReport = async (req, res) => {
               itemId: Number(itemUsage.id),
               userId: Number(createdById),
               jobId: Number(jobId),
+              reportId: Number(report.id),
               usedQuantity: Number(itemUsage.quantity),
               usedAt: new Date(),
             }
