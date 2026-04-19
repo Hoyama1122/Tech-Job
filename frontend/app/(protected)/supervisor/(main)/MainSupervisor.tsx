@@ -1,51 +1,56 @@
 "use client";
 
-import Activities from '@/components/Dashboard/Activities';
 import CardWork from '@/components/Dashboard/CardWork';
 import RenderModal from '@/components/Dashboard/Summary/RenderModal';
 import Summary from '@/components/Dashboard/Summary/Summary';
 import TeamMap from '@/components/Supervisor/Map/MapContainer';
 import { ClipboardList, Clock, File, FileClock, Filter, MapPin, Users } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react';
 import { useJobStore } from '@/store/useJobStore';
 import { JobStatus, JobStatusThai, getStatusThai } from '@/types/job';
-
-
+import { userService } from '@/services/user.service'; // ✅ เพิ่ม
+import { useAuthStore } from '@/store/useAuthStore';   // ✅ เพิ่ม
 
 export default function MainSupervisor() {
   const card = useJobStore((state) => state.jobs);
   const storeLoading = useJobStore((state) => state.isLoading);
   const fetchJobs = useJobStore((state) => state.fetchJobs);
-  const [users, setUsers] = useState([]);
+  const currentUser = useAuthStore((state) => state.user);   // ✅ เพิ่ม
+  const fetchMe = useAuthStore((state) => state.fetchMe);    // ✅ เพิ่ม
+
+  const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [detail, setDetail] = useState(null);
-  const [supervisorsDepartment, setSupervisorsDepartment] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        await fetchJobs();
+        // ✅ fetchMe ก่อนเพื่อให้ได้ departmentId ของ supervisor
+        await fetchMe();
 
-        const usersData = localStorage.getItem("Users");
-        if (usersData) {
-          const parsedUsersData = JSON.parse(usersData);
-          setUsers(parsedUsersData);
+        // ✅ ดึง jobs + users จาก API พร้อมกัน
+        const [_, usersData] = await Promise.all([
+          fetchJobs(),
+          userService.getUsers(),
+        ]);
 
-          const auth = localStorage.getItem("auth-storage");
-          if (auth) {
-            const parsedAuth = JSON.parse(auth);
-            const currentSupervisor = parsedUsersData.find(
-              (u: any) => String(u.id) === String(parsedAuth.state.userId)
-            );
-            if (currentSupervisor) {
-              setSupervisorsDepartment(currentSupervisor.department);
-            }
-          }
-        }
+        // ✅ Map users จาก API
+        const mappedUsers = (usersData.data || []).map((u: any) => ({
+          id: u.id,
+          empno: u.empno,
+          email: u.email,
+          role: u.role,                                              // "TECHNICIAN", "SUPERVISOR" etc.
+          name: `${u.profile?.firstname || ""} ${u.profile?.lastname || ""}`.trim() || u.email,
+          phone: u.profile?.phone || "-",
+          department: u.department?.name || "-",
+          departmentId: u.departmentId ?? u.department?.id ?? null, // ✅ fallback ทั้งสองแบบ
+        }));
+
+        setUsers(mappedUsers);
       } catch (error) {
         console.error("โหลดข้อมูลล้มเหลว:", error);
       } finally {
@@ -54,12 +59,14 @@ export default function MainSupervisor() {
     };
 
     loadData();
-  }, [fetchJobs]);
+  }, [fetchJobs, fetchMe]);
 
   const filteredCard = useMemo(() => {
     return card.filter((job: any) => {
       const matchesStatus =
-        statusFilter === "all" ? job.status !== "สำเร็จ" : job.status === statusFilter;
+        statusFilter === "all"
+          ? true
+          : job.status === statusFilter || getStatusThai(job.status) === statusFilter;
 
       const searchLower = searchTerm.toLowerCase().trim();
       const matchesSearch =
@@ -70,31 +77,34 @@ export default function MainSupervisor() {
         job.technicians?.some((t: any) => t.name?.toLowerCase().includes(searchLower));
 
       return matchesStatus && matchesSearch;
-
     });
   }, [card, statusFilter, searchTerm]);
 
   const summary = useMemo(() => {
-    const departmentTechnicians = users.filter(
-      (u: any) => u.role === "technician" && u.department === supervisorsDepartment
+    const myDeptId = currentUser?.departmentId;
+    console.log(myDeptId)
+    // ✅ นับช่างในแผนกเดียวกับ supervisor ที่ login อยู่
+    const techInDept = users.filter(
+      (u) =>
+        u.role === "TECHNICIAN" &&
+        Number(u.departmentId) === Number(myDeptId)
     ).length;
 
-
-    const technicians = users.filter((u: any) => u.role === "technician").length;
+    // ✅ ใช้ enum จริงจาก DB
+    const inProgressJobs = card.filter(
+      (j: any) => j.status === JobStatus.IN_PROGRESS
+    ).length;
 
     const waitingJobs = card.filter((j: any) => {
       const s = j.status?.toUpperCase();
-      return s === JobStatus.SUBMITTED || s === JobStatus.PENDING ||
-        j.status === "ส่งงานแล้ว" || j.status === "รอการตรวจสอบ";
+      return s === JobStatus.SUBMITTED || s === JobStatus.PENDING;
     }).length;
 
-    const inProgressJobs = card.filter((j: any) => j.status === "กำลังทำงาน").length;
-
-    const baseStats = [
+    return [
       {
         type: "techniciansDepartment",
-        title: "จำนวนช่างในแผนก ",
-        value: departmentTechnicians,
+        title: "จำนวนช่างในแผนก",
+        value: techInDept,
         icon: <Users className="w-8 h-8" />,
         bg: "bg-blue-50",
         iconColor: "text-blue-600",
@@ -123,16 +133,15 @@ export default function MainSupervisor() {
         bg: "bg-orange-50",
         iconColor: "text-orange-600",
       },
-    ]
-
-    return baseStats;
-  }, [users, card, filteredCard, searchTerm, statusFilter]);
+    ];
+  }, [users, card, currentUser]);
 
   const itemPerPage = 6;
   const totalPages = Math.ceil(filteredCard.length / itemPerPage);
-  const startIndex = (currentPage - 1) * itemPerPage;
-  const endIndex = startIndex + itemPerPage;
-  const paginatedCard = filteredCard.slice(startIndex, endIndex);
+  const paginatedCard = filteredCard.slice(
+    (currentPage - 1) * itemPerPage,
+    currentPage * itemPerPage
+  );
 
   useEffect(() => {
     setCurrentPage(1);
@@ -170,15 +179,13 @@ export default function MainSupervisor() {
 
   return (
     <div className='p-4'>
-      {/* Header */}
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4'>
         <div>
           <h1 className='text-3xl font-bold text-primary'>หน้าหลัก</h1>
-          <p className='text-sm text-text-secondary mt-1' >ระบบจัดการงานช่าง</p>
+          <p className='text-sm text-text-secondary mt-1'>ระบบจัดการงานช่าง</p>
         </div>
       </div>
 
-      {/* summary */}
       <Summary summary={summary} onSelect={(item: any) => setDetail(item)} />
 
       <RenderModal
@@ -187,16 +194,14 @@ export default function MainSupervisor() {
         card={card}
         onClose={() => setDetail(null)}
       />
-      {/* Main Content */}
+
       <div className='grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-4'>
-        {/*  */}
         <div>
-          <div className='bg-white/90 rounded-t-lg shadow-md p-4 '>
-            <h1 className='text-base md:text-lg font-bold text-text  gap-2 flex items-center mb-2'>
+          <div className='bg-white/90 rounded-t-lg shadow-md p-4'>
+            <h1 className='text-base md:text-lg font-bold text-text gap-2 flex items-center mb-2'>
               ใบงานล่าสุด <File size={20} />
             </h1>
             <div className='flex flex-col md:flex-row gap-4'>
-              {/* Search */}
               <div className='flex-1 relative'>
                 <input
                   type="text"
@@ -206,8 +211,6 @@ export default function MainSupervisor() {
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
               </div>
-
-              {/* Status Filter */}
               <div className='flex items-center gap-2'>
                 <Filter className='w-5 h-5 text-gray-500' />
                 <select
@@ -217,18 +220,16 @@ export default function MainSupervisor() {
                 >
                   <option value="all">ทุกสถานะ</option>
                   {Object.values(JobStatus).map((status) => (
-                    <option key={status} value={JobStatusThai[status as JobStatus]}>
+                    <option key={status} value={status}>
                       {JobStatusThai[status as JobStatus]}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
-
-            {/* Active Filter Info */}
             <div className='mt-2 text-sm text-gray-600'>
-              {searchTerm && <span> คำค้น: "{searchTerm}" </span>}
-              {statusFilter !== "all" && <span> สถานะ: {statusFilter}</span>}
+              {searchTerm && <span>คำค้น: "{searchTerm}" </span>}
+              {statusFilter !== "all" && <span>สถานะ: {statusFilter}</span>}
               {filteredCard.length > 0 && (
                 <span className="ml-2">({filteredCard.length} รายการ)</span>
               )}
@@ -247,27 +248,17 @@ export default function MainSupervisor() {
               </>
             )}
           </div>
-
         </div>
 
-        {/* Right Bar */}
         <div>
-          {/* Map */}
           <div className="bg-white/90 rounded-lg shadow-md p-4">
             <h1 className="text-base md:text-lg font-bold text-text mb-4 flex items-center gap-2">
               <MapPin size={20} /> แผนที่ภาพรวม
             </h1>
             <TeamMap jobs={filteredCard} users={users} />
           </div>
-
-          {/* log */}
-          <div>
-            {/* <Activities/> */}
-          </div>
         </div>
       </div>
-
-
     </div>
-  )
+  );
 }
