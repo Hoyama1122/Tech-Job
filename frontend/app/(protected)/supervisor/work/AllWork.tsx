@@ -70,15 +70,17 @@ export default function Work() {
     });
   }, [jobs, search, filterStatus]);
 
-  const stats = useMemo(
-    () => ({
-      PENDING: jobs.filter((j) => j.status === "PENDING").length,
-      IN_PROGRESS: jobs.filter((j) => j.status === "IN_PROGRESS").length,
-      COMPLETED: jobs.filter((j) => j.status === "COMPLETED").length,
-      REJECTED: jobs.filter((j) => j.status === "REJECTED").length,
-    }),
-    [jobs]
-  );
+  // Work.tsx
+const stats = useMemo(
+  () => ({
+    "รอการตรวจสอบ": jobs.filter((j) => j.status === "PENDING").length,
+    "รอการดำเนินงาน": jobs.filter((j) => j.status === "WAITING").length,
+    "กำลังทำงาน": jobs.filter((j) => j.status === "IN_PROGRESS").length,
+    "สำเร็จ": jobs.filter((j) => j.status === "COMPLETED").length,
+    "ตีกลับ": jobs.filter((j) => j.status === "REJECTED").length,
+  }),
+  [jobs]
+);
 
   return (
     <div className="p-4">

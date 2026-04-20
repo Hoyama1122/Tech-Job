@@ -14,13 +14,13 @@ import JobCard from "@/components/Executive/Work/JobCard";
 import { jobService } from "@/services/job.service";
 
 const statusMap: Record<string, string> = {
-  "PENDING": "รอดำเนินการ",
-  "IN_PROGRESS": "กำลังทำงาน",
-  "COMPLETED": "สำเร็จ",
-  "CANCELLED": "ยกเลิก",
-  "SUBMITTED": "รอการตรวจสอบ",
-  "APPROVED": "สำเร็จ",
-  "REJECTED": "ยกเลิก"
+  "SUBMITTED":  "รอการตรวจสอบ",   // ✅
+  "PENDING":    "รอดำเนินการ",     // ✅
+  "IN_PROGRESS":"กำลังทำงาน",      // ✅
+  "COMPLETED":  "สำเร็จ",          // ✅
+  "APPROVED":   "สำเร็จ",          // ✅
+  "REJECTED":   "ตีกลับ",          // ✅ เปลี่ยนจาก "ยกเลิก"
+  "CANCELLED":  "ยกเลิก",          // คงไว้ถ้าต้องการแยก
 };
 
 export default function AllJobs() {
@@ -85,19 +85,16 @@ export default function AllJobs() {
     });
   }, [jobs, search, filterStatus]);
 
-  const stats = useMemo(
-    () => ({
-      รอการตรวจสอบ: jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ")
-        .length,
-      รอการมอบหมายงาน: jobs.filter(
-        (j) => j.status?.trim() === "รอการมอบหมายงาน"
-      ).length,
-      กำลังทำงาน: jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,
-      สำเร็จ: jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,
-      ตีกลับ: jobs.filter((j) => j.status?.trim() === "ตีกลับ").length,
-    }),
-    [jobs]
-  );
+ const stats = useMemo(
+  () => ({
+    "รอการตรวจสอบ": jobs.filter((j) => j.status?.trim() === "รอการตรวจสอบ").length,   // SUBMITTED
+    "รอการดำเนินงาน": jobs.filter((j) => j.status?.trim() === "รอดำเนินการ").length,   // PENDING
+    "กำลังทำงาน": jobs.filter((j) => j.status?.trim() === "กำลังทำงาน").length,        // IN_PROGRESS
+    "สำเร็จ": jobs.filter((j) => j.status?.trim() === "สำเร็จ").length,                // COMPLETED / APPROVED
+    "ตีกลับ": jobs.filter((j) => j.status?.trim() === "ยกเลิก").length,               // REJECTED / CANCELLED
+  }),
+  [jobs]
+);
 
   return (
     <div className="p-4">
