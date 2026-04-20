@@ -148,9 +148,15 @@ jobRouter.get("/", verifyToken, authCheck, getJobs);
  *               longitude:
  *                 type: number
  *                 example: 100.523186
- *               location_name:
+  *               location_name:
  *                 type: string
  *                 example: อาคารสำนักงานใหญ่
+ *               customername:
+ *                 type: string
+ *                 example: คุณสมชาย ใจดี
+ *               customerphone:
+ *                 type: string
+ *                 example: 0812345678
  *               images:
  *                 type: array
  *                 items:
@@ -237,9 +243,15 @@ jobRouter.get("/:id", getJobById);
  *               longitude:
  *                 type: number
  *                 example: 100.523186
- *               location_name:
+  *               location_name:
  *                 type: string
  *                 example: อาคาร A ชั้น 2
+ *               customername:
+ *                 type: string
+ *                 example: คุณสมชาย ใจดี
+ *               customerphone:
+ *                 type: string
+ *                 example: 0812345678
  *               start_available_at:
  *                 type: string
  *                 format: date-time

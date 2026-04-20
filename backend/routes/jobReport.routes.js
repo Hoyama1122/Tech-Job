@@ -133,6 +133,9 @@ jobReportRouter.delete("/:id", deleteJobReport);
  *                 items:
  *                   type: string
  *                   format: binary
+ *               items:
+ *                 type: string
+ *                 example: '[{"id":1,"quantity":2,"type":"MATERIAL"}]'
  *               cus_sign:
  *                 type: string
  *                 format: binary
@@ -202,6 +205,9 @@ jobReportRouter.post(
  *                 items:
  *                   type: string
  *                   format: binary
+ *               items:
+ *                 type: string
+ *                 example: '[{"id":1,"quantity":3,"type":"MATERIAL"}]'
  *               cus_sign:
  *                 type: string
  *                 format: binary
@@ -277,6 +283,22 @@ jobReportRouter.patch("/:id/approve", verifyToken, approveJobReport);
  */
 jobReportRouter.patch("/:id/reject", verifyToken, rejectJobReport);
 
+/**
+ * @swagger
+ * /api/job-reports/job/{jobId}:
+ *   get:
+ *     summary: Get reports by Job ID
+ *     tags: [Job Reports]
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 jobReportRouter.get("/job/:jobId", getJobReportByJobId)
 
 export default jobReportRouter;
