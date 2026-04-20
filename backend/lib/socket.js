@@ -66,12 +66,7 @@ export const initSocket = (server) => {
       const userId = Number(socket.user.id);
 
       try {
-        // SAFETY CHECK: Ensure model exists in Prisma client
-        if (!prisma.technicianLocation) {
-          console.error("Prisma Error: technicianLocation model is missing from generated client. Run 'npx prisma generate'");
-          return;
-        }
-
+    
         const updatedLocation = await prisma.technicianLocation.upsert({
           where: { userId: userId },
           update: {
