@@ -2,35 +2,64 @@
 
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, FileEdit, Search } from "lucide-react";
-import { Users } from "@/lib/Mock/UserMock";
+import { userService } from "@/services/user.service";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function TableTechDepartment() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [supervisorDept, setSupervisorDept] = useState("");
-  const [myId, setMyId] = useState(null);
+  const [people, setPeople] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const currentUser = useAuthStore((state) => state.user);
+  const myId = currentUser?.id;
+  const supervisorDeptId = currentUser?.departmentId;
 
   const itemsPerPage = 10;
 
   useEffect(() => {
-    const authRaw = localStorage.getItem("auth-storage");
-    if (!authRaw) return;
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await userService.getUsers();
+        const allUsers = res.data || [];
 
-    const auth = JSON.parse(authRaw);
-    setMyId(auth?.state?.userId || null);
-    setSupervisorDept(auth?.state?.department || "");
-  }, []);
+        // กรองเอาเฉพาะช่างในแผนกเดียวกัน หรือตัว Supervisor เอง
+        const filtered = allUsers.filter((u: any) => {
+          const isTechnicianInDept = u.role?.toLowerCase() === "technician" && u.departmentId === supervisorDeptId;
+          const isMe = u.id === myId;
+          return isTechnicianInDept || isMe;
+        }).map((u: any) => ({
+             id: u.id,
+             employeeCode: u.empno,
+             name: `${u.profile?.firstname || ""} ${u.profile?.lastname || ""}`.trim() || u.email,
+             role: u.role?.toLowerCase(),
+             department: u.department?.name || "-",
+             email: u.email,
+             phone: u.profile?.phone || "-"
+        }));
 
-  // -----------------------------
-  // รวม: Supervisor ตัวเอง + Technicians ในแผนก
-  // -----------------------------
-  const people = Users.filter(
-    (u) =>
-      // ช่างในแผนก
-      (u.role === "technician" && u.department === supervisorDept) ||
-      // Supervisor ตัวเอง
-      (u.role === "supervisor" && u.id === myId)
-  );
+        setPeople(filtered);
+      } catch (error) {
+        console.error("Failed to fetch team data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (supervisorDeptId) {
+        fetchData();
+    }
+  }, [supervisorDeptId, myId]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-white p-8 rounded-lg shadow-md flex justify-center items-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-3 text-gray-500">กำลังโหลดรายชื่อทีม...</span>
+      </div>
+    );
+  }
 
   // -----------------------------
   // Search

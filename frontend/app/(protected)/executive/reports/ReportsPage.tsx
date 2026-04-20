@@ -16,6 +16,18 @@ import DepartmentChart from "@/components/Executive/DepartmentChart";
 
 const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
+import { jobService } from "@/services/job.service";
+
+const statusMap: Record<string, string> = {
+  "PENDING": "รอดำเนินการ",
+  "IN_PROGRESS": "กำลังทำงาน",
+  "COMPLETED": "สำเร็จ",
+  "CANCELLED": "ยกเลิก",
+  "SUBMITTED": "รอการตรวจสอบ",
+  "APPROVED": "สำเร็จ",
+  "REJECTED": "ยกเลิก"
+};
+
 export default function ReportsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,22 +37,30 @@ export default function ReportsPage() {
     new Date().getFullYear().toString()
   );
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("all"); // 1. เพิ่ม State แผนก
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
 
   useEffect(() => {
-    try {
-      setIsLoading(true);
-      setTimeout(() => {
-        const jobsData = localStorage.getItem("CardWork");
-        if (jobsData) {
-          setJobs(JSON.parse(jobsData));
-        }
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await jobService.getJobs();
+        const rawJobs = res.jobs || [];
+
+        // Map statuses to Thai and ensure category exists
+        const mappedJobs = rawJobs.map((job: any) => ({
+          ...job,
+          status: statusMap[job.status] || job.status,
+          category: job.category || "ไม่ระบุ"
+        }));
+
+        setJobs(mappedJobs);
+      } catch (error) {
+        console.error("Failed to load data", error);
+      } finally {
         setIsLoading(false);
-      }, 800);
-    } catch (error) {
-      console.error("Failed to load data", error);
-      setIsLoading(false);
-    }
+      }
+    };
+    fetchData();
   }, []);
 
   // --- Helpers ---
@@ -147,24 +167,24 @@ export default function ReportsPage() {
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <div className="p-4 md:p-6 space-y-6 min-h-screen pb-20 font-sans">
+    <div className="p-3 md:p-4 space-y-4 min-h-screen pb-10 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
-            <BarChart3 className="w-8 h-8 text-primary" />
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <BarChart3 className="w-7 h-7 text-primary" />
             รายงานสรุปผลการดำเนินงาน
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-xs text-slate-500">
             วิเคราะห์ข้อมูลเชิงลึกเพื่อการตัดสินใจของผู้บริหาร
           </p>
         </div>
       </div>
 
       {/* --- Filters Bar --- */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2 text-slate-700 font-medium">
-          <Filter size={20} className="text-primary" />
+      <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 text-slate-700 font-medium text-sm">
+          <Filter size={18} className="text-primary" />
           ตัวกรองข้อมูล :
         </div>
         
@@ -217,14 +237,14 @@ export default function ReportsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <KpiCard title="งานทั้งหมด" value={stats.total} unit="งาน" icon={<FileText size={24} />} color="blue" trend="+12% จากเดือนก่อน" />
-        <KpiCard title="อัตราความสำเร็จ" value={`${stats.successRate}%`} unit="Success" icon={<CheckCircle2 size={24} />} color="green" trend="อยู่ในเกณฑ์ดีเยี่ยม" />
-        <KpiCard title="งานค้างดำเนินการ" value={stats.pending} unit="งาน" icon={<Clock size={24} />} color="orange" trend="ต้องการการติดตาม" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <KpiCard title="งานทั้งหมด" value={stats.total} unit="งาน" icon={<FileText size={22} />} color="blue" trend="+12% จากเดือนก่อน" />
+        <KpiCard title="อัตราความสำเร็จ" value={`${stats.successRate}%`} unit="Success" icon={<CheckCircle2 size={22} />} color="green" trend="อยู่ในเกณฑ์ดีเยี่ยม" />
+        <KpiCard title="งานค้างดำเนินการ" value={stats.pending} unit="งาน" icon={<Clock size={22} />} color="orange" trend="ต้องการการติดตาม" />
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <MonthlyTrendChart data={monthlyData} year={selectedYear} />
         </div>
@@ -234,12 +254,12 @@ export default function ReportsPage() {
       </div>
 
       {/* Secondary Charts & Table */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
          <DepartmentChart data={deptData} />
 
          {/* Summary Table */}
-         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">สรุปประสิทธิภาพรายแผนก</h3>
+         <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <h3 className="text-base font-bold text-slate-800 mb-3">สรุปประสิทธิภาพรายแผนก</h3>
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
@@ -292,13 +312,13 @@ const KpiCard = ({ title, value, unit, icon, color, trend }: any) => {
   };
 
   return (
-    <div className={`p-5 rounded-2xl border bg-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group`}>
+    <div className={`p-4 rounded-xl border bg-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group`}>
       <div className="flex justify-between items-start">
         <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
+            <p className="text-xs font-medium text-slate-500 mb-1">{title}</p>
             <div className="flex items-baseline gap-1">
-                <h3 className="text-3xl font-bold text-slate-800">{value}</h3>
-                <span className="text-xs font-medium text-slate-400">{unit}</span>
+                <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
+                <span className="text-[10px] font-medium text-slate-400">{unit}</span>
             </div>
         </div>
         <div className={`p-3 rounded-xl ${colorClasses[color as keyof typeof colorClasses]} bg-opacity-50`}>

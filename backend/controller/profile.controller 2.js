@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { uploadSingleImage } from "../util/upload.helper.js";
 
 // helper: แปลง row จาก raw SQL ให้เป็น object ที่ frontend ใช้ง่าย
 const mapProfileRow = (user) => {
@@ -93,11 +94,24 @@ export const getMyProfile = async (req, res) => {
 // =====================================
 // UPDATE / UPSERT: แก้ไขโปรไฟล์ตัวเอง
 // แก้ได้เฉพาะ phone, address, avatar
+// รองรับทั้ง req.file และ req.body.avatar
 // =====================================
 export const updateMyProfile = async (req, res) => {
   try {
     const userId = Number(req.user.id);
     const { phone, address, avatar } = req.body;
+
+    let avatarUrl = null;
+
+    // กรณีมีการส่งไฟล์มา
+    if (req.file) {
+      const uploaded = await uploadSingleImage(req.file, "techjob/avatars");
+      avatarUrl = uploaded?.url;
+    }
+    // กรณี frontend ส่ง URL มาเลย
+    else if (avatar && typeof avatar === "string") {
+      avatarUrl = avatar;
+    }
 
     const existingUsers = await prisma.$queryRaw`
       SELECT
@@ -131,7 +145,7 @@ export const updateMyProfile = async (req, res) => {
           SET
             phone = COALESCE(${phone ?? null}, phone),
             address = COALESCE(${address ?? null}, address),
-            avatar = COALESCE(${avatar ?? null}, avatar)
+            avatar = COALESCE(${avatarUrl ?? null}, avatar)
           WHERE "userId" = ${userId}
         `;
       } else {
@@ -146,7 +160,7 @@ export const updateMyProfile = async (req, res) => {
             ${userId},
             ${phone ?? ""},
             ${address ?? ""},
-            ${avatar ?? ""}
+            ${avatarUrl ?? ""}
           )
         `;
       }

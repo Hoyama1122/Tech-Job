@@ -6,7 +6,7 @@ import ProfileEditForm from "@/components/ProfileEditForm";
 import { profileService } from "@/services/profile.service";
 import { X } from "lucide-react";
 
-export default function Page() {
+export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [openEditModal, setOpenEditModal] = useState(false);

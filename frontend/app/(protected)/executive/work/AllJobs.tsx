@@ -11,42 +11,33 @@ import EmptyState from "@/components/Dashboard/Work/EmptyState";
 
 import SearchBar from "@/components/Supervisor/work/SearchBar";
 import JobCard from "@/components/Executive/Work/JobCard";
+import { jobService } from "@/services/job.service";
 
-interface Job {
-  id: string;
-  JobId: string;
-  title: string;
-  description: string;
-  status: string;
-  supervisor?: { name: string };
-  technician?: any[];
-  date: string;
-}
+const statusMap: Record<string, string> = {
+  "PENDING": "รอดำเนินการ",
+  "IN_PROGRESS": "กำลังทำงาน",
+  "COMPLETED": "สำเร็จ",
+  "CANCELLED": "ยกเลิก",
+  "SUBMITTED": "รอการตรวจสอบ",
+  "APPROVED": "สำเร็จ",
+  "REJECTED": "ยกเลิก"
+};
 
 export default function AllJobs() {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    try {
-      const cardData = localStorage.getItem("CardWork");
-      const userData = localStorage.getItem("Users"); 
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await jobService.getJobs();
+        const rawJobs = res.jobs || [];
 
-      if (cardData) {
-        const parsedCards = JSON.parse(cardData);
-        const parsedUsers = userData ? JSON.parse(userData) : [];
-
-        const joinedJobs = parsedCards.map((job: any) => {
-          const supervisor = parsedUsers.find(
-            (user: any) =>
-              user.role === "supervisor" &&
-              String(user.id) === String(job.supervisorId)
-          );
-
-          const jobDate = job.date || job.createdAt || job.dueDate || null;
+        const mappedJobs = rawJobs.map((job: any) => {
+          const jobDate = job.createdAt || null;
           const formattedDate = jobDate
             ? new Date(jobDate).toLocaleString("th-TH", {
                 dateStyle: "short",
@@ -56,22 +47,21 @@ export default function AllJobs() {
 
           return {
             ...job,
-            supervisorName: supervisor
-              ? { name: supervisor.name, department: supervisor.department }
-              : { name: "ไม่ระบุ", department: "-" },
+            status: statusMap[job.status] || job.status,
             formattedDate,
+            supervisorName: job.supervisor || { name: "ไม่ระบุ", department: "-" }
           };
         });
 
-        setJobs(joinedJobs);
+        setJobs(mappedJobs);
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
-    } finally {
-      setTimeout(() => setIsLoading(false), 400);
-    }
-  }, [setJobs]);
-
+    };
+    fetchData();
+  }, []);
 
   const filteredJobs = useMemo(() => {
     if (!jobs.length) return [];

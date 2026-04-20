@@ -17,7 +17,7 @@ export const getSocket = () => {
 
     socket = io(baseUrl, {
       withCredentials: true,
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       extraHeaders: {
         "ngrok-skip-browser-warning": "69420",
       },

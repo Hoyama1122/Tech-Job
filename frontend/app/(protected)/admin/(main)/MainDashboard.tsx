@@ -1,21 +1,21 @@
 "use client";
 
-import CardWork from '@/components/Dashboard/CardWork';
-import RenderModal from '@/components/Dashboard/Summary/RenderModal';
-import Summary from '@/components/Dashboard/Summary/Summary';
+import CardWork from "@/components/Dashboard/CardWork";
+import Summary from "@/components/Dashboard/Summary/Summary";
+import RenderModal from "@/components/Dashboard/Summary/RenderModal";
 import TeamMap from '@/components/Supervisor/Map/MapContainer';
-import { ClipboardList, Clock, FileClock, Filter, MapPin, Users } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useJobStore } from '@/store/useJobStore';
-import { JobStatus, JobStatusThai, getStatusThai } from '@/types/job';
-import { userService } from '@/services/user.service';
-import { useAuthStore } from '@/store/useAuthStore';
-import { File } from 'lucide-react';
+import { useJobStore } from "@/store/useJobStore";
+import { userService } from "@/services/user.service";
+import { useAuthStore } from "@/store/useAuthStore";
+import { JobStatus, JobStatusThai, getStatusThai } from "@/types/job";
+import { ClipboardList, Clock, File, FileClock, Filter, MapPin, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function MainSupervisor() {
   const card = useJobStore((state) => state.jobs);
   const fetchJobs = useJobStore((state) => state.fetchJobs);
-  const currentUser = useAuthStore((state) => state.user); // ✅ ดึง supervisor ปัจจุบัน
+  const currentUser = useAuthStore((state) => state.user);
+  const fetchMe = useAuthStore((state) => state.fetchMe);
 
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,24 +28,32 @@ export default function MainSupervisor() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // ✅ ดึงข้อมูลพร้อมกัน: jobs + users จาก API
+        // ✅ fetchMe ก่อนเพื่อให้ได้ departmentId
+        await fetchMe();
+
         const [_, usersData] = await Promise.all([
           fetchJobs(),
           userService.getUsers(),
         ]);
 
-        // ✅ Map users ให้ตรงกับ format ที่ใช้
-// ✅ แก้ตรงนี้ใน loadData
-const mappedUsers = (usersData.data || []).map((u: any) => ({
-  id: u.id,
-  empno: u.empno,
-  email: u.email,
-  role: u.role,
-  name: `${u.profile?.firstname || ""} ${u.profile?.lastname || ""}`.trim() || u.email,
-  phone: u.profile?.phone || "-",
-  department: u.department?.name || "-",
-  departmentId: u.departmentId ?? u.department?.id ?? null, // ✅ fallback ทั้งสองแบบ
-}));
+        const deptId = useAuthStore.getState().user?.departmentId;
+
+        // ✅ filter เฉพาะ TECHNICIAN ในแผนกเดียวกัน
+        const mappedUsers = (usersData.data || [])
+          .filter((u: any) =>
+            u.role === "TECHNICIAN" &&
+            Number(u.departmentId) === Number(deptId)
+          )
+          .map((u: any) => ({
+            id: u.id,
+            empno: u.empno,
+            email: u.email,
+            role: u.role,
+            name: `${u.profile?.firstname || ""} ${u.profile?.lastname || ""}`.trim() || u.email,
+            phone: u.profile?.phone || "-",
+            department: u.department?.name || "-",
+            departmentId: u.departmentId ?? u.department?.id ?? null,
+          }));
 
         setUsers(mappedUsers);
       } catch (error) {
@@ -56,7 +64,7 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
     };
 
     loadData();
-  }, [fetchJobs]);
+  }, [fetchJobs, fetchMe]);
 
   const filteredCard = useMemo(() => {
     return card.filter((job: any) => {
@@ -78,19 +86,6 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
   }, [card, statusFilter, searchTerm]);
 
   const summary = useMemo(() => {
-    // ✅ ดึง departmentId ของ supervisor ที่ login อยู่
-    const myDeptId = currentUser?.departmentId;
-      console.log("myDeptId:", myDeptId);
-  console.log("users sample:", users.slice(0, 3));
-
-    // ✅ นับช่างในแผนกเดียวกับ supervisor
-  const techInDept = users.filter(
-    (u) =>
-      u.role === "TECHNICIAN" &&
-      (u.departmentId === myDeptId ||        // ✅ match by id
-       u.department?.id === myDeptId)        // ✅ fallback match by nested object
-  ).length;
-    // ✅ นับจำนวนงานตาม enum จริงจาก DB
     const inProgressCount = card.filter(
       (j: any) => j.status === JobStatus.IN_PROGRESS
     ).length;
@@ -104,7 +99,7 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
       {
         type: "techniciansDepartment",
         title: "จำนวนช่างในแผนก",
-        value: techInDept,
+        value: users.length, // ✅ users มีแค่ช่างในแผนกแล้ว
         icon: <Users className="w-8 h-8" />,
         bg: "bg-blue-50",
         iconColor: "text-blue-600",
@@ -134,7 +129,7 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
         iconColor: "text-orange-600",
       },
     ];
-  }, [users, card, currentUser]);
+  }, [users, card]);
 
   const itemPerPage = 6;
   const totalPages = Math.ceil(filteredCard.length / itemPerPage);
@@ -179,7 +174,6 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
 
   return (
     <div className='p-4'>
-      {/* Header */}
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4'>
         <div>
           <h1 className='text-3xl font-bold text-primary'>หน้าหลัก</h1>
@@ -187,7 +181,6 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
         </div>
       </div>
 
-      {/* Summary Cards */}
       <Summary summary={summary} onSelect={(item: any) => setDetail(item)} />
 
       <RenderModal
@@ -197,7 +190,6 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
         onClose={() => setDetail(null)}
       />
 
-      {/* Main Content */}
       <div className='grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-4'>
         <div>
           <div className='bg-white/90 rounded-t-lg shadow-md p-4'>
@@ -205,13 +197,13 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
               ใบงานล่าสุด <File size={20} />
             </h1>
             <div className='flex flex-col md:flex-row gap-4'>
-              <div className='flex-1 relative'>
+              <div className='flex-1'>
                 <input
                   type="text"
                   placeholder="ค้นหาด้วย หมายเลขงาน, ชื่องาน, ชื่อช่าง..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-4 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
               </div>
               <div className='flex items-center gap-2'>
@@ -250,7 +242,6 @@ const mappedUsers = (usersData.data || []).map((u: any) => ({
           </div>
         </div>
 
-        {/* Right Bar - Map */}
         <div>
           <div className="bg-white/90 rounded-lg shadow-md p-4">
             <h1 className="text-base md:text-lg font-bold text-text mb-4 flex items-center gap-2">

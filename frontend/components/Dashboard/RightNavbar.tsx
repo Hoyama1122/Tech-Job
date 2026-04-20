@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { NavNotifacation } from "@/lib/Mock/NavNotifacation";
-import profile from "@/public/profile/profile.png";
 import Image from "next/image";
 import NotifacationBell from "../Layout/NotifacationBell";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,16 +23,57 @@ type RightNavbarProps = {
 
 const RightNavbar = ({ user }: RightNavbarProps) => {
   const [showNotificationsBell, setShowNotificationsBell] = useState(false);
+  const router = useRouter();
 
   const fullName =
-    `${user?.profile?.firstname || ""} ${
-      user?.profile?.lastname || ""
-    }`.trim() || "ผู้ใช้งาน";
+    `${user?.profile?.firstname || ""} ${user?.profile?.lastname || ""}`.trim() ||
+    "ผู้ใช้งาน";
 
-  const router = useRouter();
-  const goprolfile = async () => {
-    await router.push(`/${user?.role?.toLocaleLowerCase()}/profile`);
+  const roleText = user?.role || "-";
+
+  const avatarSrc =
+    user?.profile?.avatar && user.profile.avatar.trim() !== ""
+      ? user.profile.avatar
+      : "/profile/profile.png";
+
+  const goProfile = () => {
+    if (!user?.role) {
+      router.push("/profile");
+      return;
+    }
+
+    const role = user.role.toLowerCase();
+
+    if (role === "technician") {
+      router.push("/technician/profile");
+      return;
+    }
+
+    if (role === "admin") {
+      router.push("/admin/profile");
+      return;
+    }
+
+    if (role === "superadmin") {
+      router.push("/superadmin/profile");
+      return;
+    }
+
+    if (role === "supervisor") {
+      router.push("/supervisor/profile");
+      return;
+    }
+
+    if (role === "executive") {
+      router.push("/executive/profile");
+      return;
+    }
+
+    router.push("/profile");
   };
+
+  console.log("RightNavbar user =", user);
+
   return (
     <div className="flex items-center gap-2 px-2 sm:gap-3 sm:px-4">
       <div className="relative shrink-0">
@@ -62,23 +102,24 @@ const RightNavbar = ({ user }: RightNavbarProps) => {
       <div className="hidden h-8 w-px bg-gray-200 sm:block" />
 
       <div
-        className="flex min-w-0 items-center gap-2 sm:gap-3 cursor-pointer"
-        onClick={goprolfile}
+        className="flex min-w-0 cursor-pointer items-center gap-2 sm:gap-3"
+        onClick={goProfile}
       >
         <Image
-          src={profile}
+          src={avatarSrc}
           alt="profile"
           width={40}
           height={40}
+          unoptimized
           className="h-9 w-9 shrink-0 rounded-full object-cover sm:h-10 sm:w-10"
         />
 
-        <div className="min-w-0 leading-tight ">
+        <div className="min-w-0 leading-tight">
           <p className="truncate text-[11px] font-semibold text-primary sm:text-[12px] md:text-[13px]">
             {fullName}
           </p>
           <h1 className="truncate text-[10px] font-medium text-gray-500 sm:text-[11px] md:text-[12px]">
-            {user?.role || "-"}
+            {roleText}
           </h1>
         </div>
       </div>

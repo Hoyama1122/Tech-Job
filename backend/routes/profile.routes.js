@@ -1,6 +1,7 @@
 import express from "express";
 import { authCheck, verifyToken } from "../lib/middleware.js";
 import { getMyProfile, updateMyProfile } from "../controller/profile.controller 2.js";
+import { upload } from "../lib/upload.js";
 
 const routerProfile = express.Router();
 
@@ -66,7 +67,7 @@ routerProfile.get("/", verifyToken, authCheck, getMyProfile);
  *       500:
  *         description: Server error
  */
-routerProfile.put("/", verifyToken, authCheck, updateMyProfile);
+routerProfile.put("/", verifyToken, authCheck, upload.single("avatar"), updateMyProfile);
 
 export default routerProfile;
 

@@ -86,8 +86,14 @@ export const getItems = async (req, res) => {
 export const getItemById = async (req, res) => {
   try {
     const { id } = req.params;
+    const itemId = Number(id);
+
+    if (isNaN(itemId)) {
+      return res.status(400).json({ message: "รหัส ID อุปกรณ์ไม่ถูกต้อง" });
+    }
+
     const item = await prisma.item.findUnique({
-      where: { id: Number(id) },
+      where: { id: itemId },
       include: {
         creator: true,
       },
@@ -106,14 +112,20 @@ export const getItemById = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
+    const itemId = Number(id);
+
+    if (isNaN(itemId)) {
+      return res.status(400).json({ message: "รหัส ID อุปกรณ์ไม่ถูกต้อง" });
+    }
+
     const { code, name, model, brand, type, quantity, unit, note } = req.body;
 
     // Check if code exists on other items
     if (code) {
       const existing = await prisma.item.findFirst({
-        where: { 
+        where: {
           code,
-          id: { not: Number(id) }
+          id: { not: itemId }
         }
       });
       if (existing) {
@@ -122,7 +134,7 @@ export const updateItem = async (req, res) => {
     }
 
     const item = await prisma.item.update({
-      where: { id: Number(id) },
+      where: { id: itemId },
       data: {
         code,
         name,
@@ -145,8 +157,14 @@ export const updateItem = async (req, res) => {
 export const deleteItem = async (req, res) => {
   try {
     const { id } = req.params;
+    const itemId = Number(id);
+
+    if (isNaN(itemId)) {
+      return res.status(400).json({ message: "รหัส ID อุปกรณ์ไม่ถูกต้อง" });
+    }
+
     await prisma.item.delete({
-      where: { id: Number(id) },
+      where: { id: itemId },
     });
     res.json({ message: "ลบอุปกรณ์สำเร็จ" });
   } catch (error) {
