@@ -14,11 +14,26 @@ import {
   updateUser,
 } from "../controller/user.controller 2.js";
 
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management
+ */
+
 const userRouter = express.Router();
 
 /**
- * ดูตำแหน่งช่างล่าสุด
- * SUPERADMIN / ADMIN / SUPERVISOR
+ * @swagger
+ * /api/users/locations:
+ *   get:
+ *     summary: Get latest technician locations
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of locations
  */
 userRouter.get(
   "/locations",
@@ -29,8 +44,16 @@ userRouter.get(
 );
 
 /**
- * ดูผู้ใช้ทั้งหมด
- * SUPERADMIN / ADMIN / SUPERVISOR / EXECUTIVE
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
  */
 userRouter.get(
   "/",
@@ -41,8 +64,22 @@ userRouter.get(
 );
 
 /**
- * ดูผู้ใช้ตาม id
- * SUPERADMIN / ADMIN / EXECUTIVE
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User data
  */
 userRouter.get(
   "/:id",
@@ -53,8 +90,22 @@ userRouter.get(
 );
 
 /**
- * สร้างผู้ใช้ใหม่
- * SUPERADMIN เท่านั้น
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Create new user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: User created
  */
 userRouter.post(
   "/",
@@ -65,8 +116,28 @@ userRouter.post(
 );
 
 /**
- * แก้ไขผู้ใช้ตาม id
- * SUPERADMIN เท่านั้น
+ * @swagger
+ * /api/users/{id}:
+ *   put:
+ *     summary: Update user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Success
  */
 userRouter.put(
   "/:id",
@@ -77,8 +148,22 @@ userRouter.put(
 );
 
 /**
- * ลบผู้ใช้ตาม id
- * SUPERADMIN เท่านั้น
+ * @swagger
+ * /api/users/{id}:
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
  */
 userRouter.delete(
   "/:id",

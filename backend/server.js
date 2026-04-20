@@ -56,6 +56,7 @@ app.use("/api/job-reports", jobReportRouter);
 app.use("/api/users", userRouter);
 app.use("/api/profile", routerProfile);
 app.use("/api/items", itemRouter);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 httpServer.listen(PORT, () => {

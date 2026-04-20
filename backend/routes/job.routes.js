@@ -39,7 +39,54 @@ const jobRouter = Router();
  *         description: Server error
  */
 jobRouter.get("/my", verifyToken, getMyJobs);
+
+/**
+ * @swagger
+ * /api/jobs/my/{id}:
+ *   get:
+ *     summary: Get details of my job
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 jobRouter.get("/my/:id", verifyToken, getMyJobDetail);
+
+/**
+ * @swagger
+ * /api/jobs/my/{id}/status:
+ *   patch:
+ *     summary: Update status of my job
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ */
 jobRouter.patch("/my/:id/status", verifyToken, updateMyJobStatus);
 
 /**
