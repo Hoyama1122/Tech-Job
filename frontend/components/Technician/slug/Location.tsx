@@ -14,7 +14,7 @@ const Location = ({ job }) => {
             สถานที่
           </h3>
           <p className="text-gray-700 mb-2">
-            {job.customer?.address || "ไม่ระบุสถานที่"}
+            {job.location_name || "ไม่ระบุสถานที่"}
           </p>
           <MapLocation lat={job.loc.lat} lng={job.loc.lng} />
         </div>

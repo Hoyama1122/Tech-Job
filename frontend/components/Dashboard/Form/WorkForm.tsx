@@ -158,6 +158,8 @@ const WorkForm = () => {
         latitude: loc.lat,
         longitude: loc.lng,
         location_name: data.address,
+        customername: data.customername,
+        customerphone: data.customerphone,
         images: data.image ? Array.from(data.image) : [],
       };
 

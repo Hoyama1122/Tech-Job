@@ -54,7 +54,7 @@ const Jobs = ({ displayJobs, activeTab }) => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">
-                      ลูกค้า: {job.customer?.name || "ไม่ระบุ"}
+                      ลูกค้า: {job.customername || "ไม่ระบุ"}
                     </h3>
                     <p className="text-sm text-gray-600 line-clamp-2">
                       {job.description}
@@ -65,7 +65,7 @@ const Jobs = ({ displayJobs, activeTab }) => {
                 <div className="flex  mt-3 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
                     <MapPin className="w-4 h-4 text-primary" />
-                    {job.customer?.address || "ไม่ระบุสถานที่"}
+                    {job.location_name || "ไม่ระบุสถานที่"}
                   </span>
                 </div>
                 <div className="">{formatThaiDateTime(job.createdAt)}</div>
