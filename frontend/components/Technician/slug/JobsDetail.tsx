@@ -1,4 +1,4 @@
-import { Clock, FileText, ImageIcon } from "lucide-react";
+import { Clock, FileText, ImageIcon, User, Phone } from "lucide-react";
 import React from "react";
 import Location from "./Location";
 import Team from "./Team";
@@ -23,6 +23,34 @@ const JobsDetail = ({ job, adminImages }) => {
             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-sm">
               {job.description}
             </p>
+          </div>
+        </div>
+
+        {/* Customer Info */}
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+            <User className="w-5 h-5 text-blue-600" />
+            ข้อมูลลูกค้า
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-xs text-gray-500 mb-1">ชื่อลูกค้า</p>
+              <p className="font-medium text-gray-900">{job.customername || "ไม่ระบุ"}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-xs text-gray-500 mb-1">เบอร์โทรศัพท์</p>
+              <div className="flex items-center justify-between">
+                <p className="font-medium text-gray-900">{job.customerphone || "-"}</p>
+                {job.customerphone && (
+                  <a 
+                    href={`tel:${job.customerphone}`}
+                    className="p-2 bg-green-100 text-green-600 rounded-full hover:bg-green-200 transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         <div className="mt-2">

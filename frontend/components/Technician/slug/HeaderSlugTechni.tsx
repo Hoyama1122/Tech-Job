@@ -12,7 +12,7 @@ const HeaderSlugTechni = ({ job, getStatusBadge }) => {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              ลูกค้า: {job.customer?.name || "ไม่ระบุ"}
+              ลูกค้า: {job.customername || "ไม่ระบุ"}
             </h1>
             <p className="text-gray-500">
               หมายเลขงาน: <span className="font-mono">#{job.JobId}</span>

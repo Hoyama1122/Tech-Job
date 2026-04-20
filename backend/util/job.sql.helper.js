@@ -23,6 +23,8 @@ export const mapJobsRows = (rows = [], formatJobId) => {
         location_name: row.location_name,
         latitude: row.latitude,
         longitude: row.longitude,
+        customername: row.customername,
+        customerphone: row.customerphone,
         customer: {
             address: row.location_name || "ไม่ระบุสถานที่"
         },
@@ -90,6 +92,8 @@ export const mapJobDetailRows = (rows = [], formatJobId) => {
       latitude: first.latitude,
       longitude: first.longitude,
       location_name: first.location_name,
+      customername: first.customername,
+      customerphone: first.customerphone,
     },
 
     department: first.department_id
@@ -191,6 +195,8 @@ export const buildJobUpdateFields = ({
   start_available_at,
   end_available_at,
   departmentId,
+  customername,
+  customerphone,
 }) => {
   const fields = [];
 
@@ -228,6 +234,14 @@ export const buildJobUpdateFields = ({
 
   if (departmentId !== undefined && departmentId !== "") {
     fields.push(Prisma.sql`"departmentId" = ${Number(departmentId)}`);
+  }
+
+  if (customername !== undefined) {
+    fields.push(Prisma.sql`customername = ${customername}`);
+  }
+
+  if (customerphone !== undefined) {
+    fields.push(Prisma.sql`customerphone = ${customerphone}`);
   }
 
   fields.push(Prisma.sql`"updatedAt" = NOW()`);

@@ -18,6 +18,8 @@ export interface CreateJobPayload {
   latitude?: number | null;
   longitude?: number | null;
   location_name?: string;
+  customername?: string;
+  customerphone?: string;
   images?: File[];
 }
 
@@ -31,6 +33,8 @@ export interface UpdateJobPayload {
   latitude?: number | null;
   longitude?: number | null;
   location_name?: string;
+  customername?: string;
+  customerphone?: string;
   technicianId?: number | number[];
   images?: File[];
 }
@@ -91,6 +95,14 @@ export const jobService = {
       formData.append("location_name", payload.location_name);
     }
 
+    if (payload.customername) {
+      formData.append("customername", payload.customername);
+    }
+
+    if (payload.customerphone) {
+      formData.append("customerphone", payload.customerphone);
+    }
+
     if (payload.images && payload.images.length > 0) {
       payload.images.forEach((file) => {
         formData.append("images", file);
@@ -126,6 +138,9 @@ export const jobService = {
     if (payload.latitude !== undefined && payload.latitude !== null) formData.append("latitude", String(payload.latitude));
     if (payload.longitude !== undefined && payload.longitude !== null) formData.append("longitude", String(payload.longitude));
     if (payload.location_name !== undefined) formData.append("location_name", payload.location_name);
+    
+    if (payload.customername !== undefined) formData.append("customername", payload.customername);
+    if (payload.customerphone !== undefined) formData.append("customerphone", payload.customerphone);
 
     if (payload.images && payload.images.length > 0) {
       payload.images.forEach((file) => {

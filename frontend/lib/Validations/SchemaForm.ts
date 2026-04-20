@@ -16,8 +16,8 @@ export const workSchema = z
     endTime: z.string().optional(),
     category: z.union([z.string(), z.number()]).refine(val => !!val, "กรุณาเลือกประเภทงาน"),
     technicianId: z.array(z.number()).min(1, "กรุณาเลือกช่างอย่างน้อย 1 คน"),
-    customerName: z.string().min(1, "กรุณาระบุชื่อลูกค้า"),
-    customerPhone: z
+    customername: z.string().min(1, "กรุณาระบุชื่อลูกค้า"),
+    customerphone: z
       .string()
       .min(10, "เบอร์โทรต้องมีอย่างน้อย 10 หลัก")
       .regex(/^[0-9-+\s]+$/, "รูปแบบเบอร์โทรไม่ถูกต้อง เช่น 0812345678"),

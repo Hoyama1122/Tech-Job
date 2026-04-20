@@ -27,14 +27,14 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ register, errors }) =
           ชื่อลูกค้า <span className="text-red-500">*</span>
         </label>
         <input
-          {...register("customerName")}
+          {...register("customername")}
           className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
           placeholder="กรอกชื่อ-นามสกุลลูกค้า"
         />
-        {errors.customerName && (
+        {errors.customername && (
           <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
             <AlertCircle className="w-4 h-4" />
-            {errors.customerName.message}
+            {errors.customername.message}
           </div>
         )}
       </div>
@@ -45,17 +45,17 @@ const CustomerSection: React.FC<CustomerSectionProps> = ({ register, errors }) =
           เบอร์โทรศัพท์ลูกค้า <span className="text-red-500">*</span>
         </label>
         <input
-          {...register("customerPhone")}
+          {...register("customerphone")}
           type="tel"
           className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all duration-200 placeholder-gray-400"
           placeholder="000-000-0000"
           onInput={handlePhoneInput}
           maxLength={12}
         />
-        {errors.customerPhone && (
+        {errors.customerphone && (
           <div className="mt-2 flex items-center gap-2 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-md">
             <AlertCircle className="w-4 h-4" />
-            {errors.customerPhone.message}
+            {errors.customerphone.message}
           </div>
         )}
       </div>

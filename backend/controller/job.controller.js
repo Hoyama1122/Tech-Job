@@ -41,6 +41,8 @@ export const getJobs = async (req, res) => {
         j.latitude,
         j.longitude,
         j.location_name,
+        j.customername,
+        j.customerphone,
         j."departmentId",
         d.name AS department_name,
 
@@ -151,6 +153,8 @@ export const getJobById = async (req, res) => {
       latitude: job.latitude,
       longitude: job.longitude,
       location_name: job.location_name,
+      customername: job.customername,
+      customerphone: job.customerphone,
 
       department: job.department,
 
@@ -274,6 +278,8 @@ export const createJob = async (req, res) => {
       latitude,
       longitude,
       location_name,
+      customername,
+      customerphone,
     } = req.body;
 
     if (!title) {
@@ -333,6 +339,8 @@ export const createJob = async (req, res) => {
           latitude,
           longitude,
           location_name,
+          customername,
+          customerphone,
           "departmentId",
           "createdById",
           "createdAt",
@@ -347,6 +355,8 @@ export const createJob = async (req, res) => {
           ${locationFields.latitude},
           ${locationFields.longitude},
           ${locationFields.location_name},
+          ${customername || null},
+          ${customerphone || null},
           ${Number(departmentId)},
           ${Number(createdById)},
           NOW(),
@@ -381,6 +391,7 @@ export const createJob = async (req, res) => {
         SELECT
           j.id, j.title, j.description, j.status, j."createdAt", j."updatedAt",
           j.start_available_at, j.end_available_at, j.latitude, j.longitude, j.location_name,
+          j.customername, j.customerphone,
           d.id AS department_id, d.name AS department_name,
           cb.id AS created_by_id, cb.empno AS created_by_empno,
           cbp.firstname AS created_by_firstname, cbp.lastname AS created_by_lastname,
@@ -441,6 +452,8 @@ export const updateJob = async (req, res) => {
       end_available_at,
       supervisorId,
       technicianId,
+      customername,
+      customerphone,
     } = req.body;
 
     const existingJob = await prisma.$queryRaw`
@@ -522,6 +535,8 @@ export const updateJob = async (req, res) => {
         start_available_at: dateFields.start_available_at,
         end_available_at: dateFields.end_available_at,
         departmentId,
+        customername,
+        customerphone,
       });
 
       if (updateFields.length > 0) {
@@ -712,6 +727,8 @@ export const getMyJobs = async (req, res) => {
         j.start_available_at,
         j.end_available_at,
         j.location_name,
+        j.customername,
+        j.customerphone,
 
         ja.role AS assignment_role,
         au.id AS assignment_user_id,
@@ -888,6 +905,8 @@ export const getMyJobDetail = async (req, res) => {
       latitude: job.latitude,
       longitude: job.longitude,
       location_name: job.location_name,
+      customername: job.customername,
+      customerphone: job.customerphone,
 
       loc: {
         lat: job.latitude,
