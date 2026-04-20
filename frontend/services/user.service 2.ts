@@ -70,7 +70,7 @@ export const userService = {
   },
 
   async updateUser(payload: UpdateUserPayload) {
-    const res = await api.put("/users", payload);
+    const res = await api.put(`/users/${payload.id}`, payload);
     return res.data;
   },
 
