@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Clock, Briefcase, Signal, CheckCircle2, Users } from "lucide-react";
-import { JobStatus, JobLocation } from "@/types/tracking";
+import { JobLocation } from "@/types/tracking";
 
 interface StatusCounterProps {
   jobs: JobLocation[];

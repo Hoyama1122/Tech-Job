@@ -70,14 +70,13 @@ export default function Work() {
     });
   }, [jobs, search, filterStatus]);
 
-  // Work.tsx
 const stats = useMemo(
   () => ({
-    "รอการตรวจสอบ": jobs.filter((j) => j.status === "PENDING").length,
-    "รอการดำเนินงาน": jobs.filter((j) => j.status === "WAITING").length,
-    "กำลังทำงาน": jobs.filter((j) => j.status === "IN_PROGRESS").length,
-    "สำเร็จ": jobs.filter((j) => j.status === "COMPLETED").length,
-    "ตีกลับ": jobs.filter((j) => j.status === "REJECTED").length,
+    รอการตรวจสอบ: jobs.filter((j) => j.status === "SUBMITTED").length,
+    รอการดำเนินงาน: jobs.filter((j) => j.status === "PENDING").length,
+    กำลังทำงาน: jobs.filter((j) => j.status === "IN_PROGRESS").length,
+    สำเร็จ: jobs.filter((j) => ["COMPLETED", "APPROVED"].includes(j.status)).length,
+    ตีกลับ: jobs.filter((j) => ["REJECTED", "CANCELLED"].includes(j.status)).length,
   }),
   [jobs]
 );
